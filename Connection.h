@@ -3,6 +3,7 @@
 
 #include <cstdarg>
 #include <cassert>
+#include <vector>
 
 #include <boost/enable_shared_from_this.hpp>
 
@@ -15,7 +16,7 @@ class Connection
 {
 public:
 
-    Connection(ConnectionPoolPtr pool , char** error);
+    Connection(ConnectionPoolPtr pool);
     virtual ~Connection();
     void setAvailable(bool isAvailable);
     bool isAvailable();
@@ -26,17 +27,17 @@ public:
     virtual void setMaxRows(int max);
     int getMaxRows();
     URLPtr getURL();
-    int ping();
-    void clear();
-    void close();
-    void beginTransaction();
-    void commit();
-    void rollback();
-    long long getLastRowId();
-    long long rowsChanged();
-    void execute(CONST_STDSTR sql , ...);
-    ResultSetPtr executeQuery(CONST_STDSTR sql , ...);
-    PreparedStatementPtr getPreparedStatement(CONST_STDSTR sql , ...);
+    virtual int ping();
+    virtual void clear();
+    virtual void close();
+    virtual void beginTransaction();
+    virtual void commit();
+    virtual void rollback();
+    virtual long long getLastRowId();
+    virtual long long rowsChanged();
+    virtual void execute(CONST_STDSTR sql , ...);
+    virtual ResultSetPtr executeQuery(CONST_STDSTR sql , ...);
+    virtual PreparedStatementPtr getPreparedStatement(CONST_STDSTR sql , ...);
     CONST_STDSTR getLastError();
 
 private:
@@ -55,5 +56,7 @@ private:
 
     void freePrepared();
 };
+
+typedef std::vector<ConnectionPtr> ConnectionVec;
 
 #endif
