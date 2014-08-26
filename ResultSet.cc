@@ -92,6 +92,10 @@ struct tm* ResultSet::getDateTimeByName(CONST_STDSTR name , struct tm* tm)
     return getDateTime(getIndex(name) , tm);
 }
 
+void clear()
+{
+}
+
 int ResultSet::checkAndSetColumnIndex(int columnIndex , int columnCount)
 {
     int i = columnIndex - 1;

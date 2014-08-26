@@ -10,10 +10,7 @@
 #include <muduo/base/Logging.h>
 
 #include "Exception.h"
-#include "ResultSetDelegate.h"
-
-typedef std::string STDSTR ;
-#define CONST_STDSTR STDSTR const
+#include "Str.h"
 
 class ResultSet
 {
@@ -37,6 +34,7 @@ public:
     time_t getTimestampByName(CONST_STDSTR name);//TODO
     virtual struct tm* getDateTime(int columnIndex, struct tm* tm);//TODO
     struct tm* getDateTimeByName(CONST_STDSTR name, struct tm* tm);//TODO
+    virtual void clear();
 
 private:
 
