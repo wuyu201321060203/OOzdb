@@ -20,6 +20,12 @@ using namespace muduo;
 
 typedef boost::function<void (char const*)> AbortHandlerFunc;
 typedef boost::function<void (void)> ThreadFunc;
+typedef boost::shared_ptr<Thread> ThreadPtr;
+
+#define VERSION 0.1
+#define OOzdb_URL "https://github.com/wuyu201321060203/OOzdb"
+
+#define ABOUT "OOzdb/" #VERSION " Copyright (C) Wu Yu" OOzdb_URL
 
 class ConnectionPool
 {
@@ -41,7 +47,7 @@ public:
     template<typename ConcreteConnection> void start();
     void stop();
     ConnectionPtr getConnection();
-    void returnConnection();
+    void returnConnection(ConnectionPtr conn);
     int reapConnections();
     CONST_STDSTR getVersion();
 
@@ -59,7 +65,7 @@ private:
     int _sweepInterval;
     volatile int _stopped;
     AbortHandlerFunc _handler;
-    Thread _reaper;
+    ThreadPtr _reaper;
 
 private:
 
@@ -70,8 +76,9 @@ private:
     void drainPool();
     template<typename ConcreteConnection> int fillPool();
     int getActive();
-    int reapConnections();
+    int onReapConnections();
     virtual void doSweep();//TODO
+    virtual void onStop();
 };
 
 ConnectionPool::ConnectionPool(URLPtr url):
@@ -79,7 +86,7 @@ ConnectionPool::ConnectionPool(URLPtr url):
     _maxConnections(SQL_DEFAULT_MAX_CONNECTIONS),
     _initialConnections(SQL_DEFAULT_INIT_CONNECTIONS),
     _connectionTimeout(SQL_DEFAULT_CONNECTION_TIMEOUT),
-    _reaper( boost::bind(&doSweep , this) )
+    _reaper( new Thread( boost::bind(&doSweep , this) ) )
 {
     assert(_url);
     _connectionsVec.reserve(SQL_DEFAULT_MAX_CONNECTIONS);
@@ -174,7 +181,7 @@ void ConnectionPool::start()
         if(_filled && _doSweep)
         {
             LOG_DEBUG << "Starting Database reaper thread\n";
-            _reaper.start();
+            _reaper->start();
         }
     }
     if(!_filled)
@@ -183,27 +190,96 @@ void ConnectionPool::start()
 
 void ConnectionPool::stop()
 {
-
+    int stopSweep = false;
+    {
+        MutexLockGuard(&_mutex);
+        _stopped = true;
+        if(_filled)
+        {
+            drainPool();
+            _filled = false;
+            stopSweep = _doSweep && _reaper;
+            onStop();
+        }
+    }
+    if(stopSweep)
+    {
+        LOG_DEBUG << "Stopping Database reaper thread...\n";
+        _alarm.notify();
+        _reaper->join();
+    }
 }
 
 ConnectionPtr ConnectionPool::getConnection()
 {
-
+    ConnectionPtr conn(NULL);
+    {
+        MutexLockGuard(&_mutex);
+        int i = 0;
+        int size = _connectionsVec.size();
+        for( ; i != size ; ++i )
+        {
+            ConnectionPtr temp = _connectionsVec[i];
+            if(temp->isAvailable() && temp->ping())
+            {
+                temp->setAvailable(false);
+                conn = temp;
+                goto done;
+            }
+        }
+        if(size < _maxConnections)
+        {
+            ConnectionPtr temp(new Connection(enable_shared_from_this()));
+            if(temp)
+            {
+                temp->setAvailable(false);
+                _connectionsVec.push_back(temp);
+                conn = temp;
+            }
+            else
+            {
+                LOG_DEBUG << "Failed to create connection\n";
+            }
+        }
+    }
+done:
+    return conn;
 }
 
-void ConnectionPool::returnConnection()
+void ConnectionPool::returnConnection(ConnectionPtr conn)
 {
-
+    assert(conn);
+    if(conn->isInTransaction())
+    {
+        try
+        {
+            conn->rollback();
+        }
+        catch(...)
+        {
+            LOG_ERROR << "Connection can't rollback\n";
+        }
+    }
+    conn->clear();
+    {
+        MutexLockGuard(&_mutex);
+        conn->setAvailable(true);
+    }
 }
 
 int ConnectionPool::reapConnections()
 {
-
+    int n = 0;
+    {
+        MutexLockGuard(&_mutex);
+        n = onReapConnections();
+    }
+    return n;
 }
 
 CONST_STDSTR ConnectionPool::getVersion()
 {
-
+    return ABOUT;
 }
 
 void ConnectionPool::drainPool()
@@ -242,7 +318,7 @@ int ConnectionPool::getActive()
     return n;
 }
 
-int ConnectionPool::reapConnections()
+int ConnectionPool::onReapConnections()
 {
     int n = 0;
     int totalSize = _connectionsVec.size();
@@ -268,7 +344,17 @@ int ConnectionPool::reapConnections()
 
 void ConnectionPool::doSweep()//TODO
 {
-
+    {
+        MutexLockGuard(&_mutex);
+        while(!_stopped)
+        {
+            _alarm.waitForSeconds(_sweepInterval);
+            if(_stopped) break;
+            reapConnections();
+        }
+    }
+    LOG_DEBUG << "Reaper thread stopped\n";
+    return NULL;
 }
 
 #endif
