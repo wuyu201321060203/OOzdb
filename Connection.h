@@ -26,7 +26,7 @@ public:
     int getQueryTimeout();
     virtual void setMaxRows(int max);
     int getMaxRows();
-    URLPtr getURL();
+    URL_T getURL();
     virtual int ping();
     virtual void clear();
     virtual void close();
@@ -46,7 +46,7 @@ private:
     bool _isAvailable;
     bool _isInTransaction;
     int _timeout;
-    URLPtr _url;
+    URL_T _url;
     time_t _lastAccessedTime;
     int _maxRows;
     PreparedStatementVec _prepared;

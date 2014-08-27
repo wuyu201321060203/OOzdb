@@ -31,9 +31,9 @@ class ConnectionPool
 {
 public:
 
-    ConnectionPool(URLPtr url);
+    ConnectionPool(URL_T url);
     ~ConnectionPool();
-    URLPtr getURL();
+    URL_T getURL();
     void setInitialConnections(int connections);
     int getInitialConnections();
     void setMaxConnections(int maxConnections);
@@ -53,7 +53,7 @@ public:
 
 private:
 
-    URLPtr _url;
+    URL_T _url;
     int _maxConnections;
     int _initialConnections;
     int _connectionTimeout;
@@ -81,7 +81,7 @@ private:
     virtual void onStop();
 };
 
-ConnectionPool::ConnectionPool(URLPtr url):
+ConnectionPool::ConnectionPool(URL_T url):
     _url(url),
     _maxConnections(SQL_DEFAULT_MAX_CONNECTIONS),
     _initialConnections(SQL_DEFAULT_INIT_CONNECTIONS),
@@ -97,7 +97,7 @@ ConnectionPool::~ConnectionPool()
     if(!_stopped) stop();
 }
 
-URLPtr ConnectionPool::getURL()
+URL_T ConnectionPool::getURL()
 {
     return _url;
 }
