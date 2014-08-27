@@ -164,14 +164,48 @@ public:
         return _columns[i].buffer;
     }
 
-    virtual int getInt(int columnIndex);
+    virtual int getInt(int columnIndex)
+    {
+        char const* s = getString(columnIndex);
+        return s ? strToInt(s) : 0;
+    }
+
     virtual long long  getLLong(int columnIndex);
+    {
+        char const* s = getString(columnIndex);
+        return s ? strToLL(s) : 0;
+    }
+
     virtual double getDouble(int columnIndex);
-    virtual void const* getBlob(int columnIndex , int* size);
-    void const* getBlobByName(CONST_STDSTR name , int* size);
-    virtual time_t getTimestamp(int columnIndex);//TODO
-    virtual struct tm* getDateTime(int columnIndex, struct tm* tm);//TODO
-    virtual void clear();
+    {
+        char const* s = getString(columnIndex);
+        return s ? strToDouble(s) : 0.0;
+    }
+
+    virtual time_t getTimestamp(int columnIndex)//TODO
+    {
+        char const* s = getString(columnIndex);
+        return s ? strToTimestamp(s) : ;
+    }
+
+    virtual struct tm* getDateTime(int columnIndex, struct tm* tm)//TODO
+    {
+        char const* s = getString(columnIndex);
+        return s ? strToDateTime(s) : ;
+    }
+
+    virtual void clear()
+    {
+        for (int i = 0; i < _columnCount; i++)
+            FREE(_columns[i].buffer);
+        mysql_stmt_free_result(_stmt);
+        if (_keep == false)
+            mysql_stmt_close(_stmt);
+        if (_meta)
+            mysql_free_result(_meta);
+        FREE(_columns);
+        FREE(_bind);
+    }
 
 private:
 
