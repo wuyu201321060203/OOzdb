@@ -26,9 +26,9 @@ public:
     virtual int rollback();
     virtual long long getLastRowId();
     virtual long long rowsChanged();
-    virtual void execute(char const* sql , va_list ap);
-    virtual ResultSetPtr executeQuery(char const* sql , va_list ap);
-    virtual PreparedStatement getPrepareStatement(char const* sql , va_list ap);
+    virtual void execute(char const* sql , ...);
+    virtual ResultSetPtr executeQuery(char const* sql , ...);
+    virtual PreparedStatement getPrepareStatement(char const* sql , ...);
     virtual CONST_STDSTR getLastError();
     virtual void onstop();
 

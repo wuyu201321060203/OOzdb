@@ -18,28 +18,27 @@ public:
 
     Connection(ConnectionPoolPtr pool);
     virtual ~Connection();
-    void setAvailable(bool isAvailable);
-    bool isAvailable();
-    time_t getLastAccessedTime();
-    bool isInTransaction();
-    virtual void setQueryTimeout(int ms);
-    int getQueryTimeout();
-    virtual void setMaxRows(int max);
-    int getMaxRows();
-    URL_T getURL();
     virtual int ping();
     virtual int beginTransaction();
-    virtual void clear();
-    virtual void close();
     virtual int commit();
     virtual int rollback();
     virtual long long getLastRowId();
     virtual long long rowsChanged();
-    virtual void execute(CONST_STDSTR sql , ...);
-    virtual ResultSetPtr executeQuery(CONST_STDSTR sql , ...);
-    virtual PreparedStatementPtr getPreparedStatement(CONST_STDSTR sql , ...);
+    virtual void execute(char const* sql , ...);
+    virtual ResultSetPtr executeQuery(char const* sql , ...);
+    virtual PreparedStatementPtr getPreparedStatement(char const* sql , ...);
     virtual CONST_STDSTR getLastError();
     virtual void onStop();
+
+    void setAvailable(bool isAvailable);
+    bool isAvailable();
+    time_t getLastAccessedTime();
+    bool isInTransaction();
+    void setQueryTimeout(int ms);
+    int getQueryTimeout();
+    void setMaxRows(int max);
+    int getMaxRows();
+    URL_T getURL();
 
 private:
 
