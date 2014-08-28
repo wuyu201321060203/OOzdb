@@ -44,7 +44,7 @@ private:
 
 private:
 
-    virtual int getColumnCount();
+    int getColumnCount();
     virtual CONST_STDSTR getColumnName(int columnIndex);
     virtual long getColumnSize(int columnIndex);
     static inline int checkAndSetColumnIndex(int columnIndex, int columnCount);

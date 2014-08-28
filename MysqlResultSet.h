@@ -37,16 +37,16 @@ public:
     typedef std::vector<column_t> columnVec;
 
     MysqlResultSet(CONST_STDSTR name , void *stmt, int maxRows, int keep);
-    virtual ~MysqlResultSet();
+    ~MysqlResultSet();
     virtual int next();
     virtual int isnull(int columnIndex);
     virtual CONST_STDSTR getString(int columnIndex);
+    virtual void const* getBlob(int columnIndex, int *size);
     virtual int getInt(int columnIndex);
     virtual long long  getLLong(int columnIndex);
     virtual double getDouble(int columnIndex);
-    virtual void const* getBlob(int columnIndex, int *size);
-    virtual time_t getTimestamp(int columnIndex);//TODO
-    virtual struct tm* getDateTime(int columnIndex, struct tm* tm);//TODO
+    virtual time_t getTimestamp(int columnIndex);
+    virtual struct tm* getDateTime(int columnIndex, struct tm* tm);
     virtual void clear();
 
 private:
@@ -63,10 +63,10 @@ private:
 
 private:
 
-    virtual int getColumnCount();
     virtual CONST_STDSTR getColumnName(int columnIndex);
     virtual long getColumnSize(int columnIndex);
     inline void ensureCapacity(int i);
+    int checkAndSetColumnIndex(int columnIndex);
 };
 
 #endif

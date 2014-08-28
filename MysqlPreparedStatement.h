@@ -5,16 +5,15 @@
 #include <string.h>
 #include <mysql.h>
 
+#include "Config.h"
 #include "ResultSet.h"
 #include "MysqlResultSet.h"
-#include "PreparedStatementDelegate.h"
 #include "MysqlPreparedStatement.h"
-
-#define MYSQL_OK 0
 
 class MysqlPreparedStatement : public PreparedStatement
 {
 public:
+
     typedef struct param_t
     {
         union
@@ -28,13 +27,14 @@ public:
     }param_t;
 
     MysqlPreparedStatement(void* stmt , int maxRows , int parameterCount);
-    virtual ~MysqlPreparedStatement();
+    ~MysqlPreparedStatement();
+    virtual void clear();
     virtual void setString(int parameterIndex , CONST_STDSTR str);
     virtual void setInt(int parameterIndex , int x);
     virtual void setLLong(int parameterIndex, long long x);
     virtual void setDouble(int parameterIndex , double x);
     virtual void setTimestamp(int parameterIndex, time_t x);
-    virtual void setBlob(int parameterIndex, const void *x, int size);
+    virtual void setBlob(int parameterIndex , const void *x , int size);
     virtual void execute();
     virtual ResultSetPtr executeQuery();
     virtual long long rowsChanged();

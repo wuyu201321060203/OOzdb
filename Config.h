@@ -1,28 +1,3 @@
-/*
- * Copyright (C) Tildeslash Ltd. All rights reserved.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 3.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * In addition, as a special exception, the copyright holders give
- * permission to link the code of portions of this program with the
- * OpenSSL library under certain conditions as described in each
- * individual source file, and distribute linked combinations
- * including the two.
- *
- * You must obey the GNU General Public License in all respects
- * for all of the code used other than OpenSSL.
- */
-
-
 #ifndef CONFIG_INCLUDED
 #define CONFIG_INCLUDED
 
@@ -75,7 +50,7 @@
 
 
 /**
- * Standard millisecond timeout value for a database call. 
+ * Standard millisecond timeout value for a database call.
  */
 #define SQL_DEFAULT_TIMEOUT 3000
 
@@ -151,14 +126,14 @@
 #define false 0
 
 
-/** 
- * Microseconds per second 
+/**
+ * Microseconds per second
 */
 #define USEC_PER_SEC 1000000
 
 
-/** 
- * Microseconds per millisecond 
+/**
+ * Microseconds per millisecond
  */
 #define USEC_PER_MSEC 1000
 
@@ -203,10 +178,13 @@ extern void(*AbortHandler)(const char *error);
 
 
 /**
- * Library Debug flag. If set to true, emit debug output 
+ * Library Debug flag. If set to true, emit debug output
  */
 extern int ZBDEBUG;
 
+#define MYSQL_OK 0
+#define EXCEPTION_MESSAGE_LENGTH 512
+#define BADSTR "null"
 
 #endif
 

@@ -3,12 +3,12 @@
 static my_bool yes = true;
 
 MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
-                                               int parameterCount)
+                                               int parameterCount):
+    _parameterCount(parameterCount)
 {
     assert(stmt);
     _stmt = stmt;
     _maxRows = maxRows;
-    _parameterCount = parameterCount;
     if(_parameterCount > 0)
     {
         _params = CALLOC(_parameterCount, sizeof(struct param_t));
@@ -18,6 +18,11 @@ MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
 }
 
 MysqlPreparedStatement::~MysqlPreparedStatement()
+{
+    clear();
+}
+
+void MysqlPreparedStatement::clear()
 {
     FREE(_bind);
     mysql_stmt_free_result(_stmt);
@@ -30,10 +35,10 @@ MysqlPreparedStatement::~MysqlPreparedStatement()
 
 void MysqlPreparedStatement::setString(int parameterIndex , CONST_STDSTR str)
 {
-    int i = checkAndSetParameterIndex(parameterIndex, _parameterCount);
-    P->bind[i].buffer_type = MYSQL_TYPE_STRING;
-    P->bind[i].buffer = static_cast<char*>( str.c_str() );
-    if (! x)
+    int i = checkAndSetParameterIndex(parameterIndex);
+    _bind[i].buffer_type = MYSQL_TYPE_STRING;
+    _bind[i].buffer = static_cast<char*>( str.c_str() );
+    if(!str.empty())
     {
         _params[i].length = 0;
         _bind[i].is_null = &yes;
@@ -48,7 +53,7 @@ void MysqlPreparedStatement::setString(int parameterIndex , CONST_STDSTR str)
 
 void MysqlPreparedStatement::setInt(int parameterIndex , int x)
 {
-    int i = checkAndSetParameterIndex(parameterIndex , _parameterCount);
+    int i = checkAndSetParameterIndex(parameterIndex);
     _params[i].type.integer = x;
     _bind[i].buffer_type = MYSQL_TYPE_LONG;
     _bind[i].buffer = &_params[i].type.integer;
@@ -57,7 +62,7 @@ void MysqlPreparedStatement::setInt(int parameterIndex , int x)
 
 void MysqlPreparedStatement::setLLong(int parameterIndex, long long x)
 {
-    int i = checkAndSetParameterIndex(parameterIndex , _parameterCount);
+    int i = checkAndSetParameterIndex(parameterIndex);
     _params[i].type.llong = x;
     _bind[i].buffer_type = MYSQL_TYPE_LONGLONG;
     _bind[i].buffer = &_params[i].type.llong;
@@ -66,7 +71,7 @@ void MysqlPreparedStatement::setLLong(int parameterIndex, long long x)
 
 void MysqlPreparedStatement::setDouble(int parameterIndex , double x)
 {
-    int i = checkAndSetParameterIndex(parameterIndex, parameterCount);
+    int i = checkAndSetParameterIndex(parameterIndex);
     _params[i].type.real = x;
     _bind[i].buffer_type = MYSQL_TYPE_DOUBLE;
     _bind[i].buffer = &_params[i].type.real;
@@ -75,7 +80,7 @@ void MysqlPreparedStatement::setDouble(int parameterIndex , double x)
 
 void MysqlPreparedStatement::setTimestamp(int parameterIndex, time_t x)
 {
-    int i = checkAndSetParameterIndex(parameterIndex, parameterCount);
+    int i = checkAndSetParameterIndex(parameterIndex);
     struct tm ts = {.tm_isdst = -1};
     gmtime_r(&x, &ts);
     _params[i].type.timestamp.year = ts.tm_year + 1900;
@@ -89,12 +94,12 @@ void MysqlPreparedStatement::setTimestamp(int parameterIndex, time_t x)
     _bind[i].is_null = 0;
 }
 
-void MysqlPreparedStatement::setBlob(int parameterIndex, const void *x, int size)
+void MysqlPreparedStatement::setBlob(int parameterIndex , void const* x , int size)
 {
-    int i = checkAndSetParameterIndex(parameterIndex, parameterCount);
+    int i = checkAndSetParameterIndex(parameterIndex);
     _bind[i].buffer_type = MYSQL_TYPE_BLOB;
     _bind[i].buffer = (void*)x;
-    if (! x)
+    if(!x)
     {
         _params[i].length = 0;
         _bind[i].is_null = &yes;
@@ -107,7 +112,7 @@ void MysqlPreparedStatement::setBlob(int parameterIndex, const void *x, int size
     _bind[i].length = &_params[i].length;
 }
 
-void MysqlPreparedStatement::MysqlPreparedStatement_execute()
+void MysqlPreparedStatement::execute()
 {
     if(_parameterCount > 0)
         if( ( _lastError = mysql_stmt_bind_param(_stmt , _bind) ) )
@@ -124,7 +129,7 @@ void MysqlPreparedStatement::MysqlPreparedStatement_execute()
     }
 }
 
-ResultSet_T MysqlPreparedStatement::MysqlPreparedStatement_executeQuery()
+ResultSetPtr MysqlPreparedStatement::executeQuery()
 {
     if(_parameterCount > 0)
         if((_lastError = mysql_stmt_bind_param(_stmt , _bind)))
@@ -136,9 +141,10 @@ ResultSet_T MysqlPreparedStatement::MysqlPreparedStatement_executeQuery()
     if ((_lastError = mysql_stmt_execute(_stmt)))
         THROW(SQLException, "%s", mysql_stmt_error(_stmt));
     if (_lastError == MYSQL_OK)
-        return ResultSet_new(MysqlResultSet_new(_stmt, _maxRows, true), (Rop_T)&mysqlrops);//TODO
+        return ResultSetPtr( new MysqlResultSet("MysqlResultSet" , _stmt, _maxRows,
+                                                true) );
     THROW(SQLException, "%s", mysql_stmt_error(_stmt));
-    return NULL;
+    return ResultSetPtr(NULL);
 }
 
 long long MysqlPreparedStatement::rowsChanged()

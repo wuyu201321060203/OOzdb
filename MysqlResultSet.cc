@@ -7,11 +7,8 @@
 #include "MysqlResultSet.h"
 #include "Str.h"
 #include "Memory.h"
-#include "Time.h
+#include "Time.h"
 
-#define MYSQL_OK 0
-#define EXCEPTION_MESSAGE_LENGTH 512
-#define BADSTR "null"
 
 #define FREE(p) (if(p) free(p);)
 
