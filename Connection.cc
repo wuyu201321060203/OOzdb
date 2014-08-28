@@ -109,7 +109,7 @@ time_t Connection::getLastAccessedTime()
 
 bool Connection::isInTransaction()
 {
-    return _isInTransaction;
+    return (_isInTransaction > 0);
 }
 
 void Connection::setQueryTimeout(int ms)

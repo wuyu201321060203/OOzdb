@@ -58,7 +58,7 @@ private:
 
     ConnectionPoolPtr _pool;
     bool _isAvailable;
-    bool _isInTransaction;
+    int _isInTransaction;
     int _timeout;
     URL_T _url;
     muduo::Timestamp _lastAccessedTime;
