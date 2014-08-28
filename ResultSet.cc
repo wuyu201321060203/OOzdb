@@ -1,5 +1,7 @@
 #include "ResultSet.h"
 
+#define OK 0//TODO
+
 ResultSet::ResultSet(CONST_STDSTR name):_resultSetName(name)
 {
     assert(_resultSetName);
@@ -9,28 +11,19 @@ ResultSet::~ResultSet()
 {
 }
 
-int ResultSet::getColumnCount()
-{
-}
-
-CONST_STDSTR ResultSet::getColumnName(int columnIndex)
-{
-}
-
-long ResultSet::getColumnSize(int columnIndex)
-{
-}
-
 int ResultSet::next()
 {
+    return OK;
 }
 
 bool ResultSet::isnull(int columnIndex)
 {
+    return false;
 }
 
 CONST_STDSTR ResultSet::getString(int columnIndex)
 {
+    return "null"
 }
 
 CONST_STDSTR ResultSet::getStringByName(CONST_STDSTR name)
@@ -40,6 +33,7 @@ CONST_STDSTR ResultSet::getStringByName(CONST_STDSTR name)
 
 int ResultSet::getInt(int columnIndex)
 {
+    return -1;
 }
 
 int ResultSet::getIntByName(CONST_STDSTR name)
@@ -49,6 +43,7 @@ int ResultSet::getIntByName(CONST_STDSTR name)
 
 long long ResultSet::getLLong(int columnIndex)
 {
+    return -1;
 }
 
 long long ResultSet::getLLongByName(CONST_STDSTR name)
@@ -58,6 +53,7 @@ long long ResultSet::getLLongByName(CONST_STDSTR name)
 
 double ResultSet::getDouble(int columnIndex)
 {
+    return -1.0;
 }
 
 double ResultSet::getDoubleByName(CONST_STDSTR name)
@@ -67,6 +63,7 @@ double ResultSet::getDoubleByName(CONST_STDSTR name)
 
 void const* ResultSet::getBlob(int columnIndex , int* size)
 {
+    return NULL;
 }
 
 void const* ResultSet::getBlobByName(CONST_STDSTR name , int* size)
@@ -76,6 +73,7 @@ void const* ResultSet::getBlobByName(CONST_STDSTR name , int* size)
 
 time_t ResultSet::getTimestamp(int columnIndex)
 {
+    return 0;
 }
 
 time_t ResultSet::getTimestampByName(CONST_STDSTR name)
@@ -85,6 +83,7 @@ time_t ResultSet::getTimestampByName(CONST_STDSTR name)
 
 struct tm* ResultSet::getDateTime(int columnIndex, struct tm* tm)
 {
+    return NULL;
 }
 
 struct tm* ResultSet::getDateTimeByName(CONST_STDSTR name , struct tm* tm)
@@ -94,6 +93,21 @@ struct tm* ResultSet::getDateTimeByName(CONST_STDSTR name , struct tm* tm)
 
 void clear()
 {
+}
+
+int ResultSet::getColumnCount()
+{
+    return _columnCount;
+}
+
+CONST_STDSTR ResultSet::getColumnName(int columnIndex)
+{
+    return "null";
+}
+
+long ResultSet::getColumnSize(int columnIndex)
+{
+    return -1;
 }
 
 int ResultSet::checkAndSetColumnIndex(int columnIndex , int columnCount)
@@ -109,7 +123,7 @@ int ResultSet::getIndex(CONST_STDSTR name)
     int i;
     int columns = getColumnCount();
     for (i = 1; i <= columns; i++)
-        if (name == getColumnName(i))
+        if ( name == getColumnName(i) )
             return i;
     throw(SQLException(name ? name : "null"));
     return -1;

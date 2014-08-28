@@ -22,28 +22,28 @@ class MysqlConnection : public Connection
 public:
 
     MysqlConnection(URL_T url , char** error);
-    ~MysqlConnection();
-    void setQueryTimeout(int ms);
-    void setMaxRows(int max);
-    int ping();
-    int beginTransaction();
-    int commit();
-    int rollback();
-    long long lastRowId();
-    long long rowsChanged();
-    int execute(char const* sql , va_list ap);
-    ResultSet executeQuery(char const* sql , va_list ap);
-    PreparedStatement_T prepareStatement(char const* sql , va_list ap);
-    char const* getLastError();
+    virtual ~MysqlConnection();
+    virtual void setQueryTimeout(int ms);
+    virtual void setMaxRows(int max);
+    virtual int ping();
+    virtual int beginTransaction();
+    virtual void clear();
+    virtual void close();
+    virtual int commit();
+    virtual int rollback();
+    virtual long long getLastRowId();
+    virtual long long rowsChanged();
+    virtual void execute(char const* sql , va_list ap);
+    virtual ResultSetPtr executeQuery(char const* sql , va_list ap);
+    virtual PreparedStatement getPrepareStatement(char const* sql , va_list ap);
+    virtual CONST_STDSTR getLastError();
     /* Class method: MySQL client library finalization */
-    void onstop(void);
+    virtual void onstop();
 
 private:
 
     URL_T _url;
     MYSQL* db;
-    int maxRows;
-    int timeout;
     int lastError;
     StringBuffer_t sb;
 

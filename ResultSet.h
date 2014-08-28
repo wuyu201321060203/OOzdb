@@ -2,12 +2,12 @@
 #define RESULTSET_H
 
 #include <string>
-#include <time.h>//TODO
 #include <cassert>
 
 #include <boost/shared_ptr.hpp>
 
 #include <muduo/base/Logging.h>
+#include <muduo/base/Time.h>
 
 #include "Exception.h"
 #include "Str.h"
@@ -39,14 +39,16 @@ public:
 private:
 
     CONST_STDSTR _resultSetName;
+    int _maxRows;
+    int _columnCount;
 
 private:
 
     virtual int getColumnCount();
     virtual CONST_STDSTR getColumnName(int columnIndex);
     virtual long getColumnSize(int columnIndex);
-
     static inline int checkAndSetColumnIndex(int columnIndex, int columnCount);
+    virtual int getIndex(CONST_STDSTR name);
 };
 
 typedef boost::shared_ptr<ResultSet> ResultSetPtr;

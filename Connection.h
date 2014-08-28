@@ -28,17 +28,18 @@ public:
     int getMaxRows();
     URL_T getURL();
     virtual int ping();
+    virtual int beginTransaction();
     virtual void clear();
     virtual void close();
-    virtual void beginTransaction();
-    virtual void commit();
-    virtual void rollback();
+    virtual int commit();
+    virtual int rollback();
     virtual long long getLastRowId();
     virtual long long rowsChanged();
     virtual void execute(CONST_STDSTR sql , ...);
     virtual ResultSetPtr executeQuery(CONST_STDSTR sql , ...);
     virtual PreparedStatementPtr getPreparedStatement(CONST_STDSTR sql , ...);
-    CONST_STDSTR getLastError();
+    virtual CONST_STDSTR getLastError();
+    virtual void onStop();
 
 private:
 

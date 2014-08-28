@@ -1,34 +1,9 @@
-/*
- * Copyright (C) Tildeslash Ltd. All rights reserved.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 3.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * In addition, as a special exception, the copyright holders give
- * permission to link the code of portions of this program with the
- * OpenSSL library under certain conditions as described in each
- * individual source file, and distribute linked combinations
- * including the two.
- *
- * You must obey the GNU General Public License in all respects
- * for all of the code used other than OpenSSL.
- */
-
-
 #ifndef URL_INCLUDED
 #define URL_INCLUDED
 
 
 /**
- * <b>URL</b> represent an immutable Uniform Resource Locator. 
+ * <b>URL</b> represent an immutable Uniform Resource Locator.
  * A Uniform Resource Locator (URL), is used to uniquely identify a
  * resource on the Internet. The URL is a compact text string with a
  * restricted syntax that consists of four main components:
@@ -58,7 +33,6 @@
  */
 
 
-#define T URL_T
 typedef struct URL_S *T;
 
 
@@ -89,7 +63,7 @@ T URL_create(const char *url, ...) __attribute__((format (printf, 1, 2)));
 
 
 /**
- * Destroy a URL object. 
+ * Destroy a URL object.
  * @param U A URL object reference
  */
 void URL_free(T *U);
@@ -147,7 +121,7 @@ const char *URL_getPath(T U);
 
 
 /**
- * Get the query string of the URL. 
+ * Get the query string of the URL.
  * @param U An URL object
  * @return The query string of the URL or NULL if not found
  */
@@ -156,13 +130,13 @@ const char *URL_getQueryString(T U);
 
 /**
  * Returns an array of string objects with the names of the
- * parameters contained in this URL. If the URL has no parameters, 
+ * parameters contained in this URL. If the URL has no parameters,
  * the method returns NULL. The last value in the array is NULL.
- * To print all parameter names and their values contained in this 
+ * To print all parameter names and their values contained in this
  * URL, the following code can be used:
  * <pre>
  *   const char **params = URL_getParameterNames(U);
- *   if (params) 
+ *   if (params)
  *           for (int i = 0; params[i]; i++)
  *                   printf("%s = %s\n", params[i], URL_getParameter(U, params[i]));
  * </pre>
@@ -175,8 +149,8 @@ const char **URL_getParameterNames(T U);
 
 /**
  * Returns the value of a URL parameter as a string, or NULL if
- * the parameter does not exist. If you use this method with a 
- * multi-valued parameter, the value returned is the first value found. 
+ * the parameter does not exist. If you use this method with a
+ * multi-valued parameter, the value returned is the first value found.
  * Lookup is <i>case-sensitive</i>.
  * @param U An URL object
  * @param name The parameter name to lookup
@@ -208,12 +182,12 @@ char *URL_unescape(char *url);
 
 
 /**
- * <b>Class method</b>, escape an url string converting unsafe 
+ * <b>Class method</b>, escape an url string converting unsafe
  * characters to a hex (%%HEXHEX) representation. The following URL unsafe
- * characters are encoded: <pre><>\"#%%{}|\\^ [] `</pre> as well as 
+ * characters are encoded: <pre><>\"#%%{}|\\^ [] `</pre> as well as
  * characters in the interval 00-1F hex (0-31 decimal) and in the interval
- * 7F-FF (127-255 decimal) <i>The caller must free the returned string.</i> 
- * If the <code>url</code> parameter is NULL then this method returns NULL, 
+ * 7F-FF (127-255 decimal) <i>The caller must free the returned string.</i>
+ * If the <code>url</code> parameter is NULL then this method returns NULL,
  * if it is the empty string "" a <i>new</i> empty string is returned.
  * @param url an url string
  * @return the escaped string
@@ -222,7 +196,7 @@ char *URL_escape(const char *url);
 
 
 /**
- * <b>Class method</b>, normalize an URL path string. The 
+ * <b>Class method</b>, normalize an URL path string. The
  * <code>path</code> parameter is modified by this method. Examples:
  * <p><table>
  * <tr><td><b>path</b></td><td><b>normalized path</b></td>

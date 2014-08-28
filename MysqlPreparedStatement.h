@@ -28,16 +28,16 @@ public:
     }param_t;
 
     MysqlPreparedStatement(void* stmt , int maxRows , int parameterCount);
-    ~MysqlPreparedStatement();
-    void setString(int parameterIndex , CONST_STDSTR str);
-    void setInt(int parameterIndex , int x);
-    void setLLong(int parameterIndex, long long x);
-    void setDouble(int parameterIndex , double x);
-    void setTimestamp(int parameterIndex, time_t x);
-    void setBlob(int parameterIndex, const void *x, int size);
-    void MysqlPreparedStatement_execute();
-    ResultSet_T MysqlPreparedStatement_executeQuery();
-    long long rowsChanged();
+    virtual ~MysqlPreparedStatement();
+    virtual void setString(int parameterIndex , CONST_STDSTR str);
+    virtual void setInt(int parameterIndex , int x);
+    virtual void setLLong(int parameterIndex, long long x);
+    virtual void setDouble(int parameterIndex , double x);
+    virtual void setTimestamp(int parameterIndex, time_t x);
+    virtual void setBlob(int parameterIndex, const void *x, int size);
+    virtual void execute();
+    virtual ResultSetPtr executeQuery();
+    virtual long long rowsChanged();
 
 private:
 
@@ -46,7 +46,6 @@ private:
     param_t* _params;
     MYSQL_STMT *_stmt;
     MYSQL_BIND *_bind;
-    int _parameterCount;
 };
 
 #endif
