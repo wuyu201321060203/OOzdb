@@ -185,6 +185,9 @@ extern int ZBDEBUG;
 #define MYSQL_OK 0
 #define EXCEPTION_MESSAGE_LENGTH 512
 #define BADSTR "null"
+#define SUCCESSFUL 0
+#define INVALID_ROWID -1
+#define INVALID_ROWSCHANGED -1
 
 #endif
 

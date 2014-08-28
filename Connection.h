@@ -30,6 +30,8 @@ public:
     virtual CONST_STDSTR getLastError();
     virtual void onStop();
 
+public:
+
     void setAvailable(bool isAvailable);
     bool isAvailable();
     time_t getLastAccessedTime();

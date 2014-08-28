@@ -1,4 +1,7 @@
+#include <muduo/base/Timestamp.h>
+
 #include "Connection.h"
+#include "COnfig.h"
 
 Connection::Connection(ConnectionPoolPtr pool):
     _pool(pool),
@@ -7,6 +10,7 @@ Connection::Connection(ConnectionPoolPtr pool):
     _timeout(SQL_DEFAULT_TIMEOUT),
     _url(_pool->getURL()),
     _lastAccessedTime(Time::now())
+    _maxRows(0)
 {
     assert(_pool);
 }
@@ -14,6 +18,74 @@ Connection::Connection(ConnectionPoolPtr pool):
 Connection::~Connection()
 {
     clear();
+}
+
+int Connection::ping()
+{
+    return SUCCESSFUL;
+}
+
+int Connection::beginTransaction()
+{
+    ++_isInTransaction;
+    return SUCCESSFUL;
+}
+
+int Connection::commit()
+{
+    if(_isInTransaction)
+        _isInTransaction = 0;
+    return SUCCESSFUL;
+}
+
+int Connection::rollback()
+{
+    if(_isInTransaction)
+    {
+        clear();
+        _isInTransaction = 0;
+    }
+    return SUCCESSFUL;
+}
+
+long long Connection::getLastRowId()
+{
+    return INVALID_ROWID;
+}
+
+long long Connection::rowsChanged()
+{
+    return INVALID_ROWSCHANGED;
+}
+
+void Connection::execute(char const* sql , ...)
+{
+    assert(sql);
+    if(_resultSet)
+        _resultSet->clear();
+}
+
+ResultSetPtr Connection::executeQuery(char const* sql , ...)
+{
+    assert(sql);
+    if(_resultSet)
+        _resultSet->clear();
+    return _resultSet;
+}
+
+PreparedStatementPtr Connection::getPreparedStatement(char const* sql , ...)
+{
+    assert(sql);
+    return PreparedStatementPtr(NULL);
+}
+
+CONST_STDSTR Connection::getLastError()
+{
+    return "?";
+}
+
+void onStop()
+{
 }
 
 void Connection::setAvailable(bool isAvailable)
@@ -63,11 +135,6 @@ URL_T Connection::getURL()
     return _url;
 }
 
-int Connection::ping()
-{
-    return SUCCESSFUL;
-}
-
 void Connection::clear()
 {
     if(_resultSet)
@@ -84,59 +151,6 @@ void Connection::close()
     _pool->returnConnection( enable_shared_from_this() );
 }
 
-void Connection::beginTransaction()
-{
-    ++_isInTransaction;
-}
 
-void Connection::commit()
-{
-    if(_isInTransaction)
-        _isInTransaction = 0;
 
-}
 
-void Connection::rollback()
-{
-    if(_isInTransaction)
-    {
-        clear();
-        _isInTransaction = 0;
-    }
-}
-
-long long Connection::getLastRowId()
-{
-    return INVALID_ROWID;
-}
-
-long long Connection::rowsChanged()
-{
-    return INVALID_ROWSCHANGED;
-}
-
-void Connection::execute(CONST_STDSTR sql , ...)
-{
-    assert(sql);
-    if(_resultSet)
-        _resultSet->clear();
-}
-
-ResultSetPtr Connection::executeQuery(CONST_STDSTR sql , ...)
-{
-    assert(sql);
-    if(_resultSet)
-        _resultSet->clear();
-    return _resultSet;
-}
-
-PreparedStatementPtr Connection::getPreparedStatement(CONST_STDSTR sql , ...)
-{
-    assert(sql);
-    return PreparedStatementPtr(NULL);
-}
-
-CONST_STDSTR Connection::getLastError()
-{
-    return "?";
-}
