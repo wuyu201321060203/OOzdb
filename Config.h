@@ -17,6 +17,7 @@
 #include "Str.h"
 #include "SQLException.h"
 #include "system/System.h"
+#include <string>
 
 
 /**
@@ -188,6 +189,9 @@ extern int ZBDEBUG;
 #define SUCCESSFUL 0
 #define INVALID_ROWID -1
 #define INVALID_ROWSCHANGED -1
+
+typedef std::string STDSTR;
+#define CONST_STDSTR STDSTR const
 
 #endif
 

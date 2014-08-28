@@ -1,7 +1,10 @@
+#include <assert.h>
+
+#include <boost/enable_shared_from_this.hpp>
+
 #include <muduo/base/Timestamp.h>
 
 #include "Connection.h"
-#include "COnfig.h"
 
 Connection::Connection(ConnectionPoolPtr pool):
     _pool(pool),
@@ -9,7 +12,7 @@ Connection::Connection(ConnectionPoolPtr pool):
     _isInTransaction(false),
     _timeout(SQL_DEFAULT_TIMEOUT),
     _url(_pool->getURL()),
-    _lastAccessedTime(Time::now())
+    _lastAccessedTime(Timestamp::now())
     _maxRows(0)
 {
     assert(_pool);
@@ -76,7 +79,7 @@ ResultSetPtr Connection::executeQuery(char const* sql , ...)
 PreparedStatementPtr Connection::getPreparedStatement(char const* sql , ...)
 {
     assert(sql);
-    return PreparedStatementPtr(NULL);
+    return PreparedStatementPtr();//non-beautiful
 }
 
 CONST_STDSTR Connection::getLastError()
@@ -91,7 +94,7 @@ void onStop()
 void Connection::setAvailable(bool isAvailable)
 {
     _isAvailable = isAvailable;
-    _lastAccessedTime = Time::now();
+    _lastAccessedTime = Timestamp::now();
 }
 
 bool Connection::isAvailable()
@@ -120,7 +123,7 @@ int Connection::getQueryTimeout()
     return _timeout;
 }
 
-void Connection::setMaxRows(int max)
+void Connection::setMaxRows(int rows)
 {
     _maxRows = max;
 }
@@ -151,6 +154,7 @@ void Connection::close()
     _pool->returnConnection( enable_shared_from_this() );
 }
 
-
-
-
+void Connection::freePrepared()
+{
+    _prepared.clear();
+}

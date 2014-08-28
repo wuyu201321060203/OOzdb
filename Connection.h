@@ -1,12 +1,13 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#include <cstdarg>
-#include <cassert>
 #include <vector>
 
-#include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_ptr.hpp>
 
+#include <muduo/base/Timestamp.h>
+
+#include "Config.h"
 #include "ConnectionPool.h"
 #include "ResultSet.h"
 #include "PreparedStatement.h"
@@ -15,6 +16,11 @@
 class Connection
 {
 public:
+
+    /*
+     * The following functions are virtual functions and must be implemented by
+     * subclass
+     */
 
     Connection(ConnectionPoolPtr pool);
     virtual ~Connection();
@@ -30,6 +36,10 @@ public:
     virtual CONST_STDSTR getLastError();
     virtual void onStop();
 
+    /*
+     *The following functions are inherited by subclasses directly
+     */
+
 public:
 
     void setAvailable(bool isAvailable);
@@ -38,9 +48,11 @@ public:
     bool isInTransaction();
     void setQueryTimeout(int ms);
     int getQueryTimeout();
-    void setMaxRows(int max);
+    void setMaxRows(int rows);
     int getMaxRows();
     URL_T getURL();
+    void clear();
+    void close();
 
 private:
 
@@ -49,7 +61,7 @@ private:
     bool _isInTransaction;
     int _timeout;
     URL_T _url;
-    time_t _lastAccessedTime;
+    muduo::Timestamp _lastAccessedTime;
     int _maxRows;
     PreparedStatementVec _prepared;
     ResultSetPtr _resultSet;
@@ -59,6 +71,7 @@ private:
     void freePrepared();
 };
 
+typedef boost::shared_ptr<Connection> ConnectionPtr;
 typedef std::vector<ConnectionPtr> ConnectionVec;
 
 #endif
