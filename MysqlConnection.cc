@@ -1,15 +1,16 @@
+#include <cstdarg>
+#include <cassert>
+
 #include "MysqlConnection.h"
 
-MysqlConnection::MysqlConnection(ConnectionPoolPtr pool , URL_T url ,
-                                 char** error):Connection(pool)
+MysqlConnection::MysqlConnection(ConnectionPoolPtr pool , char** error):
+    Connection(pool),
+    _lastError(MYSQL_OK)
 {
-    assert(url);
     assert(error);
-    if(!(_db = doConnect(url, error)))
+    if(!(_db = doConnect(_url, error)))
         THROW(SQLException("Can't connect to MySQL"));//TODO
-    _url = url;
     _sb = StringBuffer_create(STRLEN);
-    _timeout = SQL_DEFAULT_TIMEOUT;
 }
 
 MysqlConnection::~MysqlConnection()
@@ -25,8 +26,14 @@ int MysqlConnection::ping()
 
 int MysqlConnection::beginTransaction()
 {
+    int ret = false;
     _lastError = mysql_query(_db, "START TRANSACTION;");
-    return (_lastError == MYSQL_OK);
+    if (_lastError == MYSQL_OK)
+    {
+        ++_isInTransaction;
+        ret = true;
+    }
+    return ret;
 }
 
 int MysqlConnection::commit()
@@ -51,24 +58,28 @@ long long MysqlConnection::rowsChanged()
     return (long long)mysql_affected_rows(_db);
 }
 
-int MysqlConnection::execute(char const* sql , va_list ap)
+int MysqlConnection::execute(char const* sql , ...)
 {
-    va_list ap_copy;
-    va_copy(ap_copy, ap);
-    StringBuffer_vset(_sb, sql, ap_copy);
-    va_end(ap_copy);
+    assert(sql);
+    va_list ap;
+    va_start(ap , sql);
+    _resultSet->clear();
+    StringBuffer_vset(_sb, sql, ap);
+    va_end(ap);
     _lastError = mysql_real_query(_db , StringBuffer_toString(_sb),
                                   StringBuffer_length(_sb));
     return (_lastError == MYSQL_OK);
 }
 
-ResultSetPtr MysqlConnection::executeQuery(char const* sql , va_list ap)
+ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
 {
-    va_list ap_copy;
-    MYSQL_STMT *stmt = NULL;
-    va_copy(ap_copy, ap);
-    StringBuffer_vset(_sb , sql , ap_copy);
-    va_end(ap_copy);
+    assert(sql);
+    _resultSet->clear();
+    va_list ap;
+    va_start(ap , sql);
+    MYSQL_STMT* stmt = NULL;
+    StringBuffer_vset(_sb , sql , ap);
+    va_end(ap);
     if(prepare(StringBuffer_toString(_sb) , StringBuffer_length(_sb) , &stmt))
     {
 #if MYSQL_VERSION_ID >= 50002
@@ -84,7 +95,7 @@ ResultSetPtr MysqlConnection::executeQuery(char const* sql , va_list ap)
             return ResultSetPtr(new MysqlResultSet("MysqlResultSet" , _stmt , _maxRows,
                                                     false));
     }
-    return ResultSetPtr(NULL);
+    return ResultSetPtr();
 }
 
 PreparedStatementPtr MysqlConnection::getPrepareStatement(char const* sql , va_list ap)
@@ -106,7 +117,7 @@ PreparedStatementPtr MysqlConnection::getPrepareStatement(char const* sql , va_l
 CONST_STDSTR MysqlConnection::getLastError()
 {
     if(mysql_errno(_db))
-        return mysql_error(_db);
+        return CONST_STDSTR(mysql_error(_db));
     return CONST_STDSTR( StringBuffer_toString(_sb) ); // Either the statement itself or a statement error
 }
 

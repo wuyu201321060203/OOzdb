@@ -1,18 +1,11 @@
 #ifndef MYSQLCONNECTION_H
 #define MYSQLCONNECTION_H
 
-#include <stdio.h>
-#include <string.h>
 #include <mysql.h>
 #include <errmsg.h>
 
-#include "Config.h"
-#include "URL.h"
-#include "ResultSet.h"
 #include "StringBuffer.h"
-#include "PreparedStatement.h"
-#include "MysqlResultSet.h"
-#include "MysqlPreparedStatement.h"
+#include "Connection.h"
 
 class MysqlConnection : public Connection
 {
@@ -34,7 +27,6 @@ public:
 
 private:
 
-    URL_T _url;
     MYSQL* db;
     int lastError;
     StringBuffer_t sb;
