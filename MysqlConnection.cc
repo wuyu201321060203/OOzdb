@@ -26,26 +26,38 @@ int MysqlConnection::ping()
 
 int MysqlConnection::beginTransaction()
 {
-    int ret = false;
     _lastError = mysql_query(_db, "START TRANSACTION;");
     if (_lastError == MYSQL_OK)
     {
         ++_isInTransaction;
-        ret = true;
+        return true;
     }
-    return ret;
+    THROW(SQLException);//TODO
 }
 
 int MysqlConnection::commit()
 {
+    if(_isInTransaction)
+        _isInTransaction = 0;
     _lastError = mysql_query(_db, "COMMIT;");
-    return (_lastError == MYSQL_OK);
+    if(_lastError == MYSQL_OK)
+        return true;
+    else
+        THROW(SQLException());//TODO
 }
 
 int MysqlConnection::rollback()
 {
+    if(_isInTransaction)
+    {
+        _isInTransaction = 0;
+        Clear();
+    }
     _lastError = mysql_query(db, "ROLLBACK;");
-    return (_lastError == MYSQL_OK);
+    if(_lastError == MYSQL_OK)
+        return true;
+    else
+        THROW();//TODO
 }
 
 long long MysqlConnection::getLastRowId()
@@ -68,7 +80,10 @@ int MysqlConnection::execute(char const* sql , ...)
     va_end(ap);
     _lastError = mysql_real_query(_db , StringBuffer_toString(_sb),
                                   StringBuffer_length(_sb));
-    return (_lastError == MYSQL_OK);
+    if(_lastError == MYSQL_OK)
+        return true;
+    else
+        THROW();//TODO
 }
 
 ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
@@ -95,23 +110,26 @@ ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
             return ResultSetPtr(new MysqlResultSet("MysqlResultSet" , _stmt , _maxRows,
                                                     false));
     }
-    return ResultSetPtr();
+    THROW();//TODO
 }
 
-PreparedStatementPtr MysqlConnection::getPrepareStatement(char const* sql , va_list ap)
+PreparedStatementPtr MysqlConnection::getPrepareStatement(char const* sql , ...)
 {
-    va_list ap_copy;
+    assert(sql);
+    va_list ap;
+    va_start(ap , sql);
     MYSQL_STMT *stmt = NULL;
-    va_copy(ap_copy, ap);
-    StringBuffer_vset(_sb , sql , ap_copy);
-    va_end(ap_copy);
+    StringBuffer_vset(_sb , sql , ap);
+    va_end(ap);
     if (prepare(StringBuffer_toString(_sb) , StringBuffer_length(_sb) , &stmt))
     {
         int parameterCount = (int)mysql_stmt_param_count(_stmt);
-        return PreparedStatementPtr(new MysqlPreparedStatement(stmt , _maxRows,
+        PreparedStatementPtr item(new MysqlPreparedStatement(stmt , _maxRows,
                                                                parameterCount) );
+        _prepared.push_back(item);
+        return item;
     }
-    return PreparedStatementPtr(NULL);
+    THROW();//TODO
 }
 
 CONST_STDSTR MysqlConnection::getLastError()
