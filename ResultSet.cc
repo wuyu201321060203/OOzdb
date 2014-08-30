@@ -1,8 +1,10 @@
+#include "Config.h"
 #include "ResultSet.h"
 
-#define OK 0//TODO
-
-ResultSet::ResultSet(CONST_STDSTR name):_resultSetName(name)
+ResultSet::ResultSet(CONST_STDSTR name):
+    _resultSetName(name),
+    _maxRows(0),
+    _columnCount(0)
 {
     assert(_resultSetName);
 }
@@ -13,7 +15,7 @@ ResultSet::~ResultSet()
 
 int ResultSet::next()
 {
-    return OK;
+    return SUCCESSFUL;
 }
 
 bool ResultSet::isnull(int columnIndex)
@@ -23,7 +25,7 @@ bool ResultSet::isnull(int columnIndex)
 
 CONST_STDSTR ResultSet::getString(int columnIndex)
 {
-    return "null"
+    return BADSTR;
 }
 
 CONST_STDSTR ResultSet::getStringByName(CONST_STDSTR name)
@@ -71,22 +73,23 @@ void const* ResultSet::getBlobByName(CONST_STDSTR name , int* size)
     return getBlob(getIndex(name) , size);
 }
 
-time_t ResultSet::getTimestamp(int columnIndex)
+muduo::Timestamp ResultSet::getTimestamp(int columnIndex)
 {
-    return 0;
+    return muduo::Timestamp();
 }
 
-time_t ResultSet::getTimestampByName(CONST_STDSTR name)
+muduo::Timestamp ResultSet::getTimestampByName(CONST_STDSTR name)
 {
     return getTimestamp(getIndex(name));
 }
 
-struct tm* ResultSet::getDateTime(int columnIndex, struct tm* tm)
+struct tm ResultSet::getDateTime(int columnIndex, struct tm* tm)
 {
-    return NULL;
+    struct tm t = {.tm_year = 0};
+    return t;
 }
 
-struct tm* ResultSet::getDateTimeByName(CONST_STDSTR name , struct tm* tm)
+struct tm ResultSet::getDateTimeByName(CONST_STDSTR name , struct tm* tm)
 {
     return getDateTime(getIndex(name) , tm);
 }
@@ -102,7 +105,7 @@ int ResultSet::getColumnCount()
 
 CONST_STDSTR ResultSet::getColumnName(int columnIndex)
 {
-    return "null";
+    return BADSTR;
 }
 
 long ResultSet::getColumnSize(int columnIndex)
@@ -110,10 +113,10 @@ long ResultSet::getColumnSize(int columnIndex)
     return -1;
 }
 
-int ResultSet::checkAndSetColumnIndex(int columnIndex , int columnCount)
+int ResultSet::checkAndSetColumnIndex(int columnIndex)
 {
     int i = columnIndex - 1;
-    if (columnCount <= 0 || i < 0 || i >= columnCount)
+    if (_columnCount <= 0 || i < 0 || i >= columnCount)
         throw( SQLException("Column index is out of range") );
     return i;
 }
@@ -125,6 +128,6 @@ int ResultSet::getIndex(CONST_STDSTR name)
     for (i = 1; i <= columns; i++)
         if ( name == getColumnName(i) )
             return i;
-    throw(SQLException(name ? name : "null"));
+    THROW(SQLException(name ? name : "null"));//TODO
     return -1;
 }
