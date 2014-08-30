@@ -40,8 +40,8 @@ private:
     int getColumnCount();
     virtual CONST_STDSTR getColumnName(int columnIndex);
     virtual long getColumnSize(int columnIndex);
-    inline int checkAndSetColumnIndex(int columnIndex, int columnCount);
-    virtual int getIndex(CONST_STDSTR name);
+    inline int checkAndSetColumnIndex(int columnIndex);
+    int getIndex(CONST_STDSTR name);
 };
 
 typedef boost::shared_ptr<ResultSet> ResultSetPtr;

@@ -9,9 +9,6 @@
 #include "Memory.h"
 #include "Time.h"
 
-
-#define FREE(p) (if(p) free(p);)
-
 MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
                                int keep):
     ResultSet(name)
