@@ -1,28 +1,103 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
-#include <exception>
+#include <stdarg.h>
+#include <stdio.h>
 #include <string>
+#include <type_traits>
 
-using std::exception;
-using std::string;
+#include "Config.h"
 
 class Exception
 {
 public:
 
-    Exception(string const& reason):_reason(reason)
+    explicit Exception()
     {
     }
 
-    std::string const getReason()
+    explicit Exception(CONST_STDSTR& funcName , CONST_STDSTR& fileName,
+              long const& lineNum , CONST_STDSTR& reason):
+        _funcName(funcName),
+        _fileName(fileName),
+        _lineNum(lineNum),
+        _reason(reason)
+    {
+    }
+
+    virtual ~Exception()
+    {
+    }
+
+    void setFuncName(char const* funcName)
+    {
+        _funcName = funcName;
+    }
+
+    CONST_STDSTR getFuncName()
+    {
+        return _funcName;
+    }
+
+    void setFileName(char const* fileName)
+    {
+        _fileName  = fileName;
+    }
+
+    CONST_STDSTR getFileName()
+    {
+        return _fileName;
+    }
+
+    void setLineNum(long const& lineNum)
+    {
+        _lineNUm = lineNum;
+    }
+
+    long const getLineNum()
+    {
+        return _lineNum;
+    }
+
+    void setReason(char const* reason)
+    {
+        _reason = reason;
+    }
+
+    CONST_STDSTR getReason()
     {
         return _reason;
     }
 
 private:
 
-    string _reason;
+    STDSTR _funcName;
+    STDSTR _fileName;
+    long   _lineNum;
+    STDSTR _reason;
 };
 
+template<typename T>
+void ExceptionThrow(T e , char const* funcName,
+                    char const* fileName , long const& lineNum,
+    char const* reason , ...)
+{
+    static_assert(std::is_convertible<T* , Exception*> , "Exception type is invalid");
+    va_list ap;
+    va_start(ap , reason);
+    e.setFuncName(funcName);
+    e.setFileName(fileName);
+    e.setLineNum(lineNum);
+    char message[EXCEPTION_MESSAGE_LENGTH + 1];
+    int ret = vsnprintf(message , EXCEPTION_MESSAGE_LENGTH, reason, ap);
+    if(ret < 0)
+        LOG_ERROR << "vsnprintf return error";
+    else
+        e.setReason(message);
+    va_end(ap);
+    throw e;
+}
+
+#define THROW(e, cause, ...) \
+        ExceptionThrow((e()), __func__, __FILE__, __LINE__, cause, ##__VA_ARGS__, NULL)
 #endif
