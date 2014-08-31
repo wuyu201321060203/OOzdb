@@ -1,38 +1,6 @@
 #ifndef URL_INCLUDED
 #define URL_INCLUDED
 
-
-/**
- * <b>URL</b> represent an immutable Uniform Resource Locator.
- * A Uniform Resource Locator (URL), is used to uniquely identify a
- * resource on the Internet. The URL is a compact text string with a
- * restricted syntax that consists of four main components:
- * <center><code>
- * &lt;protocol&gt;://&lt;authority&gt;&lt;path&gt;?&lt;query&gt;
- * </code></center>
- *
- * The &lt;protocol&gt; part is mandatory, the other components may or
- * may not be present in an URL string. For instance the
- * <code>file</code> protocol only use the path component while a
- * <code>http</code> protocol may use all components. Here is an
- * example where all components are used:
- *
- * <pre>
- * http://user:password@www.foo.bar:8080/document/index.csp?querystring#ref
- * </pre>
- *
- * The following URL components are automatically unescaped according to the escaping
- * mechanism defined in RFC 2396; <code>credentials</code>, <code>path</code> and parameter
- * <code>values</code>.
- *
- * For more information about the URL syntax and specification, see,
- * <a href="ftp://ftp.rfc-editor.org/in-notes/rfc2396.txt">RFC2396 -
- * Uniform Resource Identifiers (URI): Generic Syntax</a>
- *
- * @file
- */
-
-
 typedef struct URL_S *T;
 
 

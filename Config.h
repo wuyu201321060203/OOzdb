@@ -11,40 +11,10 @@
 
 #include <assert.h>
 #include <errno.h>
-#include "xconfig.h"
 
-#include "system/Mem.h"
+#include "Memory.h"
 #include "Str.h"
-#include "SQLException.h"
-#include "system/System.h"
 #include <string>
-
-
-/**
- * The libzdb URL
- */
-#define LIBZDB_URL	"http://tildeslash.com/libzdb/"
-
-
-/**
- * Version, copyright and contact information
- */
-#define ABOUT   "libzdb/" VERSION " Copyright (C) Tildeslash Ltd. " LIBZDB_URL
-
-
-/* ----------------------------------- Error, Exceptions and report macros */
-
-
-/**
- * The standard abort routine
- */
-#define ABORT	System_abort
-
-
-/**
- * The standard debug routine
- */
-#define DEBUG	System_debug
 
 
 /* --------------------------------------------- SQL standard value macros */
@@ -172,16 +142,6 @@ typedef  unsigned int uint32_t;
 /* -------------------------------------------------------------- Globals  */
 
 
-/**
- * Abort handler callback
- */
-extern void(*AbortHandler)(const char *error);
-
-
-/**
- * Library Debug flag. If set to true, emit debug output
- */
-extern int ZBDEBUG;
 
 #define MYSQL_OK 0
 #define EXCEPTION_MESSAGE_LENGTH 512
@@ -194,5 +154,3 @@ typedef std::string STDSTR;
 #define CONST_STDSTR STDSTR const
 
 #endif
-
-

@@ -54,14 +54,14 @@ public:
     void clear();
     void close();
 
-private:
+protected:
 
     ConnectionPoolPtr _pool;
     bool _isAvailable;
     int _isInTransaction;
     int _timeout;
     URL_T _url;
-    muduo::Timestamp _lastAccessedTime;
+    time_t _lastAccessedTime;
     int _maxRows;
     PreparedStatementVec _prepared;
     ResultSetPtr _resultSet;

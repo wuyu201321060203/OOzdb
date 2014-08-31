@@ -4,7 +4,6 @@
 #include <time.h>
 #include <vector>
 
-#include "Str.h"
 #include "ResultSet.h"
 
 class PreparedStatement
@@ -25,12 +24,17 @@ public:
     virtual void execute();
     virtual ResultSetPtr executeQuery();
     virtual long long rowsChanged();
+    virtual void clear();
     int getParameterCount();
 
-private:
+protected:
 
     int _parameterCount;
     ResultSetPtr _resultSet;
+
+protected:
+
+    inline int checkAndSetParameterIndex(int parameterIndex);
 };
 
 typedef boost::shared_ptr<PreparedStatement> PreparedStatementPtr;

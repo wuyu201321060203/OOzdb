@@ -2,8 +2,7 @@
 
 #include <boost/enable_shared_from_this.hpp>
 
-#include <muduo/base/Timestamp.h>
-
+#include "Time.h"
 #include "Connection.h"
 
 Connection::Connection(ConnectionPoolPtr pool):
@@ -12,7 +11,7 @@ Connection::Connection(ConnectionPoolPtr pool):
     _isInTransaction(false),
     _timeout(SQL_DEFAULT_TIMEOUT),
     _url(_pool->getURL()),
-    _lastAccessedTime(Timestamp::now())
+    _lastAccessedTime(Time_now())
     _maxRows(0)
 {
     assert(_pool);
@@ -94,7 +93,7 @@ void onStop()
 void Connection::setAvailable(bool isAvailable)
 {
     _isAvailable = isAvailable;
-    _lastAccessedTime = Timestamp::now();
+    _lastAccessedTime = Time_now();
 }
 
 bool Connection::isAvailable()

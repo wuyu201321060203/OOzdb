@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "Config.h"
 #include "Time.h"
 
 class ResultSet
@@ -29,13 +30,13 @@ public:
     struct tm getDateTimeByName(CONST_STDSTR name);//TODO
     virtual void clear();
 
-private:
+protected:
 
     CONST_STDSTR _resultSetName;
     int _maxRows;
     int _columnCount;
 
-private:
+protected:
 
     int getColumnCount();
     virtual CONST_STDSTR getColumnName(int columnIndex);

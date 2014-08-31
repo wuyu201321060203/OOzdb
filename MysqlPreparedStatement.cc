@@ -4,7 +4,7 @@ static my_bool yes = true;
 
 MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
                                                int parameterCount):
-    _parameterCount(parameterCount)
+    PreparedStatement(parameterCount)
 {
     assert(stmt);
     _stmt = stmt;
@@ -20,17 +20,6 @@ MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
 MysqlPreparedStatement::~MysqlPreparedStatement()
 {
     clear();
-}
-
-void MysqlPreparedStatement::clear()
-{
-    FREE(_bind);
-    mysql_stmt_free_result(_stmt);
-#if MYSQL_VERSION_ID >= 50503
-    while (mysql_stmt_next_result(_stmt) == 0);
-#endif
-    mysql_stmt_close(_stmt);
-    FREE(_params);
 }
 
 void MysqlPreparedStatement::setString(int parameterIndex , CONST_STDSTR str)
@@ -78,22 +67,6 @@ void MysqlPreparedStatement::setDouble(int parameterIndex , double x)
     _bind[i].is_null = 0;
 }
 
-void MysqlPreparedStatement::setTimestamp(int parameterIndex, time_t x)
-{
-    int i = checkAndSetParameterIndex(parameterIndex);
-    struct tm ts = {.tm_isdst = -1};
-    gmtime_r(&x, &ts);
-    _params[i].type.timestamp.year = ts.tm_year + 1900;
-    _params[i].type.timestamp.month = ts.tm_mon + 1;
-    _params[i].type.timestamp.day = ts.tm_mday;
-    _params[i].type.timestamp.hour = ts.tm_hour;
-    _params[i].type.timestamp.minute = ts.tm_min;
-    _params[i].type.timestamp.second = ts.tm_sec;
-    _bind[i].buffer_type = MYSQL_TYPE_TIMESTAMP;
-    _bind[i].buffer = &_params[i].type.timestamp;
-    _bind[i].is_null = 0;
-}
-
 void MysqlPreparedStatement::setBlob(int parameterIndex , void const* x , int size)
 {
     int i = checkAndSetParameterIndex(parameterIndex);
@@ -112,8 +85,25 @@ void MysqlPreparedStatement::setBlob(int parameterIndex , void const* x , int si
     _bind[i].length = &_params[i].length;
 }
 
+void MysqlPreparedStatement::setTimestamp(int parameterIndex, time_t x)
+{
+    int i = checkAndSetParameterIndex(parameterIndex);
+    struct tm ts = {.tm_isdst = -1};
+    gmtime_r(&x, &ts);
+    _params[i].type.timestamp.year = ts.tm_year + 1900;
+    _params[i].type.timestamp.month = ts.tm_mon + 1;
+    _params[i].type.timestamp.day = ts.tm_mday;
+    _params[i].type.timestamp.hour = ts.tm_hour;
+    _params[i].type.timestamp.minute = ts.tm_min;
+    _params[i].type.timestamp.second = ts.tm_sec;
+    _bind[i].buffer_type = MYSQL_TYPE_TIMESTAMP;
+    _bind[i].buffer = &_params[i].type.timestamp;
+    _bind[i].is_null = 0;
+}
+
 void MysqlPreparedStatement::execute()
 {
+    _resultSet->clear();
     if(_parameterCount > 0)
         if( ( _lastError = mysql_stmt_bind_param(_stmt , _bind) ) )
             THROW(SQLException, "%s", mysql_stmt_error(_stmt));
@@ -131,6 +121,7 @@ void MysqlPreparedStatement::execute()
 
 ResultSetPtr MysqlPreparedStatement::executeQuery()
 {
+    _resultSet->clear();
     if(_parameterCount > 0)
         if((_lastError = mysql_stmt_bind_param(_stmt , _bind)))
             THROW(SQLException, "%s", mysql_stmt_error(_stmt));
@@ -143,11 +134,20 @@ ResultSetPtr MysqlPreparedStatement::executeQuery()
     if (_lastError == MYSQL_OK)
         return ResultSetPtr( new MysqlResultSet("MysqlResultSet" , _stmt, _maxRows,
                                                 true) );
-    THROW(SQLException, "%s", mysql_stmt_error(_stmt));
-    return ResultSetPtr(NULL);
 }
 
 long long MysqlPreparedStatement::rowsChanged()
 {
     return (long long)mysql_stmt_affected_rows(_stmt);
+}
+
+void MysqlPreparedStatement::clear()
+{
+    FREE(_bind);
+    mysql_stmt_free_result(_stmt);
+#if MYSQL_VERSION_ID >= 50503
+    while (mysql_stmt_next_result(_stmt) == 0);
+#endif
+    mysql_stmt_close(_stmt);
+    FREE(_params);
 }

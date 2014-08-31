@@ -1,28 +1,3 @@
-/*
- * Copyright (C) Tildeslash Ltd. All rights reserved.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 3.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * In addition, as a special exception, the copyright holders give
- * permission to link the code of portions of this program with the
- * OpenSSL library under certain conditions as described in each
- * individual source file, and distribute linked combinations
- * including the two.
- *
- * You must obey the GNU General Public License in all respects
- * for all of the code used other than OpenSSL.
- */
-
-
 #include "Config.h"
 
 #include <stdio.h>
@@ -48,7 +23,7 @@
 #endif
 
 int Str_isEqual(const char *a, const char *b) {
-	if (a && b) { 
+	if (a && b) {
                 while (*a && *b)
                         if (toupper(*a++) != toupper(*b++)) return false;
                 return (*a == *b);
@@ -69,7 +44,7 @@ int Str_isByteEqual(const char *a, const char *b) {
 
 int Str_startsWith(const char *a, const char *b) {
 	if (a && b) {
-	        do 
+	        do
 	                if (*a++ != *b++) return false;
                 while (*b);
                 return true;
@@ -79,7 +54,7 @@ int Str_startsWith(const char *a, const char *b) {
 
 
 char *Str_copy(char *dest, const char *src, int n) {
-	if (src && dest && (n > 0)) { 
+	if (src && dest && (n > 0)) {
         	char *t = dest;
 	        while (*src && n--)
         		*t++ = *src++;
@@ -91,7 +66,7 @@ char *Str_copy(char *dest, const char *src, int n) {
 
 
 // We do not use strdup so we can throw MemoryException on OOM
-char *Str_dup(const char *s) { 
+char *Str_dup(const char *s) {
         char *t = NULL;
         if (s) {
                 size_t n = strlen(s) + 1;
@@ -106,7 +81,7 @@ char *Str_ndup(const char *s, int n) {
         char *t = NULL;
         assert(n >= 0);
         if (s) {
-                int l = (int)strlen(s); 
+                int l = (int)strlen(s);
                 n = l < n ? l : n; // Use the actual length of s if shorter than n
                 t = ALLOC(n + 1);
                 memcpy(t, s, n);

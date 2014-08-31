@@ -41,14 +41,27 @@ void PreparedStatement::execute()
 ResultSetPtr PreparedStatement::executeQuery()
 {
     _resultSet->clear();
-    return ResultSetPtr(NULL);
+    return _resultSet;
 }
 
 long long PreparedStatement::rowsChanged()
+{
+    return 0;
+}
+
+void PreparedStatement::clear()
 {
 }
 
 int PreparedStatement::getParameterCount()
 {
     return _parameterCount;
+}
+
+int PreparedStatement::checkAndSetParameterIndex(int parameterIndex)
+{
+    int i = parameterIndex - 1;
+    if (_parameterCount <= 0 || i < 0 || i >= _parameterCount)
+        THROW(SQLException, "Parameter index is out of range");//TODO
+    return i;
 }
