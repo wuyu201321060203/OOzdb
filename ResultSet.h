@@ -3,7 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <muduo/base/Timestamp.h>
+#include "Time.h"
 
 class ResultSet
 {
@@ -23,10 +23,10 @@ public:
     double getDoubleByName(CONST_STDSTR name);
     virtual void const* getBlob(int columnIndex , int* size);
     void const* getBlobByName(CONST_STDSTR name , int* size);
-    virtual muduo::Timestamp getTimestamp(int columnIndex);//TODO
-    muduo::Timestamp getTimestampByName(CONST_STDSTR name);//TODO
-    virtual struct tm getDateTime(int columnIndex, struct tm* tm);//TODO
-    struct tm getDateTimeByName(CONST_STDSTR name, struct tm* tm);//TODO
+    virtual time_t getTimestamp(int columnIndex);//TODO
+    time_t getTimestampByName(CONST_STDSTR name);//TODO
+    virtual struct tm getDateTime(int columnIndex);//TODO
+    struct tm getDateTimeByName(CONST_STDSTR name);//TODO
     virtual void clear();
 
 private:

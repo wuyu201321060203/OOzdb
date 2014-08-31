@@ -1,14 +1,11 @@
 #ifndef MYSQLRESULTSET_INCLUDED
 #define MYSQLRESULTSET_INCLUDED
 
-#include <stdio.h>
 #include <mysql.h>
 #include <errmsg.h>
-#include <stdarg.h>
-#include <string>
 #include <vector>
 
-#include "Str.h"
+#include "ResultSet.h"
 
 template<typename T>
 void THROW(T ExceptionType , char const* cause , ...)
@@ -45,8 +42,8 @@ public:
     virtual long long  getLLong(int columnIndex);
     virtual double getDouble(int columnIndex);
     virtual void const* getBlob(int columnIndex, int *size);
-    virtual muduo::Timestamp getTimestamp(int columnIndex);
-    virtual struct tm getDateTime(int columnIndex, struct tm* tm);
+    virtual time_t getTimestamp(int columnIndex);
+    virtual struct tm getDateTime(int columnIndex);
     virtual void clear();
 
 private:

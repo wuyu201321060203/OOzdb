@@ -73,25 +73,26 @@ void const* ResultSet::getBlobByName(CONST_STDSTR name , int* size)
     return getBlob(getIndex(name) , size);
 }
 
-muduo::Timestamp ResultSet::getTimestamp(int columnIndex)
+time_t ResultSet::getTimestamp(int columnIndex)
 {
-    return muduo::Timestamp();
+    time_t t = 0;
+    return t;
 }
 
-muduo::Timestamp ResultSet::getTimestampByName(CONST_STDSTR name)
+time_t ResultSet::getTimestampByName(CONST_STDSTR name)
 {
     return getTimestamp(getIndex(name));
 }
 
-struct tm ResultSet::getDateTime(int columnIndex, struct tm* tm)
+struct tm ResultSet::getDateTime(int columnIndex)
 {
     struct tm t = {.tm_year = 0};
     return t;
 }
 
-struct tm ResultSet::getDateTimeByName(CONST_STDSTR name , struct tm* tm)
+struct tm ResultSet::getDateTimeByName(CONST_STDSTR name)
 {
-    return getDateTime(getIndex(name) , tm);
+    return getDateTime(getIndex(name));
 }
 
 void clear()
