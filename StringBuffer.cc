@@ -3,29 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdarg.h>
 
 #include "StringBuffer.h"
-
-
-/**
- * Implementation of the StringBuffer interface.
- *
- * @file
- */
-
-
-/* ----------------------------------------------------------- Definitions */
-
-
-#define T StringBuffer_T
-struct T {
-        int used;
-        int length;
-	uchar_t *buffer;
-};
-
-
-/* ------------------------------------------------------- Private methods */
 
 
 static inline void append(T S, const char *s, va_list ap) {
@@ -206,9 +186,3 @@ T StringBuffer_trim(T S) {
         }
         return S;
 }
-
-
-#ifdef PACKAGE_PROTECTED
-#pragma GCC visibility pop
-#endif
-

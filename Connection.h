@@ -30,9 +30,14 @@ public:
     virtual int rollback();
     virtual long long getLastRowId();
     virtual long long rowsChanged();
-    virtual void execute(char const* sql , ...);
-    virtual ResultSetPtr executeQuery(char const* sql , ...);
-    virtual PreparedStatementPtr getPreparedStatement(char const* sql , ...);
+    virtual void execute(char const* sql,
+                         ...)__attribute__((format (printf, 1, 2)));//第一个参数
+    //是格式字符串，从第二个参数开始是可变参数列表，从这按照printf检查要求进行检查
+    virtual ResultSetPtr executeQuery(char const* sql,
+                                      ...)__attribute__((format (printf, 1, 2)));
+    virtual PreparedStatementPtr getPreparedStatement(char const* sql,
+                                        ...)__attribute__((format (printf, 1, 2)));
+
     virtual CONST_STDSTR getLastError();
     virtual void onStop();
 

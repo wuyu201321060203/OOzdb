@@ -19,9 +19,11 @@ public:
     virtual int rollback();
     virtual long long getLastRowId();
     virtual long long rowsChanged();
-    virtual void execute(char const* sql , ...);
-    virtual ResultSetPtr executeQuery(char const* sql , ...);
-    virtual PreparedStatement getPrepareStatement(char const* sql , ...);
+    virtual void execute(char const* sql , ...) __attribute__((format (printf, 1, 2)));
+    virtual ResultSetPtr executeQuery(char const* sql,
+                                    ...)__attribute__((format (printf, 1, 2)));
+    virtual PreparedStatement getPrepareStatement(char const* sql,
+                                    ...)__attribute__((format (printf, 1, 2)));
     virtual CONST_STDSTR getLastError();
     virtual void onstop();
 
@@ -29,7 +31,7 @@ private:
 
     MYSQL* db;
     int lastError;
-    StringBuffer_t sb;
+    StringBuffer sb;
 
 private:
 
