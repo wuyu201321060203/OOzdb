@@ -1055,5 +1055,10 @@ yy103:
 
 void URL::freeParams()
 {
-
+    while(_params)
+    {
+        param_t* tmp = _params->next;
+        FREE(_params);
+        _params = tmp;
+    }
 }

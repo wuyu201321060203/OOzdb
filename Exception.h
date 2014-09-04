@@ -51,7 +51,7 @@ public:
 
     void setLineNum(long const& lineNum)
     {
-        _lineNUm = lineNum;
+        _lineNum = lineNum;
     }
 
     long const getLineNum()
