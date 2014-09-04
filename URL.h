@@ -1,190 +1,62 @@
 #ifndef URL_INCLUDED
 #define URL_INCLUDED
 
-typedef struct URL_S *T;
+class URL
+{
+public:
+
+    struct param_t
+    {
+        char* _name;
+        char* _value;
+        param_t* _next;
+    };
+
+    URL(char const* url);
+    URL(char const* url , ...);
+    ~URL();
+    void clear();
+    char const* getProtocol() const;
+    char const* getUser() const;
+    char const* getPassword() const;
+    char const* getHost() const;
+    int getPort() const;
+    char const* getPath() const;
+    char const* getQueryString() const;
+    char const* getParameterNames() const;
+    char const* getParameter(char const* name) const;
+    char const* toString() const;
+    char* unescape(char* url);
+    char* escape(char const* url);
+    char* normalize(char* path);
+
+private:
+
+    int _port;
+    char* _ref;
+	char* _path;
+	char* _host;
+	char* _user;
+    char* _qptr;
+	char* _query;
+	char* _portStr;
+	char* _protocol;
+	char* _password;
+	char* _toString;
+    param_t* _params;
+    char** _paramNames;
+	uchar_t* _data;
+	uchar_t* _buffer;
+	uchar_t* _marker;
+    uchar_t* _ctx;
+    uchar_t* _limit;
+    uchar_t* _token;
 
 
-/**
- * Create a new URL object from the <code>url</code> parameter
- * string. The url string <i>must</i> start with a protocol
- * specifier, such as <code>http://</code> or <code>ftp://</code>
- * @param url A string specifying the URL
- * @return A URL object or NULL if the <code>url</code> parameter
- * cannot be parsed as an URL.
- */
-T URL_new(const char *url);
+private:
 
+    void parseURL();
+    void freeParams();
+};
 
-/**
- * Factory method for building an URL object using a variable argument
- * list. <i>Important</i>: since the '%%' character is used as a format
- * specifier (e.g. %%s for string, %%d for integer and so on),
- * submitting an URL escaped string (i.e. a %%HEXHEX encoded string)
- * in the <code>url</code> parameter can produce undesired results. In
- * this case, use either the URL_new() method or URL_unescape() the
- * <code>url</code> parameter first.
- * @param url A string specifying the URL
- * @return A URL object or NULL if the <code>url</code> parameter
- * cannot be parsed as an URL.
- */
-T URL_create(const char *url, ...) __attribute__((format (printf, 1, 2)));
-
-
-/**
- * Destroy a URL object.
- * @param U A URL object reference
- */
-void URL_free(T *U);
-
-
-/** @name Properties */
-//@{
-
-/**
- * Get the protocol of the URL.
- * @param U An URL object
- * @return The protocol name
- */
-const char *URL_getProtocol(T U);
-
-
-/**
- * Get the user name from the authority part of the URL.
- * @param U An URL object
- * @return A username specified in the URL or NULL if not found
- */
-const char *URL_getUser(T U);
-
-
-/**
- * Get the password from the authority part of the URL.
- * @param U An URL object
- * @return A password specified in the URL or NULL if not found
- */
-const char *URL_getPassword(T U);
-
-
-/**
- * Get the hostname of the URL.
- * @param U An URL object
- * @return The hostname of the URL or NULL if not found
- */
-const char *URL_getHost(T U);
-
-
-/**
- * Get the port of the URL.
- * @param U An URL object
- * @return The port number of the URL or -1 if not specified
- */
-int URL_getPort(T U);
-
-
-/**
- * Get the path of the URL.
- * @param U An URL object
- * @return The path of the URL or NULL if not found
- */
-const char *URL_getPath(T U);
-
-
-/**
- * Get the query string of the URL.
- * @param U An URL object
- * @return The query string of the URL or NULL if not found
- */
-const char *URL_getQueryString(T U);
-
-
-/**
- * Returns an array of string objects with the names of the
- * parameters contained in this URL. If the URL has no parameters,
- * the method returns NULL. The last value in the array is NULL.
- * To print all parameter names and their values contained in this
- * URL, the following code can be used:
- * <pre>
- *   const char **params = URL_getParameterNames(U);
- *   if (params)
- *           for (int i = 0; params[i]; i++)
- *                   printf("%s = %s\n", params[i], URL_getParameter(U, params[i]));
- * </pre>
- * @param U An URL object
- * @return An array of string objects, each string containing the name
- * of a URL parameter; or NULL if the URL has no parameters
- */
-const char **URL_getParameterNames(T U);
-
-
-/**
- * Returns the value of a URL parameter as a string, or NULL if
- * the parameter does not exist. If you use this method with a
- * multi-valued parameter, the value returned is the first value found.
- * Lookup is <i>case-sensitive</i>.
- * @param U An URL object
- * @param name The parameter name to lookup
- * @return The parameter value or NULL if not found
- */
-const char *URL_getParameter(T U, const char *name);
-
-//@}
-
-
-/**
- * Returns a string representation of this URL object
- * @param U An URL object
- * @return The URL string
- */
-const char *URL_toString(T U);
-
-
-/** @name Class methods */
-//@{
-
-/**
- * <b>Class method</b>, unescape an url string. The <code>url</code>
- * parameter is modified by this method.
- * @param url an escaped url string
- * @return A pointer to the unescaped <code>url</code> string
- */
-char *URL_unescape(char *url);
-
-
-/**
- * <b>Class method</b>, escape an url string converting unsafe
- * characters to a hex (%%HEXHEX) representation. The following URL unsafe
- * characters are encoded: <pre><>\"#%%{}|\\^ [] `</pre> as well as
- * characters in the interval 00-1F hex (0-31 decimal) and in the interval
- * 7F-FF (127-255 decimal) <i>The caller must free the returned string.</i>
- * If the <code>url</code> parameter is NULL then this method returns NULL,
- * if it is the empty string "" a <i>new</i> empty string is returned.
- * @param url an url string
- * @return the escaped string
- */
-char *URL_escape(const char *url);
-
-
-/**
- * <b>Class method</b>, normalize an URL path string. The
- * <code>path</code> parameter is modified by this method. Examples:
- * <p><table>
- * <tr><td><b>path</b></td><td><b>normalized path</b></td>
- * <tr><td>/foo//</td><td>/foo/</td>
- * <tr><td>/foo/./</td><td>/foo/</td>
- * <tr><td>/foo/../bar</td><td>/bar</td>
- * <tr><td>/foo/../bar/</td><td>/bar/</td>
- * <tr><td>/foo/../bar/../baz</td><td>/baz</td>
- * <tr><td>//foo//./bar</td><td>/foo/bar</td>
- * <tr><td>/../foo</td><td>/foo</td>
- * <tr><td>/a/../b/../../x</td><td>/x</td>
- * <tr><td>/.././../</td><td>/</td>
- * <tr><td>/..</td><td>/</td>
- * </table>
- * @param path The path to normalize
- * @return A pointer to the normalized <code>path</code> string.
- */
-char *URL_normalize(char *path);
-
-// @}
-
-#undef T
 #endif
