@@ -28,7 +28,7 @@
  * @param b The string to test for equality with <code>a</code>
  * @return true if a equals b, otherwise false
  */
-int Str_isEqual(const char *a, const char *b);
+int strIsEqual(char const* a , char const* b);
 
 
 /**
@@ -38,7 +38,7 @@ int Str_isEqual(const char *a, const char *b);
  * @param b The string to test for equality with <code>a</code>
  * @return true if a equals b, otherwise false
  */
-int Str_isByteEqual(const char *a, const char *b);
+int strIsByteEqual(char const* a , char const* b);
 
 
 /**
@@ -48,7 +48,7 @@ int Str_isByteEqual(const char *a, const char *b);
  * @param b The <i>sub-string</i> to test a against
  * @return true if a starts with b, otherwise false
  */
-int Str_startsWith(const char *a, const char *b);
+int strStartsWith(char const* a , char const* b);
 
 
 /**
@@ -61,7 +61,7 @@ int Str_startsWith(const char *a, const char *b);
  * @param n The number of bytes to copy
  * @return A pointer to dest
  */
-char *Str_copy(char *dest, const char *src, int n);
+char* strCopy(char* dest , char const* src , int n);
 
 
 /**
@@ -70,7 +70,7 @@ char *Str_copy(char *dest, const char *src, int n);
  * @return A pointer to the duplicated string, NULL if s is NULL
  * @exception MemoryException if allocation failed
  */
-char *Str_dup(const char *s);
+char* strDup(char const* s);
 
 
 /**
@@ -83,7 +83,7 @@ char *Str_dup(const char *s);
  * @exception MemoryException if allocation failed
  * @exception AssertException if n is less than 0
  */
-char *Str_ndup(const char *s, int n);
+char* strNDup(char const* s , int n);
 
 
 /**
@@ -93,7 +93,7 @@ char *Str_ndup(const char *s, int n);
  * @return The new String or NULL if the string could not be created
  * @exception MemoryException if memory allocation fails
  */
-char *Str_cat(const char *s, ...) __attribute__((format (printf, 1, 2)));
+char* strCat(char const* s , ...) __attribute__((format (printf, 1, 2)));
 
 
 /**
@@ -104,7 +104,7 @@ char *Str_cat(const char *s, ...) __attribute__((format (printf, 1, 2)));
  * @return a new String concating s and va_list or NULL on error
  * @exception MemoryException if memory allocation fails
  */
-char *Str_vcat(const char *s, va_list ap);
+char* strVcat(char const* s , va_list ap);
 
 
 /**
@@ -113,7 +113,7 @@ char *Str_vcat(const char *s, va_list ap);
  * @return The integer represented by the string argument.
  * @exception SQLException If a parse error occurred
  */
-int Str_parseInt(const char *s);
+int strParseInt(char const* s);
 
 
 /**
@@ -122,7 +122,7 @@ int Str_parseInt(const char *s);
  * @return The long long represented by the string argument.
  * @exception SQLException If a parse error occurred
  */
-long long Str_parseLLong(const char *s);
+long long strParseLLong(char const*s);
 
 
 /**
@@ -131,7 +131,7 @@ long long Str_parseLLong(const char *s);
  * @return The double represented by the string argument.
  * @exception SQLException If a parse error occurred
  */
-double Str_parseDouble(const char *s);
+double strParseDouble(char const*s);
 
 
 #endif
