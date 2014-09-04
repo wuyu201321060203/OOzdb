@@ -1,188 +1,163 @@
-#include "Config.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <cassert>
 
+#include "Config.h"
 #include "StringBuffer.h"
 
+StringBuffer::StringBuffer(char const* s):_used(0),
+    _length(STRLEN)
+{
+    _buffer = ALLOC(_length);
+    append("%s" , s);
+}
 
-static inline void append(T S, const char *s, va_list ap) {
+StringBuffer::StringBuffer(int length , char const* s)
+{
+    assert(length > 0);
+    _used = 0;
+    _length = length;
+    _buffer = ALLOC(_length);
+    append("%s" , s);
+}
+
+StringBuffer::~StringBuffer()
+{
+    FREE(_buffer);
+}
+
+void StringBuffer::append(char const* s , ...)
+{
+    if(STR_DEF(s))
+    {
+        va_list ap;
+        va_start(ap , s);
+        doAppend(s , ap);
+        va_end(ap);
+    }
+}
+
+void StringBuffer::vappend(char const* s , va_list ap)
+{
+    if(STR_DEF(s))
+    {
         va_list ap_copy;
-        while (true) {
-                va_copy(ap_copy, ap);
-                int n = vsnprintf((char*)(S->buffer + S->used), S->length - S->used, s, ap_copy);
-                va_end(ap_copy);
-                if ((S->used + n) < S->length) {
-                        S->used += n;
-                        break;
-                }
-                S->length += STRLEN + n;
-                RESIZE(S->buffer, S->length);
+        va_copy(ap_copy , ap);
+        doAppend(s , ap_copy);
+        va_end(ap_copy);
+    }
+}
+
+void StringBuffer::set(char const* s , ...)
+{
+    clear();
+    if(STR_DEF(s))
+    {
+        va_list ap;
+        va_start(ap , s);
+        doAppend(s , ap);
+        va_end(ap);
+    }
+}
+
+void StringBuffer::vset(char const* s , va_list ap)
+{
+    clear();
+    if(STR_DEF(s))
+    {
+        va_list ap_copy;
+        va_copy(ap_copy , ap);
+        doAppend(s , ap_copy);
+        va_end(ap_copy);
+    }
+}
+
+int StringBuffer::getLength()
+{
+    return _used;
+}
+
+void StringBuffer::clear()
+{
+    _used = 0;
+    *_buffer = 0;
+}
+
+char const* StringBuffer::toString()
+{
+    return static_cast<char const*>(_buffer);
+}
+
+int StringBuffer::prepare4postgres()
+{
+    return prepare('$');
+}
+
+int StringBuffer::prepare4oracle()
+{
+    return prepare(':');
+}
+
+void StringBuffer::trim()
+{
+    while(_used && ( (_buffer[_used - 1] == ';') || isspace(_buffer[_used - 1]) ))
+        _buffer[--_used] = 0;
+    if(isspace(*_buffer))
+    {
+        int i = 0;
+        for( ; isspace(_buffer[i]) ; ++i );
+        memmove(_buffer , _buffer + i , _used - i);
+        _used -= i;
+        _buffer[_used] = 0;
+    }
+}
+
+void StringBuffer::doAppend(char const* s , va_list ap)
+{
+    va_list ap_copy;
+    while (true)
+    {
+        va_copy(ap_copy, ap);
+        int n = vsnprintf((char*)(S->buffer + S->used),
+            S->length - S->used, s, ap_copy);
+        va_end(ap_copy);
+        if ((S->used + n) < S->length) {
+            S->used += n;
+            break;
         }
+        S->length += STRLEN + n;
+        RESIZE(S->buffer, S->length);
+    }
 }
 
-
-/* Replace all occurences of ? in this string buffer with prefix[1..99] */
-static int prepare(T S, char prefix) {
-        int n, i;
-        for (n = i = 0; S->buffer[i]; i++) if (S->buffer[i] == '?') n++;
-        if (n > 99)
-                THROW(SQLException, "Max 99 parameters are allowed in a prepared statement. Found %d parameters in statement", n);
-        else if (n) {
-                int j, xl;
-                char x[3] = {prefix};
-                int required = (n * 2) + S->used;
-                if (required >= S->length) {
-                        S->length = required;
-                        RESIZE(S->buffer, S->length);
-                }
-                for (i = 0, j = 1; (j <= n); i++) {
-                        if (S->buffer[i] == '?') {
-                                if(j<10){xl=2;x[1]=j+'0';}else{xl=3;x[1]=(j/10)+'0';x[2]=(j%10)+'0';}
-                                memmove(S->buffer + i + xl, S->buffer + i + 1, (S->used - (i + 1)));
-                                memmove(S->buffer + i, x, xl);
-                                S->used += xl - 1;
-                                j++;
-                        }
-                }
-                S->buffer[S->used] = 0;
+int prepare(char prefix)
+{
+    int n, i;
+    for(n = i = 0; S->buffer[i]; i++) if (S->buffer[i] == '?') n++;
+    if(n > 99)
+        THROW(SQLException, "Max 99 parameters are allowed in a prepared statement.
+                             Found %d parameters in statement", n);
+    else if(n)
+    {
+        int j, xl;
+        char x[3] = {prefix};
+        int required = (n * 2) + S->used;
+        if (required >= S->length) {
+            S->length = required;
+            RESIZE(S->buffer, S->length);
         }
-        return n;
-}
-
-
-static inline T ctor(int hint) {
-        T S;
-        NEW(S);
-        S->length = hint;
-        S->buffer = ALLOC(hint);
-        *S->buffer = 0;
-        return S;
-}
-
-
-/* ----------------------------------------------------- Protected methods */
-
-
-#ifdef PACKAGE_PROTECTED
-#pragma GCC visibility push(hidden)
-#endif
-
-T StringBuffer_new(const char *s) {
-        return StringBuffer_append(ctor(STRLEN), "%s", s);
-}
-
-
-T StringBuffer_create(int hint) {
-        if (hint <= 0)
-                THROW(AssertException, "Illegal hint value");
-        return ctor(hint);
-}
-
-
-void StringBuffer_free(T *S) {
-        assert(S && *S);
-	FREE((*S)->buffer);
-        FREE(*S);
-}
-
-
-T StringBuffer_append(T S, const char *s, ...) {
-        assert(S);
-        if (STR_DEF(s)) {
-                va_list ap;
-                va_start(ap, s);
-                append(S, s, ap);
-                va_end(ap);
+        for (i = 0, j = 1; (j <= n); i++) {
+            if (S->buffer[i] == '?') {
+                if(j<10){xl=2;x[1]=j+'0';}else{xl=3;x[1]=(j/10)+'0';x[2]=(j%10)+'0';}
+                memmove(S->buffer + i + xl, S->buffer + i + 1, (S->used - (i + 1)));
+                memmove(S->buffer + i, x, xl);
+                S->used += xl - 1;
+                j++;
+            }
         }
-        return S;
-}
-
-
-T StringBuffer_vappend(T S, const char *s, va_list ap) {
-        assert(S);
-        if (STR_DEF(s)) {
-                va_list ap_copy;
-                va_copy(ap_copy, ap);
-                append(S, s, ap_copy);
-                va_end(ap_copy);
-        }
-        return S;
-}
-
-
-T StringBuffer_set(T S, const char *s, ...) {
-	assert(S);
-        StringBuffer_clear(S);
-        if (STR_DEF(s)) {
-                va_list ap;
-                va_start(ap, s);
-                append(S, s, ap);
-                va_end(ap);
-        }
-        return S;
-}
-
-
-T StringBuffer_vset(T S, const char *s, va_list ap) {
-	assert(S);
-        StringBuffer_clear(S);
-        if (STR_DEF(s)) {
-                va_list ap_copy;
-                va_copy(ap_copy, ap);
-                append(S, s, ap_copy);
-                va_end(ap_copy);
-        }
-        return S;
-}
-
-
-int StringBuffer_length(T S) {
-        assert(S);
-        return S->used;
-}
-
-
-T StringBuffer_clear(T S) {
-        assert(S);
-        S->used = 0;
-        *S->buffer = 0;
-        return S;
-}
-
-
-const char *StringBuffer_toString(T S) {
-        assert(S);
-        return (const char*)S->buffer;
-}
-
-
-int StringBuffer_prepare4postgres(T S) {
-        assert(S);
-        return prepare(S, '$');
-}
-
-
-int StringBuffer_prepare4oracle(T S) {
-        assert(S);
-        return prepare(S, ':');
-}
-
-
-T StringBuffer_trim(T S) {
-        assert(S);
-        // Right trim and remove trailing semicolon
-        while (S->used && ((S->buffer[S->used - 1] == ';') || isspace(S->buffer[S->used - 1])))
-                S->buffer[--S->used] = 0;
-        // Left trim
-        if (isspace(*S->buffer)) {
-                int i;
-                for (i = 0; isspace(S->buffer[i]); i++) ;
-                memmove(S->buffer, S->buffer + i, S->used - i);
-                S->used -= i;
-                S->buffer[S->used] = 0;
-        }
-        return S;
+        S->buffer[S->used] = 0;
+    }
+    return n;
 }

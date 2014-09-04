@@ -2,22 +2,38 @@
 #define STRINGBUFFER_INCLUDED
 
 #include <boost/noncopyable.hpp>
+#include <cassert>
+
+typedef unsigned char uchar_t;
 
 class StringBuffer : boost::noncopyable
 {
 public:
 
-    StringBuffer(int length , char const* str);
+    explicit StringBuffer(char const* s);
+    explicit StringBuffer(int length , char const* s);
     ~StringBuffer();
     void append(char const* s , ...)__attribute__((format (printf, 1, 2)));
     void vappend(char const* s , va_list ap);
     void set(char const* s , ...)__attribute__((format (printf, 1, 2)));
     void vset(char const* s , va_list ap);
-    int length();
+    int getLength();
     void clear();
     char const* toString();
+    int prepare4postgres();
+    int prepare4oracle();
     void trim();
 
+private:
+
+    int _used;
+    int _length;
+    uchar_t* _buffer;
+
+private:
+
+    inline void doAppend(char const* s , va_list ap);
+    int prepare(char prefix);
 };
 
 #endif
