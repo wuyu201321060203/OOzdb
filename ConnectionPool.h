@@ -81,8 +81,8 @@ private:
 
     void drainPool();
     template<typename ConcreteConnection> int fillPool();
-    int getActive();
-    int onReapConnections();
+    int doGetActiveConnections();
+    int doReapConnections();
     void doSweep();
 };
 

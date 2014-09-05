@@ -97,7 +97,7 @@ int ConnectionPool::getActiveConnections()
     int n = 0;
     {
         MutexLockGuard lock(&_mutex);
-        n = getActive();
+        n = doGetActiveConnections();
     }
     return n;
 }
@@ -129,9 +129,8 @@ ConnectionPtr ConnectionPool::getConnection()
     ConnectionPtr conn(NULL);
     {
         MutexLockGuard(&_mutex);
-        int i = 0;
         int size = _connectionsVec.size();
-        for( ; i != size ; ++i )
+        for( int i = 0; i != size ; ++i )
         {
             ConnectionPtr temp = _connectionsVec[i];
             if(temp->isAvailable() && temp->ping())
@@ -186,7 +185,7 @@ int ConnectionPool::reapConnections()
     int n = 0;
     {
         MutexLockGuard(&_mutex);
-        n = onReapConnections();
+        n = doReapConnections();
     }
     return n;
 }
@@ -199,12 +198,12 @@ CONST_STDSTR ConnectionPool::getVersion()
 void ConnectionPool::drainPool()
 {
     std::for_each( _connectionsVec.begin() , _connectionsVec.end(),
-                  [](ConnectionPtr& conn){ conn->clear(); } );
+                  [](ConnectionPtr& conn){ conn->clear(); } );//c++11
 
     _connectionsVec.clear();
 }
 
-int ConnectionPool::getActive()
+int ConnectionPool::doGetActiveConnections()
 {
     int n = 0;
     std::for_each(_connectionsVec.begin() , _connectionsVec.end(),
@@ -212,7 +211,7 @@ int ConnectionPool::getActive()
     return n;
 }
 
-int ConnectionPool::onReapConnections()
+int ConnectionPool::doReapConnections()
 {
     int n = 0;
     int totalSize = _connectionsVec.size();
