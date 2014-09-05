@@ -1,8 +1,10 @@
+#include <algorithm>
 #include <boost/bind.hpp>
 
-#include "Config.h"
 #include "ConnectionPool.h"
 #include "TimeOperation.h"
+#include "ResultSet.h"
+#include "PreparedStatement.h"
 
 ConnectionPool::ConnectionPool(char const* url):
     _url(new URL(url)),
@@ -64,12 +66,13 @@ int ConnectionPool::getConnectionTimeout()
     return _connectionTimeout;
 }
 
+/*
 void ConnectionPool::setAbortHandler(AbortHandlerFunc handler)//TODO
 {
     _abortHandler = handler;
-}
+}*/
 
-void ConnectionPool::setStopHandler(StopHandlerFunc handler)
+void ConnectionPool::setStopHandler(StopHandler handler)
 {
     _stopHandler = handler;
 }

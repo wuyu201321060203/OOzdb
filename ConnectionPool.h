@@ -1,8 +1,6 @@
 #ifndef CONNECTIONPOOL_H
 #define CONNECTIONPOOL_H
 
-#include <algorithm>
-
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -11,17 +9,20 @@
 #include <muduo/base/Thread.h>
 #include <muduo/base/Mutex.h>
 #include <muduo/base/Condition.h>
+#include <muduo/base/Logging.h>
 
+#include "Config.h"
 #include "URL.h"
-#include "ResultSet.h"
-#include "PreparedStatement.h"
 #include "Connection.h"
+#include "SQLException.h"
 
-using namespace muduo;
+using muduo::Thread;
+using muduo::MutexLock;
+using muduo::Condition;
 
-typedef boost::function<void (char const*)> AbortHandlerFunc;
+//typedef boost::function<void (char const*)> AbortHandlerFunc;//TODO
 typedef boost::function<void (void)> ThreadFunc;
-typedef boost::function<void (void)> StopHandlerFunc;
+typedef boost::function<void (void)> StopHandler;
 typedef boost::shared_ptr<Thread> ThreadPtr;
 
 #define VERSION 0.1
@@ -29,7 +30,8 @@ typedef boost::shared_ptr<Thread> ThreadPtr;
 
 #define ABOUT "OOzdb/" #VERSION " Copyright (C) Wu Yu" OOzdb_URL
 
-class ConnectionPool : boost::noncopyable , public boost::enable_shared_from_this<ConnectionPool>
+class ConnectionPool : boost::noncopyable,
+                       public boost::enable_shared_from_this<ConnectionPool>
 {
 public:
 
@@ -42,8 +44,8 @@ public:
     int getMaxConnections() const;
     void setConnectionTimeout(int connectionTimeout);
     int getConnectionTimeout() const;
-    void setAbortHandler(AbortHandlerFunc handler);
-    void setStopHandler(StopHandlerFunc handler);
+ //   void setAbortHandler(AbortHandlerFunc handler);
+    void setStopHandler(StopHandler handler);
     void setReaper(int sweepInterval);
     int getSize() const;
     int getActiveConnections() const;
@@ -67,8 +69,8 @@ private:
     MutexLock _mutex;
     int _sweepInterval;
     volatile int _stopped;
-    AbortHandlerFunc _abortHandler;
-    StopHandlerFunc  _stopHandler;
+  //  AbortHandlerFunc _abortHandler;
+    StopHandler  _stopHandler;
     ThreadPtr _reaper;
 
 private:
@@ -81,7 +83,7 @@ private:
     template<typename ConcreteConnection> int fillPool();
     int getActive();
     int onReapConnections();
-    virtual void doSweep();
+    void doSweep();
 };
 
 template<typename ConcreteConnection>
@@ -98,7 +100,7 @@ void ConnectionPool::start()
         }
     }
     if(!_filled)
-        throw SQLException("Failed to start connection pool");
+        ExceptionThrow(SQLException , "Failed to start connection pool");
 }
 
 template<typename ConcreteConnection>
