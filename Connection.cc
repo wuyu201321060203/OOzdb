@@ -132,7 +132,7 @@ int Connection::getMaxRows()
     return _maxRows;
 }
 
-URL_T Connection::getURL()
+URLPtr Connection::getURL()
 {
     return _url;
 }

@@ -55,7 +55,7 @@ public:
     int getQueryTimeout();
     void setMaxRows(int rows);
     int getMaxRows();
-    URL_T getURL();
+    URLPtr getURL();
     void clear();
     void close();
 
@@ -65,7 +65,7 @@ protected:
     bool _isAvailable;
     int _isInTransaction;
     int _timeout;
-    URL_T _url;
+    URLPtr _url;
     time_t _lastAccessedTime;
     int _maxRows;
     PreparedStatementVec _prepared;
