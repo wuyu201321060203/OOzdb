@@ -13,7 +13,7 @@
 #include <errno.h>
 
 #include "Memory.h"
-#include "Str.h"
+#include "StrOperation.h"
 #include <string>
 
 

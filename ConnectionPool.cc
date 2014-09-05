@@ -1,7 +1,11 @@
-#include "ConnectionPool.h"
+#include <boost/bind.hpp>
 
-ConnectionPool::ConnectionPool(URL_T url):
-    _url(url),
+#include "Config.h"
+#include "ConnectionPool.h"
+#include "TimeOperation.h"
+
+ConnectionPool::ConnectionPool(char const* url):
+    _url(new URL(url)),
     _maxConnections(SQL_DEFAULT_MAX_CONNECTIONS),
     _initialConnections(SQL_DEFAULT_INIT_CONNECTIONS),
     _connectionTimeout(SQL_DEFAULT_CONNECTION_TIMEOUT),
@@ -16,7 +20,7 @@ ConnectionPool::~ConnectionPool()
     if(!_stopped) stop();
 }
 
-URL_T ConnectionPool::getURL()
+URLPtr ConnectionPool::getURL()
 {
     return _url;
 }
@@ -60,9 +64,14 @@ int ConnectionPool::getConnectionTimeout()
     return _connectionTimeout;
 }
 
-void ConnectionPool::setAbortHandler(AbortHandlerFunc handler)
+void ConnectionPool::setAbortHandler(AbortHandlerFunc handler)//TODO
 {
-    _handler = handler;
+    _abortHandler = handler;
+}
+
+void ConnectionPool::setStopHandler(StopHandlerFunc handler)
+{
+    _stopHandler = handler;
 }
 
 void ConnectionPool::setReaper(int sweepInterval)
@@ -101,7 +110,7 @@ void ConnectionPool::stop()
             drainPool();
             _filled = false;
             stopSweep = _doSweep && _reaper;
-            onStop();
+            if(_stopHandler) _stopHandler();
         }
     }
     if(stopSweep)
@@ -125,7 +134,7 @@ ConnectionPtr ConnectionPool::getConnection()
             if(temp->isAvailable() && temp->ping())
             {
                 temp->setAvailable(false);
-                conn = temp;
+                conn.swap(temp);
                 goto done;
             }
         }
@@ -136,7 +145,7 @@ ConnectionPtr ConnectionPool::getConnection()
             {
                 temp->setAvailable(false);
                 _connectionsVec.push_back(temp);
-                conn = temp;
+                conn.swap(temp);
             }
             else
             {
@@ -205,7 +214,7 @@ int ConnectionPool::onReapConnections()
     int n = 0;
     int totalSize = _connectionsVec.size();
     int reapUpperLimit = size - getActive() - _initialConnections;
-    time_t timeout = Time::now() - _connectionTimeout;
+    time_t timeout = Time_now() - _connectionTimeout;
     ConnectionPtr conn;
     for(int i = 0 ; (i != _connectionsVec.size()) && n != reapUpperLimit ; ++i)
     {
