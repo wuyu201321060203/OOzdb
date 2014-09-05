@@ -1,6 +1,8 @@
 #ifndef URL_INCLUDED
 #define URL_INCLUDED
 
+#include <boost/shared_ptr.hpp>
+
 class URL
 {
 public:
@@ -58,5 +60,7 @@ private:
     void parseURL();
     void freeParams();
 };
+
+typedef boost::shared_ptr<URL> URLPtr;
 
 #endif
