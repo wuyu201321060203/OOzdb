@@ -11,7 +11,7 @@ class MysqlConnection : public Connection
 {
 public:
 
-    MysqlConnection(ConnectionPoolPtr pool , URL_T url , char** error);
+    MysqlConnection(ConnectionPoolPtr pool , URLPtr url , char** error);
     ~MysqlConnection();
     virtual int ping();
     virtual int beginTransaction();
@@ -35,7 +35,7 @@ private:
 
 private:
 
-    static MYSQL* doConnect(URL_T url , char **error);
+    static MYSQL* doConnect(URLPtr url , char **error);
     int prepare(char const*sql , int len, MYSQL_STMT **stmt);
 };
 
