@@ -1,11 +1,6 @@
-#include <assert.h>
-
-#include <boost/enable_shared_from_this.hpp>
-
-#include "Time.h"
 #include "Connection.h"
 
-Connection::Connection(ConnectionPoolPtr pool):
+Connection::Connection(ConnectionPool* pool):
     _pool(pool),
     _isAvailable(true),
     _isInTransaction(false),
@@ -150,6 +145,7 @@ void Connection::clear()
 
 void Connection::close()
 {
+    if(_pool)
     _pool->returnConnection( enable_shared_from_this() );
 }
 

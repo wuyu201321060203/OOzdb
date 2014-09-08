@@ -131,7 +131,8 @@ int strParseInt(char const* s)
     char* e;
     int i = (int)strtol(s, &e, 10);
     if(errno || (e == s))
-        THROW(SQLException , "NumberFormatException: For input string %s -- %s", s , System_getLastError());
+        THROW(SQLException , "NumberFormatException: For input string %s -- %s",
+                                s , System_getLastError());
     return i;
 }
 
@@ -144,7 +145,8 @@ long long strParseLLong(char const* s)
     char* e;
     long long ll = strtoll(s, &e, 10);
     if(errno || (e == s))
-        THROW(SQLException, "NumberFormatException: For input string %s -- %s", s, System_getLastError());
+        THROW(SQLException, "NumberFormatException: For input string %s -- %s",
+                                s, System_getLastError());
     return ll;
 }
 
@@ -156,7 +158,8 @@ double strParseDouble(const char *s)
     char* e;
     double d = strtod(s, &e);
     if(errno || (e == s))
-        THROW(SQLException, "NumberFormatException: For input string %s -- %s", s , System_getLastError());
+        THROW(SQLException, "NumberFormatException: For input string %s -- %s",
+                                s , System_getLastError());
     return d;
 }
 

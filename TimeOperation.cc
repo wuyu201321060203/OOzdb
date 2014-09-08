@@ -11,8 +11,8 @@
 #include <sys/select.h>
 
 #include "Str.h"
-#include "system/System.h"
-#include "system/Time.h"
+#include "System.h"
+#include "TimeOperation.h"
 
 
 /**

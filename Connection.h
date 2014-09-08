@@ -4,16 +4,16 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-
-#include <muduo/base/Timestamp.h>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "Config.h"
 #include "ConnectionPool.h"
+#include "TimeOperation.h"
 #include "ResultSet.h"
 #include "PreparedStatement.h"
 #include "URL.h"
 
-class Connection
+class Connection : public boost::enable_shared_from_this<Connection>
 {
 public:
 
@@ -22,7 +22,7 @@ public:
      * subclass
      */
 
-    Connection(ConnectionPoolPtr pool);
+    Connection(ConnectionPool* pool);
     virtual ~Connection();
     virtual int ping();
     virtual int beginTransaction();
@@ -61,7 +61,7 @@ public:
 
 protected:
 
-    ConnectionPoolPtr _pool;
+    ConnectionPool* _pool;
     bool _isAvailable;
     int _isInTransaction;
     int _timeout;

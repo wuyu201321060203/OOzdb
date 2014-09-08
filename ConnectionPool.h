@@ -1,9 +1,10 @@
 #ifndef CONNECTIONPOOL_H
 #define CONNECTIONPOOL_H
 
+#include <type_traits>
+
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <muduo/base/Thread.h>
@@ -30,8 +31,7 @@ typedef boost::shared_ptr<Thread> ThreadPtr;
 
 #define ABOUT "OOzdb/" #VERSION " Copyright (C) Wu Yu" OOzdb_URL
 
-class ConnectionPool : boost::noncopyable,
-                       public boost::enable_shared_from_this<ConnectionPool>
+class ConnectionPool : boost::noncopyable
 {
 public:
 
@@ -89,6 +89,8 @@ private:
 template<typename ConcreteConnection>
 void ConnectionPool::start()
 {
+    static_assert(std::is_convertible<ConcreteConnection* , Connection*>,
+                  "ConcreteConnection type is not a subclass of Connection");
     {
         MutexLockGuard lock(&_mutex);
         _stopped = false;
@@ -100,15 +102,17 @@ void ConnectionPool::start()
         }
     }
     if(!_filled)
-        ExceptionThrow(SQLException , "Failed to start connection pool");
+        Throw(SQLException , "Failed to start connection pool");
 }
 
 template<typename ConcreteConnection>
 int ConnectionPool::fillPool()
 {
+    static_assert(std::is_convertible<ConcreteConnection* , Connection*>,
+                  "ConcreteConnection type is not a subclass of Connection");
     for(int i = 0 ; i != _initialConnections ; ++i)
     {
-        ConnectionPtr conn( new ConcreteConnection( enable_shared_from_this() ) );
+        ConnectionPtr conn( new ConcreteConnection(this) );
         if(!conn)
         {
             if(i > 0)
@@ -122,5 +126,7 @@ int ConnectionPool::fillPool()
     }
     return true;
 }
+
+typedef boost::shared_ptr<ConnectionPool> ConnectionPoolPtr;
 
 #endif

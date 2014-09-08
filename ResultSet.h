@@ -4,7 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "Config.h"
-#include "Time.h"
+#include "TimeOperation.h"
 
 class ResultSet
 {
