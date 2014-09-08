@@ -1,4 +1,5 @@
 #include "MysqlPreparedStatement.h"
+#include "SQLException.h"
 
 static my_bool yes = true;
 
@@ -106,13 +107,13 @@ void MysqlPreparedStatement::execute()
     _resultSet->clear();
     if(_parameterCount > 0)
         if( ( _lastError = mysql_stmt_bind_param(_stmt , _bind) ) )
-            THROW(SQLException, "%s", mysql_stmt_error(_stmt));
+            THROW(SQLException , "%s", mysql_stmt_error(_stmt));
 #if MYSQL_VERSION_ID >= 50002
     unsigned long cursor = CURSOR_TYPE_NO_CURSOR;
     mysql_stmt_attr_set(_stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
     if( (_lastError = mysql_stmt_execute(_stmt) ) )
-        THROW(SQLException, "%s", mysql_stmt_error(_stmt));
+        THROW(SQLException , "%s", mysql_stmt_error(_stmt));
     if(_lastError == MYSQL_OK)
     {
         _lastError = mysql_stmt_reset(_stmt);
@@ -124,13 +125,13 @@ ResultSetPtr MysqlPreparedStatement::executeQuery()
     _resultSet->clear();
     if(_parameterCount > 0)
         if((_lastError = mysql_stmt_bind_param(_stmt , _bind)))
-            THROW(SQLException, "%s", mysql_stmt_error(_stmt));
+            THROW(SQLException , "%s", mysql_stmt_error(_stmt));
 #if MYSQL_VERSION_ID >= 50002
     unsigned long cursor = CURSOR_TYPE_READ_ONLY;
     mysql_stmt_attr_set(_stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
     if ((_lastError = mysql_stmt_execute(_stmt)))
-        THROW(SQLException, "%s", mysql_stmt_error(_stmt));
+        THROW(SQLException , "%s", mysql_stmt_error(_stmt));
     if (_lastError == MYSQL_OK)
         return ResultSetPtr( new MysqlResultSet("MysqlResultSet" , _stmt, _maxRows,
                                                 true) );

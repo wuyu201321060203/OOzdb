@@ -23,6 +23,14 @@ StringBuffer::StringBuffer(int length , char const* s)
     append("%s" , s);
 }
 
+StringBuffer::StringBuffer(int length)
+{
+    assert(length > 0);
+    _used = 0;
+    _length = length;
+    _buffer = ALLOC(_length);
+}
+
 StringBuffer::~StringBuffer()
 {
     FREE(_buffer);
@@ -120,44 +128,44 @@ void StringBuffer::doAppend(char const* s , va_list ap)
     while (true)
     {
         va_copy(ap_copy, ap);
-        int n = vsnprintf((char*)(S->buffer + S->used),
-            S->length - S->used, s, ap_copy);
+        int n = vsnprintf((char*)(_buffer + _used),
+            _length - _used, s, ap_copy);
         va_end(ap_copy);
-        if ((S->used + n) < S->length) {
-            S->used += n;
+        if ((_used + n) < _length) {
+            _used += n;
             break;
         }
-        S->length += STRLEN + n;
-        RESIZE(S->buffer, S->length);
+        _length += STRLEN + n;
+        RESIZE(_buffer, _length);
     }
 }
 
 int prepare(char prefix)
 {
     int n, i;
-    for(n = i = 0; S->buffer[i]; i++) if (S->buffer[i] == '?') n++;
+    for(n = i = 0; _buffer[i]; i++) if (_buffer[i] == '?') n++;
     if(n > 99)
-        THROW(SQLException, "Max 99 parameters are allowed in a prepared statement.
+        THROW(SQLException , "Max 99 parameters are allowed in a prepared statement.
                              Found %d parameters in statement", n);
     else if(n)
     {
         int j, xl;
         char x[3] = {prefix};
-        int required = (n * 2) + S->used;
-        if (required >= S->length) {
-            S->length = required;
-            RESIZE(S->buffer, S->length);
+        int required = (n * 2) + _used;
+        if (required >= _length) {
+            _length = required;
+            RESIZE(_buffer , _length);
         }
         for (i = 0, j = 1; (j <= n); i++) {
-            if (S->buffer[i] == '?') {
+            if (_buffer[i] == '?') {
                 if(j<10){xl=2;x[1]=j+'0';}else{xl=3;x[1]=(j/10)+'0';x[2]=(j%10)+'0';}
-                memmove(S->buffer + i + xl, S->buffer + i + 1, (S->used - (i + 1)));
-                memmove(S->buffer + i, x, xl);
-                S->used += xl - 1;
+                memmove(_buffer + i + xl , _buffer + i + 1 , (_used - (i + 1)));
+                memmove(_buffer + i, x, xl);
+                _used += xl - 1;
                 j++;
             }
         }
-        S->buffer[S->used] = 0;
+        _buffer[_used] = 0;
     }
     return n;
 }

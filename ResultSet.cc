@@ -1,5 +1,6 @@
 #include "Config.h"
 #include "ResultSet.h"
+#include "SQLException.h"
 
 ResultSet::ResultSet(CONST_STDSTR name):
     _resultSetName(name),
@@ -118,7 +119,7 @@ int ResultSet::checkAndSetColumnIndex(int columnIndex)
 {
     int i = columnIndex - 1;
     if (_columnCount <= 0 || i < 0 || i >= columnCount)
-        throw( SQLException("Column index is out of range") );
+        THROW(SQLException , "Column index is out of range");
     return i;
 }
 
@@ -129,6 +130,6 @@ int ResultSet::getIndex(CONST_STDSTR name)
     for (i = 1; i <= columns; i++)
         if ( name == getColumnName(i) )
             return i;
-    THROW(SQLException(name ? name : "null"));//TODO
+    THROW(SQLException , (name ? name : "null"));
     return -1;
 }

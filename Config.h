@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "Memory.h"
+#include "MemoryOperation.h"
 #include "StrOperation.h"
 #include <string>
 
@@ -112,7 +112,7 @@
 /* ------------------------------------- General Purpose functional macros */
 
 
-#define IS      Str_isEqual
+#define IS      strIsEqual
 
 
 /* ---------------------------------------------------------- Build macros */
@@ -152,5 +152,9 @@ typedef  unsigned int uint32_t;
 
 typedef std::string STDSTR;
 #define CONST_STDSTR STDSTR const
+
+const char *System_getLastError(void) {
+        return strerror(errno);
+}
 
 #endif

@@ -2,21 +2,22 @@
 #include <cassert>
 
 #include "MysqlConnection.h"
+#include "SQLException.h"
 
-MysqlConnection::MysqlConnection(ConnectionPoolPtr pool , char** error):
+MysqlConnection::MysqlConnection(ConnectionPool* pool , char** error):
     Connection(pool),
-    _lastError(MYSQL_OK)
+    _lastError(MYSQL_OK).
+    _sb(STRLEN)
 {
     assert(error);
     if(!(_db = doConnect(_url, error)))
-        THROW(SQLException("Can't connect to MySQL"));//TODO
-    _sb = StringBuffer_create(STRLEN);
+        THROW(SQLException , "Can't connect to MySQL");
 }
 
 MysqlConnection::~MysqlConnection()
 {
     mysql_close(_db);
-    StringBuffer_free(&_sb);
+    _sb.clear();
 }
 
 int MysqlConnection::ping()
@@ -32,7 +33,7 @@ int MysqlConnection::beginTransaction()
         ++_isInTransaction;
         return true;
     }
-    THROW(SQLException);//TODO
+    THROW(SQLException , "Can't begin transaction");
 }
 
 int MysqlConnection::commit()
@@ -43,7 +44,7 @@ int MysqlConnection::commit()
     if(_lastError == MYSQL_OK)
         return true;
     else
-        THROW(SQLException());//TODO
+        THROW(SQLException , "Can't commit");
 }
 
 int MysqlConnection::rollback()
@@ -57,7 +58,7 @@ int MysqlConnection::rollback()
     if(_lastError == MYSQL_OK)
         return true;
     else
-        THROW();//TODO
+        THROW(SQLException , "Can't rollback");
 }
 
 long long MysqlConnection::getLastRowId()
@@ -76,14 +77,14 @@ int MysqlConnection::execute(char const* sql , ...)
     va_list ap;
     va_start(ap , sql);
     _resultSet->clear();
-    StringBuffer_vset(_sb, sql, ap);
+    _sb.vset(sql, ap);
     va_end(ap);
-    _lastError = mysql_real_query(_db , StringBuffer_toString(_sb),
-                                  StringBuffer_length(_sb));
+    _lastError = mysql_real_query(_db , _sb.toString(),
+                                  _sb.getLength());
     if(_lastError == MYSQL_OK)
         return true;
     else
-        THROW();//TODO
+        THROW(SQLException , "mysql execute failed");
 }
 
 ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
@@ -93,9 +94,9 @@ ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
     va_list ap;
     va_start(ap , sql);
     MYSQL_STMT* stmt = NULL;
-    StringBuffer_vset(_sb , sql , ap);
+    _sb.vset(sql , ap);
     va_end(ap);
-    if(prepare(StringBuffer_toString(_sb) , StringBuffer_length(_sb) , &stmt))
+    if(prepare(_sb.toString() , _sb.getLength() , &stmt))
     {
 #if MYSQL_VERSION_ID >= 50002
         unsigned long cursor = CURSOR_TYPE_READ_ONLY;
@@ -103,14 +104,14 @@ ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
 #endif
         if ((_lastError = mysql_stmt_execute(_stmt)))
         {
-            StringBuffer_set(_sb, "%s", mysql_stmt_error(_stmt));
+            _sb.set("%s", mysql_stmt_error(_stmt));
             mysql_stmt_close(_stmt);
         }
         else
             return ResultSetPtr(new MysqlResultSet("MysqlResultSet" , _stmt , _maxRows,
                                                     false));
     }
-    THROW();//TODO
+    THROW(SQLException , "prepare failed");//TODO
 }
 
 PreparedStatementPtr MysqlConnection::getPrepareStatement(char const* sql , ...)
@@ -119,9 +120,9 @@ PreparedStatementPtr MysqlConnection::getPrepareStatement(char const* sql , ...)
     va_list ap;
     va_start(ap , sql);
     MYSQL_STMT *stmt = NULL;
-    StringBuffer_vset(_sb , sql , ap);
+    _sb.vset(sql , ap);
     va_end(ap);
-    if (prepare(StringBuffer_toString(_sb) , StringBuffer_length(_sb) , &stmt))
+    if (prepare(_sb.toString() , _sb.getLength() , &stmt))
     {
         int parameterCount = (int)mysql_stmt_param_count(_stmt);
         PreparedStatementPtr item(new MysqlPreparedStatement(stmt , _maxRows,
@@ -129,14 +130,14 @@ PreparedStatementPtr MysqlConnection::getPrepareStatement(char const* sql , ...)
         _prepared.push_back(item);
         return item;
     }
-    THROW();//TODO
+    THROW(SQLException , "prepare failed");
 }
 
 CONST_STDSTR MysqlConnection::getLastError()
 {
     if(mysql_errno(_db))
         return CONST_STDSTR(mysql_error(_db));
-    return CONST_STDSTR( StringBuffer_toString(_sb) ); // Either the statement itself or a statement error
+    return CONST_STDSTR( _sb.toString() ); // Either the statement itself or a statement error
 }
 
 /* Class method: MySQL client library finalization */
@@ -150,7 +151,7 @@ void MysqlConnection::onstop()
 
 MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
 {
-#define ERROR(e) do {*error = Str_dup(e); goto error;} while (0)
+#define ERROR(e) do {*error = strDup(e); goto error;} while (0)
     int port;
     my_bool yes = 1;
     my_bool no = 0;
@@ -161,7 +162,7 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
     MYSQL* db = mysql_init(NULL);
     if(!db)
     {
-        *error = Str_dup("unable to allocate mysql handler");
+        *error = strDup("unable to allocate mysql handler");
         return NULL;
     }
     if(!( user = url->getUser() ) )
@@ -195,7 +196,7 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
     {
         try
         {
-            connectTimeout = Str_parseInt(timeout);
+            connectTimeout = strParseInt(timeout);
         }
         catch(...)
         {
@@ -212,7 +213,7 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
     if(mysql_real_connect(db, host, user, password, database, port, unix_socket,
                            clientFlags))
         return db;
-    *error = Str_dup(mysql_error(db));
+    *error = strDup(mysql_error(db));
 error:
     mysql_close(db);
     return NULL;
@@ -228,7 +229,7 @@ int MysqlConnection::prepare(char const* sql , int len , MYSQL_STMT** stmt)
     }
     if((_lastError = mysql_stmt_prepare(*stmt, sql, len)))
     {
-        StringBuffer_set(_sb, "%s", mysql_stmt_error(*stmt));
+        _sb.set("%s", mysql_stmt_error(*stmt));
         mysql_stmt_close(*stmt);
         *stmt = NULL;
         return false;

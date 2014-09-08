@@ -12,6 +12,7 @@ public:
 
     explicit StringBuffer(char const* s);
     explicit StringBuffer(int length , char const* s);
+    explicit StringBuffer(int length);
     ~StringBuffer();
     void append(char const* s , ...)__attribute__((format (printf, 1, 2)));
     void vappend(char const* s , va_list ap);

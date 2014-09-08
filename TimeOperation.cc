@@ -10,9 +10,10 @@
 #include <sys/types.h>
 #include <sys/select.h>
 
-#include "Str.h"
-#include "System.h"
+#include "StrOperation.h"
 #include "TimeOperation.h"
+#include "SQLException.h"
+#include "AssertException.h"
 
 
 /**

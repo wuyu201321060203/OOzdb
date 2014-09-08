@@ -6,8 +6,8 @@
 
 #include "Config.h"
 #include "URL.h"
-#include "Exception.h"
-#include "Memory.h"
+#include "SQLException.h"
+#include "MemoryOperation.h"
 
 #define UNKNOWN_PORT -1
 #define YYCTYPE       uchar_t
@@ -71,7 +71,7 @@ URL::URL(char const* url)
         if(!parseURL())
             clear();
     }
-    ExceptionThrow(SQLException , "URL create fail");//TODO
+    Throw(SQLException , "URL create fail");//TODO
 }
 
 URL::URL(char const* url , ...)
@@ -87,7 +87,7 @@ URL::URL(char const* url , ...)
         if(!parseURL())
             clear();
     }
-    ExceptionThrow(SQLException , "URL create fail");//TODO
+    Throw(SQLException , "URL create fail");//TODO
 }
 
 URL::~URL()

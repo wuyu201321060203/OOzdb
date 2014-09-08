@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-#include "assert.h"
 #include "MemoryException.h"
 
 
@@ -15,8 +14,8 @@
 void *Mem_alloc(long size, const char *func, const char *file, int line){
 	assert(size > 0);
 	void *p = malloc(size);
-	if (! p)
-		ExceptionThrow(MemoryException(), func, file, line, "%s", System_getLastError());
+	if(!p)
+		ExceptionThrow(MemoryException() , func, file, line, "%s", System_getLastError());
 	return p;
 }
 

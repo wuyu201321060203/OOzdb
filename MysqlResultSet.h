@@ -7,18 +7,6 @@
 
 #include "ResultSet.h"
 
-template<typename T>
-void THROW(T ExceptionType , char const* cause , ...)
-{
-    assert(cause);
-    char message[EXCEPTION_MESSAGE_LENGTH + 1];
-    va_list ap;
-    va_start(ap , cause);
-    vsnprintf(message , EXCEPTION_MESSAGE_LENGTH , cause , ap);
-    va_end(ap);
-    throw(ExceptionType(message));
-}
-
 class MysqlResultSet : public ResultSet
 {
 public:

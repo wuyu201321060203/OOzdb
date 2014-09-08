@@ -7,8 +7,9 @@
 #include "Config.h"
 
 #include "MysqlResultSet.h"
-#include "Str.h"
-#include "Memory.h"
+#include "StrOperation.h"
+#include "MemoryOperation.h"
+#include "SQLException.h"
 
 MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
                                int keep):
@@ -68,13 +69,13 @@ int MysqlResultSet::next()
     if(_needRebind)
     {
         if((_lastError = mysql_stmt_bind_result(_stmt, _bind)))
-            THROW(SQLException, "mysql_stmt_bind_result -- %s",
+            THROW(SQLException , "mysql_stmt_bind_result -- %s",
                 mysql_stmt_error(_stmt));
         _needRebind = false;
     }
     _lastError = mysql_stmt_fetch(_stmt);
     if (_lastError == 1)
-        THROW(SQLException, "mysql_stmt_fetch -- %s", mysql_stmt_error(_stmt));
+        THROW(SQLException , "mysql_stmt_fetch -- %s", mysql_stmt_error(_stmt));
     return ((_lastError == MYSQL_OK) || (_lastError == MYSQL_DATA_TRUNCATED));
 }
 
@@ -178,7 +179,7 @@ void MysqlResultSet::ensureCapacity(int i)
         _bind[i].buffer = _columns[i].buffer;
         _bind[i].buffer_length = _columns[i].real_length;
         if ((_lastError = mysql_stmt_fetch_column(_stmt, &_bind[i], i, 0)))
-            THROW(SQLException, "mysql_stmt_fetch_column -- %s", mysql_stmt_error(_stmt));//TODO
+            THROW(SQLException , "mysql_stmt_fetch_column -- %s", mysql_stmt_error(_stmt));//TODO
         _needRebind = true;
     }
 }
