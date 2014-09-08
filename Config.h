@@ -15,6 +15,7 @@
 #include "MemoryOperation.h"
 #include "StrOperation.h"
 #include <string>
+#include <cstring>
 
 
 /* --------------------------------------------- SQL standard value macros */

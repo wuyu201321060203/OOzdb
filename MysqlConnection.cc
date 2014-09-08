@@ -149,6 +149,12 @@ void MysqlConnection::onstop()
         mysql_server_end();
 }
 
+void MysqlConnection::close()
+{
+    if(_pool)
+        _pool->returnConnection(enable_shared_from_this);
+}
+
 MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
 {
 #define ERROR(e) do {*error = strDup(e); goto error;} while (0)

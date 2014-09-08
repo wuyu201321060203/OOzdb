@@ -4,10 +4,13 @@
 #include <mysql.h>
 #include <errmsg.h>
 
+#include <boost/enable_shared_from_this.hpp>
+
 #include "StringBuffer.h"
 #include "Connection.h"
 
-class MysqlConnection : public Connection
+class MysqlConnection : public Connection,
+                        public boost::enable_shared_from_this<MysqlConnection>
 {
 public:
 
@@ -26,6 +29,7 @@ public:
                                     ...)__attribute__((format (printf, 1, 2)));
     virtual CONST_STDSTR getLastError();
     virtual void onstop();
+    virtual void close();//non-beautiful
 
 private:
 

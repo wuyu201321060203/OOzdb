@@ -6,7 +6,7 @@ Connection::Connection(ConnectionPool* pool):
     _isInTransaction(false),
     _timeout(SQL_DEFAULT_TIMEOUT),
     _url(_pool->getURL()),
-    _lastAccessedTime(Time_now())
+    _lastAccessedTime(Time_now()),
     _maxRows(0)
 {
     assert(_pool);
@@ -119,7 +119,7 @@ int Connection::getQueryTimeout()
 
 void Connection::setMaxRows(int rows)
 {
-    _maxRows = max;
+    _maxRows = rows;
 }
 
 int Connection::getMaxRows()
@@ -145,8 +145,6 @@ void Connection::clear()
 
 void Connection::close()
 {
-    if(_pool)
-    _pool->returnConnection( enable_shared_from_this() );
 }
 
 void Connection::freePrepared()

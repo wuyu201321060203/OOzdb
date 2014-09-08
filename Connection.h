@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 #include "Config.h"
 #include "ConnectionPool.h"
@@ -13,7 +12,7 @@
 #include "PreparedStatement.h"
 #include "URL.h"
 
-class Connection : public boost::enable_shared_from_this<Connection>
+class Connection
 {
 public:
 
@@ -40,6 +39,7 @@ public:
 
     virtual CONST_STDSTR getLastError();
     virtual void onStop();
+    virtual void close();
 
     /*
      *The following functions are inherited by subclasses directly
@@ -57,7 +57,6 @@ public:
     int getMaxRows();
     URLPtr getURL();
     void clear();
-    void close();
 
 protected:
 
