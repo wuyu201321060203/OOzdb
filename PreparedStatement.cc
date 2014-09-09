@@ -1,4 +1,5 @@
 #include "PreparedStatement.h"
+#include "SQLException.h"
 
 PreparedStatement::PreparedStatement(int parameterCount):
     _parameterCount(parameterCount)
@@ -62,6 +63,6 @@ int PreparedStatement::checkAndSetParameterIndex(int parameterIndex)
 {
     int i = parameterIndex - 1;
     if (_parameterCount <= 0 || i < 0 || i >= _parameterCount)
-        THROW(SQLException, "Parameter index is out of range");//TODO
+        THROW(SQLException , "Parameter index is out of range");//TODO
     return i;
 }

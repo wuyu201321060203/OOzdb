@@ -1,6 +1,8 @@
 #include <cstdarg>
 #include <cassert>
 
+#include <boost/enable_shared_from_this.hpp>
+
 #include "MysqlConnection.h"
 #include "SQLException.h"
 
@@ -152,7 +154,7 @@ void MysqlConnection::onstop()
 void MysqlConnection::close()
 {
     if(_pool)
-        _pool->returnConnection(enable_shared_from_this);
+        _pool->returnConnection(enable_shared_from_this());
 }
 
 MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)

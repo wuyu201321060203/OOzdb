@@ -6,11 +6,12 @@
 #include <boost/shared_ptr.hpp>
 
 #include "Config.h"
-#include "ConnectionPool.h"
 #include "TimeOperation.h"
 #include "ResultSet.h"
 #include "PreparedStatement.h"
 #include "URL.h"
+
+class ConnectionPool;
 
 class Connection
 {
@@ -29,13 +30,12 @@ public:
     virtual int rollback();
     virtual long long getLastRowId();
     virtual long long rowsChanged();
-    virtual void execute(char const* sql,
-                         ...)__attribute__((format (printf, 1, 2)));//第一个参数
-    //是格式字符串，从第二个参数开始是可变参数列表，从这按照printf检查要求进行检查
+    virtual void execute(char const* sql ,  ...) __attribute__((format (printf, 2, 3)));//第2个参数
+    //是格式字符串，从第3个参数开始是可变参数列表，从这按照printf检查要求进行检查,第一个参数是this指针
     virtual ResultSetPtr executeQuery(char const* sql,
-                                      ...)__attribute__((format (printf, 1, 2)));
+                                      ...)__attribute__((format (printf, 2, 3)));
     virtual PreparedStatementPtr getPreparedStatement(char const* sql,
-                                        ...)__attribute__((format (printf, 1, 2)));
+                                        ...)__attribute__((format (printf, 2, 3)));
 
     virtual CONST_STDSTR getLastError();
     virtual void onStop();
@@ -47,7 +47,7 @@ public:
 
 public:
 
-    void setAvailable(bool isAvailable);
+    void setAvailable(bool available);
     bool isAvailable();
     time_t getLastAccessedTime();
     bool isInTransaction();

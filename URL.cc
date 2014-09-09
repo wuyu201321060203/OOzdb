@@ -74,7 +74,7 @@ URL::URL(char const* url)
     Throw(SQLException , "URL create fail");//TODO
 }
 
-URL::URL(char const* url , ...)
+void URL::URLCreate(char const* url , ...)
 {
     if(STR_DEF(url))
     {

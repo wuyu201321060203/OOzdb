@@ -11,7 +11,8 @@ ConnectionPool::ConnectionPool(char const* url):
     _maxConnections(SQL_DEFAULT_MAX_CONNECTIONS),
     _initialConnections(SQL_DEFAULT_INIT_CONNECTIONS),
     _connectionTimeout(SQL_DEFAULT_CONNECTION_TIMEOUT),
-    _reaper( new Thread( boost::bind(&doSweep , this) ) )
+    _alarm(_mutex),
+    _reaper( new Thread( boost::bind(&ConnectionPool::doSweep , this) ) )
 {
     assert(_url);
     _connectionsVec.reserve(SQL_DEFAULT_MAX_CONNECTIONS);
@@ -31,7 +32,7 @@ void ConnectionPool::setInitialConnections(int connections)
 {
     assert(connections >= 0);
     {
-        MutexLockGuard lock(&_mutex);
+        MutexLockGuard lock(_mutex);
         _initialConnections = connections;
     }
 }

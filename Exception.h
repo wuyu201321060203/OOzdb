@@ -4,8 +4,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string>
-#include <type_traits>
 
+#include <muduo/base/Logging.h>
+
+#include <boost/static_assert.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 #include "Config.h"
 
 class Exception
@@ -34,7 +37,7 @@ public:
         _funcName = funcName;
     }
 
-    CONST_STDSTR getFuncName()
+    CONST_STDSTR getFuncName() const
     {
         return _funcName;
     }
@@ -44,7 +47,7 @@ public:
         _fileName  = fileName;
     }
 
-    CONST_STDSTR getFileName()
+    CONST_STDSTR getFileName() const
     {
         return _fileName;
     }
@@ -54,7 +57,7 @@ public:
         _lineNum = lineNum;
     }
 
-    long const getLineNum()
+    long getLineNum()
     {
         return _lineNum;
     }
@@ -64,7 +67,7 @@ public:
         _reason = reason;
     }
 
-    CONST_STDSTR getReason()
+    CONST_STDSTR getReason() const
     {
         return _reason;
     }
@@ -82,7 +85,7 @@ void ExceptionThrow(T e , char const* funcName,
                     char const* fileName , long const& lineNum,
     char const* reason , ...)
 {
-    static_assert(std::is_convertible<T* , Exception*> , "Exception type is invalid");
+    BOOST_STATIC_ASSERT(boost::is_base_of<Exception , T>::value);
     va_list ap;
     va_start(ap , reason);
     e.setFuncName(funcName);

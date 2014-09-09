@@ -6,6 +6,8 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 
 #include <muduo/base/Thread.h>
 #include <muduo/base/Mutex.h>
@@ -20,16 +22,17 @@
 using muduo::Thread;
 using muduo::MutexLock;
 using muduo::Condition;
+using muduo::MutexLockGuard;
 
 //typedef boost::function<void (char const*)> AbortHandlerFunc;//TODO
 typedef boost::function<void (void)> ThreadFunc;
 typedef boost::function<void (void)> StopHandler;
 typedef boost::shared_ptr<Thread> ThreadPtr;
 
-#define VERSION 0.1
+#define VERSION "0.1"
 #define OOzdb_URL "https://github.com/wuyu201321060203/OOzdb"
 
-#define ABOUT "OOzdb/" #VERSION " Copyright (C) Wu Yu" OOzdb_URL
+#define ABOUT "OOzdb/" VERSION " Copyright (C) Wu Yu" OOzdb_URL
 
 class ConnectionPool : boost::noncopyable
 {
@@ -89,8 +92,7 @@ private:
 template<typename ConcreteConnection>
 void ConnectionPool::start()
 {
-    static_assert(std::is_convertible<ConcreteConnection* , Connection*>,
-                  "ConcreteConnection type is not a subclass of Connection");
+    BOOST_STATIC_ASSERT(boost::is_base_of<Connection , ConcreteConnection>::value);
     {
         MutexLockGuard lock(&_mutex);
         _stopped = false;
@@ -102,14 +104,13 @@ void ConnectionPool::start()
         }
     }
     if(!_filled)
-        Throw(SQLException , "Failed to start connection pool");
+        LOG_FATAL << "Failed to start connection pool";
 }
 
 template<typename ConcreteConnection>
 int ConnectionPool::fillPool()
 {
-    static_assert(std::is_convertible<ConcreteConnection* , Connection*>,
-                  "ConcreteConnection type is not a subclass of Connection");
+    BOOST_STATIC_ASSERT(boost::is_base_of<Connection , ConcreteConnection>::value);
     for(int i = 0 ; i != _initialConnections ; ++i)
     {
         ConnectionPtr conn( new ConcreteConnection(this) );

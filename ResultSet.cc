@@ -7,7 +7,7 @@ ResultSet::ResultSet(CONST_STDSTR name):
     _maxRows(0),
     _columnCount(0)
 {
-    assert(_resultSetName);
+    assert(!_resultSetName.empty());
 }
 
 ResultSet::~ResultSet()
@@ -87,7 +87,7 @@ time_t ResultSet::getTimestampByName(CONST_STDSTR name)
 
 struct tm ResultSet::getDateTime(int columnIndex)
 {
-    struct tm t = {.tm_year = 0};
+    struct tm t = {0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0};//??
     return t;
 }
 
@@ -118,7 +118,7 @@ long ResultSet::getColumnSize(int columnIndex)
 int ResultSet::checkAndSetColumnIndex(int columnIndex)
 {
     int i = columnIndex - 1;
-    if (_columnCount <= 0 || i < 0 || i >= columnCount)
+    if (_columnCount <= 0 || i < 0 || i >= _columnCount)
         THROW(SQLException , "Column index is out of range");
     return i;
 }
@@ -130,6 +130,6 @@ int ResultSet::getIndex(CONST_STDSTR name)
     for (i = 1; i <= columns; i++)
         if ( name == getColumnName(i) )
             return i;
-    THROW(SQLException , (name ? name : "null"));
+    THROW(SQLException , (name.empty() ? "null" : name.c_str()));
     return -1;
 }

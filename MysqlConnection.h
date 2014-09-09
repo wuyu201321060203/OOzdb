@@ -4,8 +4,6 @@
 #include <mysql.h>
 #include <errmsg.h>
 
-#include <boost/enable_shared_from_this.hpp>
-
 #include "StringBuffer.h"
 #include "Connection.h"
 

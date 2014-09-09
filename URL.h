@@ -15,7 +15,7 @@ public:
     };
 
     URL(char const* url);
-    URL(char const* url , ...);
+    void URLCreate(char const* url , ...);
     ~URL();
     void clear();
     char const* getProtocol() const;

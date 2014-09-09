@@ -1,4 +1,5 @@
 #include "Connection.h"
+#include "ConnectionPool.h"
 
 Connection::Connection(ConnectionPool* pool):
     _pool(pool),
@@ -85,9 +86,9 @@ void onStop()
 {
 }
 
-void Connection::setAvailable(bool isAvailable)
+void Connection::setAvailable(bool available)
 {
-    _isAvailable = isAvailable;
+    _isAvailable = available;
     _lastAccessedTime = Time_now();
 }
 
@@ -143,7 +144,7 @@ void Connection::clear()
     freePrepared();
 }
 
-void Connection::close()
+void Connection::close()//TODO
 {
 }
 
