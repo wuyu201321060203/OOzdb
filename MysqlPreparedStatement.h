@@ -1,10 +1,10 @@
 #ifndef MYSQLPREPAREDSTATEMENT_H
 #define MYSQLPREPAREDSTATEMENT_H
 
-#include <mysql.h>
+#include <mysql/mysql.h>
 
 #include "MysqlResultSet.h"
-#include "MysqlPreparedStatement.h"
+#include "PreparedStatement.h"
 
 class MysqlPreparedStatement : public PreparedStatement
 {
@@ -19,7 +19,7 @@ public:
             double real;
             MYSQL_TIME timestamp;
         } type;
-        long length;
+        unsigned long length;
     }param_t;
 
     MysqlPreparedStatement(void* stmt , int maxRows , int parameterCount);

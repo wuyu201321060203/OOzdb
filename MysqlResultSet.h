@@ -1,8 +1,8 @@
 #ifndef MYSQLRESULTSET_INCLUDED
 #define MYSQLRESULTSET_INCLUDED
 
-#include <mysql.h>
-#include <errmsg.h>
+#include <mysql/mysql.h>
+#include <mysql/errmsg.h>
 #include <vector>
 
 #include "ResultSet.h"
@@ -11,7 +11,7 @@ class MysqlResultSet : public ResultSet
 {
 public:
 
-    class column_t
+    struct column_t
     {
         my_bool is_null;
         MYSQL_FIELD *field;
@@ -19,7 +19,7 @@ public:
         char* buffer;
     };
 
-    typedef std::vector<column_t> columnVec;
+    typedef std::vector<column_t> ColumnVec;
 
     MysqlResultSet(CONST_STDSTR name , void *stmt, int maxRows, int keep);
     ~MysqlResultSet();
@@ -44,7 +44,7 @@ private:
     MYSQL_RES* _meta;
     MYSQL_BIND* _bind;
     MYSQL_STMT* _stmt;
-    columnVec _columns;
+    ColumnVec _columns;
 
 private:
 

@@ -51,7 +51,7 @@ public:
     void setStopHandler(StopHandler handler);
     void setReaper(int sweepInterval);
     int getSize() const;
-    int getActiveConnections() const;
+    int getActiveConnections();
     template<typename ConcreteConnection> void start();
     void stop();
     ConnectionPtr getConnection();

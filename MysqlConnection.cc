@@ -3,12 +3,15 @@
 
 #include <boost/enable_shared_from_this.hpp>
 
+#include "ConnectionPool.h"
 #include "MysqlConnection.h"
+#include "MysqlPreparedStatement.h"
+#include "MysqlResultSet.h"
 #include "SQLException.h"
 
 MysqlConnection::MysqlConnection(ConnectionPool* pool , char** error):
     Connection(pool),
-    _lastError(MYSQL_OK).
+    _lastError(MYSQL_OK),
     _sb(STRLEN)
 {
     assert(error);
@@ -27,119 +30,116 @@ int MysqlConnection::ping()
     return (mysql_ping(_db) == 0);
 }
 
-int MysqlConnection::beginTransaction()
+void MysqlConnection::beginTransaction()
 {
     _lastError = mysql_query(_db, "START TRANSACTION;");
-    if (_lastError == MYSQL_OK)
-    {
-        ++_isInTransaction;
-        return true;
-    }
-    THROW(SQLException , "Can't begin transaction");
+    if (_lastError != MYSQL_OK)
+        THROW(SQLException , "Can't begin transaction");
+    ++_isInTransaction;
 }
 
-int MysqlConnection::commit()
+void MysqlConnection::commit()
 {
     if(_isInTransaction)
         _isInTransaction = 0;
     _lastError = mysql_query(_db, "COMMIT;");
-    if(_lastError == MYSQL_OK)
-        return true;
-    else
+    if(_lastError != MYSQL_OK)
         THROW(SQLException , "Can't commit");
 }
 
-int MysqlConnection::rollback()
+void MysqlConnection::rollback()
 {
     if(_isInTransaction)
     {
         _isInTransaction = 0;
-        Clear();
+        clear();
     }
-    _lastError = mysql_query(db, "ROLLBACK;");
-    if(_lastError == MYSQL_OK)
-        return true;
-    else
+    _lastError = mysql_query(_db, "ROLLBACK;");
+    if(_lastError != MYSQL_OK)
         THROW(SQLException , "Can't rollback");
 }
 
 long long MysqlConnection::getLastRowId()
 {
-    return (long long)mysql_insert_id(_db);
+    return static_cast<long long>(mysql_insert_id(_db));
 }
 
 long long MysqlConnection::rowsChanged()
 {
-    return (long long)mysql_affected_rows(_db);
+    return static_cast<long long>(mysql_affected_rows(_db));
 }
 
-int MysqlConnection::execute(char const* sql , ...)
+void MysqlConnection::execute(char const* sql , ...)
 {
     assert(sql);
     va_list ap;
     va_start(ap , sql);
     _resultSet->clear();
     _sb.vset(sql, ap);
-    va_end(ap);
     _lastError = mysql_real_query(_db , _sb.toString(),
                                   _sb.getLength());
-    if(_lastError == MYSQL_OK)
-        return true;
-    else
+    va_end(ap);
+    if(_lastError != MYSQL_OK)
         THROW(SQLException , "mysql execute failed");
 }
 
 ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
 {
+    ResultSetPtr ret;
     assert(sql);
     _resultSet->clear();
     va_list ap;
     va_start(ap , sql);
     MYSQL_STMT* stmt = NULL;
     _sb.vset(sql , ap);
-    va_end(ap);
     if(prepare(_sb.toString() , _sb.getLength() , &stmt))
     {
 #if MYSQL_VERSION_ID >= 50002
         unsigned long cursor = CURSOR_TYPE_READ_ONLY;
-        mysql_stmt_attr_set(_stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
+        mysql_stmt_attr_set(stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
-        if ((_lastError = mysql_stmt_execute(_stmt)))
+        if ((_lastError = mysql_stmt_execute(stmt)))
         {
-            _sb.set("%s", mysql_stmt_error(_stmt));
-            mysql_stmt_close(_stmt);
+            _sb.set("%s", mysql_stmt_error(stmt));
+            mysql_stmt_close(stmt);
         }
         else
-            return ResultSetPtr(new MysqlResultSet("MysqlResultSet" , _stmt , _maxRows,
-                                                    false));
+        {
+            ResultSetPtr temp(new MysqlResultSet("MysqlResultSet" , stmt , _maxRows , false));
+            ret.swap(temp);
+        }
     }
-    THROW(SQLException , "prepare failed");//TODO
+    va_end(ap);
+    if(!ret)
+        THROW(SQLException , "Mysql executeQuery failed");
+    return ret;
 }
 
 PreparedStatementPtr MysqlConnection::getPrepareStatement(char const* sql , ...)
 {
+    PreparedStatementPtr ret;
     assert(sql);
     va_list ap;
     va_start(ap , sql);
     MYSQL_STMT *stmt = NULL;
     _sb.vset(sql , ap);
-    va_end(ap);
-    if (prepare(_sb.toString() , _sb.getLength() , &stmt))
+    if(prepare(_sb.toString() , _sb.getLength() , &stmt))
     {
-        int parameterCount = (int)mysql_stmt_param_count(_stmt);
+        int parameterCount = static_cast<int>(mysql_stmt_param_count(stmt));
         PreparedStatementPtr item(new MysqlPreparedStatement(stmt , _maxRows,
                                                                parameterCount) );
         _prepared.push_back(item);
-        return item;
+        ret.swap(item);
     }
-    THROW(SQLException , "prepare failed");
+    va_end(ap);
+    return ret;
 }
 
 CONST_STDSTR MysqlConnection::getLastError()
 {
     if(mysql_errno(_db))
-        return CONST_STDSTR(mysql_error(_db));
-    return CONST_STDSTR( _sb.toString() ); // Either the statement itself or a statement error
+        return static_cast<CONST_STDSTR>(mysql_error(_db));
+    return static_cast<CONST_STDSTR>( _sb.toString() ); // Either the statement itself or a statement error
 }
 
 /* Class method: MySQL client library finalization */
@@ -154,7 +154,7 @@ void MysqlConnection::onstop()
 void MysqlConnection::close()
 {
     if(_pool)
-        _pool->returnConnection(enable_shared_from_this());
+        _pool->returnConnection(shared_from_this());
 }
 
 MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
@@ -197,9 +197,9 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
     if(IS(url->getParameter("use-ssl"), "true"))
         mysql_ssl_set(db, 0,0,0,0,0);
     if(IS(url->getParameter("secure-auth"), "true"))
-        mysql_options(db, MYSQL_SECURE_AUTH, (const char*)&yes);
+        mysql_options(db, MYSQL_SECURE_AUTH, static_cast<char const* >(&yes));
     else
-        mysql_options(db, MYSQL_SECURE_AUTH, (const char*)&no);
+        mysql_options(db, MYSQL_SECURE_AUTH, static_cast<char const*>(&no));
     if((timeout = url->getParameter("connect-timeout")))
     {
         try
@@ -211,11 +211,11 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
             ERROR("invalid connect timeout value");
         }
     }
-    mysql_options(db, MYSQL_OPT_CONNECT_TIMEOUT, (const char*)&connectTimeout);
+    mysql_options(db, MYSQL_OPT_CONNECT_TIMEOUT, reinterpret_cast<char const*>(&connectTimeout));
     if((charset = url->getParameter("charset")))
         mysql_options(db, MYSQL_SET_CHARSET_NAME, charset);
 #if MYSQL_VERSION_ID >= 50013
-    mysql_options(db, MYSQL_OPT_RECONNECT, (const char*)&yes);
+    mysql_options(db, MYSQL_OPT_RECONNECT, static_cast<char const*>(&yes));
 #endif
     /* Connect */
     if(mysql_real_connect(db, host, user, password, database, port, unix_socket,

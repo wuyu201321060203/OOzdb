@@ -25,9 +25,9 @@ public:
     Connection(ConnectionPool* pool);
     virtual ~Connection();
     virtual int ping();
-    virtual int beginTransaction();
-    virtual int commit();
-    virtual int rollback();
+    virtual void beginTransaction();
+    virtual void commit();
+    virtual void rollback();
     virtual long long getLastRowId();
     virtual long long rowsChanged();
     virtual void execute(char const* sql ,  ...) __attribute__((format (printf, 2, 3)));//第2个参数

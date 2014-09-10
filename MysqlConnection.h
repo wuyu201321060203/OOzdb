@@ -1,8 +1,8 @@
 #ifndef MYSQLCONNECTION_H
 #define MYSQLCONNECTION_H
 
-#include <mysql.h>
-#include <errmsg.h>
+#include <mysql/mysql.h>
+#include <mysql/errmsg.h>
 
 #include "StringBuffer.h"
 #include "Connection.h"
@@ -12,19 +12,19 @@ class MysqlConnection : public Connection,
 {
 public:
 
-    MysqlConnection(ConnectionPool* pool , URLPtr url , char** error);
+    MysqlConnection(ConnectionPool* pool , char** error);
     ~MysqlConnection();
     virtual int ping();
-    virtual int beginTransaction();
-    virtual int commit();
-    virtual int rollback();
+    virtual void beginTransaction();
+    virtual void commit();
+    virtual void rollback();
     virtual long long getLastRowId();
     virtual long long rowsChanged();
-    virtual void execute(char const* sql , ...) __attribute__((format (printf, 1, 2)));
+    virtual void execute(char const* sql , ...) __attribute__((format (printf, 2, 3)));
     virtual ResultSetPtr executeQuery(char const* sql,
-                                    ...)__attribute__((format (printf, 1, 2)));
-    virtual PreparedStatement getPrepareStatement(char const* sql,
-                                    ...)__attribute__((format (printf, 1, 2)));
+                                    ...)__attribute__((format (printf, 2, 3)));
+    virtual PreparedStatementPtr getPrepareStatement(char const* sql,
+                                    ...)__attribute__((format (printf, 2, 3)));
     virtual CONST_STDSTR getLastError();
     virtual void onstop();
     virtual void close();//non-beautiful

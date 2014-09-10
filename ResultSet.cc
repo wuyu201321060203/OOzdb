@@ -19,7 +19,7 @@ int ResultSet::next()
     return SUCCESSFUL;
 }
 
-bool ResultSet::isnull(int columnIndex)
+int ResultSet::isnull(int columnIndex)
 {
     return false;
 }

@@ -23,27 +23,24 @@ int Connection::ping()
     return SUCCESSFUL;
 }
 
-int Connection::beginTransaction()
+void Connection::beginTransaction()
 {
     ++_isInTransaction;
-    return SUCCESSFUL;
 }
 
-int Connection::commit()
+void Connection::commit()
 {
     if(_isInTransaction)
         _isInTransaction = 0;
-    return SUCCESSFUL;
 }
 
-int Connection::rollback()
+void Connection::rollback()
 {
     if(_isInTransaction)
     {
         clear();
         _isInTransaction = 0;
     }
-    return SUCCESSFUL;
 }
 
 long long Connection::getLastRowId()

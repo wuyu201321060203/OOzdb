@@ -8,7 +8,7 @@ CXXFLAGS = -g -O0 -Wall -Wextra -Werror \
            -Wpointer-arith -Wshadow -Wwrite-strings \
            -march=native -rdynamic -std=c++11\
            -I$(MUDUO_INCLUDE)
-LDFLAGS = -L$(MUDUO_LIBRARY) -lmuduo_net -lmuduo_base -lpthread -lrt
+LDFLAGS = -L$(MUDUO_LIBRARY) -lmuduo_net_cpp11 -lmuduo_base_cpp11 -lpthread -lrt
 
 
 BIN_PROGRAM = test

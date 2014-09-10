@@ -26,7 +26,7 @@ void PreparedStatement::setDouble(int parameterIndex , double x)
 {
 }
 
-void PreparedStatement::setBlob(int parameterIndex , void const* x)
+void PreparedStatement::setBlob(int parameterIndex , void const* x , int size)
 {
 }
 

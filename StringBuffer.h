@@ -14,9 +14,9 @@ public:
     explicit StringBuffer(int length , char const* s);
     explicit StringBuffer(int length);
     ~StringBuffer();
-    void append(char const* s , ...)__attribute__((format (printf, 1, 2)));
+    void append(char const* s , ...)__attribute__((format (printf, 2, 3)));
     void vappend(char const* s , va_list ap);
-    void set(char const* s , ...)__attribute__((format (printf, 1, 2)));
+    void set(char const* s , ...)__attribute__((format (printf, 2, 3)));
     void vset(char const* s , va_list ap);
     int getLength();
     void clear();

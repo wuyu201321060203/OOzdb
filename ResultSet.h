@@ -13,7 +13,7 @@ public:
     ResultSet(CONST_STDSTR name);
     virtual ~ResultSet();
     virtual int next();
-    virtual bool isnull(int columnIndex);
+    virtual int isnull(int columnIndex);
     virtual CONST_STDSTR getString(int columnIndex);
     CONST_STDSTR getStringByName(CONST_STDSTR name);
     virtual int getInt(int columnIndex);
@@ -41,7 +41,7 @@ protected:
     int getColumnCount();
     virtual CONST_STDSTR getColumnName(int columnIndex);
     virtual long getColumnSize(int columnIndex);
-    inline int checkAndSetColumnIndex(int columnIndex);
+    int checkAndSetColumnIndex(int columnIndex);
     int getIndex(CONST_STDSTR name);
 };
 

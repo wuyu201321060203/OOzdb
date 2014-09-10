@@ -16,22 +16,23 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
     ResultSet(name)
 {
     assert(stmt);
-    _stmt = stmt;
+    _stmt = static_cast<MYSQL_STMT*>(stmt);
     _keep = keep;
     _maxRows = maxRows;
     _columnCount = mysql_stmt_field_count(_stmt);
     if( (_columnCount <= 0) || !(_meta = mysql_stmt_result_metadata(_stmt) ) )
     {
-        LOG_DEBUG << "Warning: column error - " << (mysql_stmt_error(stmt));
+        LOG_DEBUG << "Warning: column error - " << (mysql_stmt_error(_stmt));
         _stop = true;
     }
     else
     {
-        _bind = CALLOC(_columnCount, sizeof MYSQL_BIND);
-        _columns = CALLOC(_columnCount, sizeof(column_t));
+        _bind = static_cast<MYSQL_BIND*>( CALLOC(_columnCount , sizeof(MYSQL_BIND)) );
+        ColumnVec temp(_columnCount);
+        _columns.swap(temp);//C++11
         for(int i = 0; i < _columnCount; i++)
         {
-            _columns[i].buffer = ALLOC(STRLEN + 1);
+            _columns[i].buffer = static_cast<char*>(ALLOC(STRLEN + 1));
             _bind[i].buffer_type = MYSQL_TYPE_STRING;
             _bind[i].buffer = _columns[i].buffer;
             _bind[i].buffer_length = STRLEN;
@@ -41,7 +42,7 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
         }
         if((_lastError = mysql_stmt_bind_result(_stmt, _bind)))
         {
-            LOG_DEBUG << "Warning: bind error - " << (mysql_stmt_error(stmt));
+            LOG_DEBUG << "Warning: bind error - " << (mysql_stmt_error(_stmt));
             _stop = true;
         }
     }
@@ -92,25 +93,25 @@ CONST_STDSTR MysqlResultSet::getString(int columnIndex)
         return BADSTR;
     ensureCapacity(i);
     _columns[i].buffer[_columns[i].real_length] = 0;
-    return CONST_STDSTR(_columns[i].buffer);
+    return STDSTR(_columns[i].buffer);
 }
 
 int MysqlResultSet::getInt(int columnIndex)
 {
     CONST_STDSTR s = getString(columnIndex);
-    return s ? strParseInt(s.c_str()) : 0;
+    return s.empty() ?  0 : strParseInt(s.c_str());
 }
 
-long long  MysqlResultSet::getLLong(int columnIndex);
+long long MysqlResultSet::getLLong(int columnIndex)
 {
     CONST_STDSTR s = getString(columnIndex);
-    return s ? strParseLLong(s.c_str()) : 0;
+    return s.empty() ? 0 : strParseLLong(s.c_str());
 }
 
-double MysqlResultSet::getDouble(int columnIndex);
+double MysqlResultSet::getDouble(int columnIndex)
 {
     CONST_STDSTR s = getString(columnIndex);
-    return s ? strParseDouble(s.c_str()) : 0.0;
+    return s.empty() ? 0.0 : strParseDouble(s.c_str());
 }
 
 void const* MysqlResultSet::getBlob(int columnIndex, int* size)
@@ -122,7 +123,7 @@ void const* MysqlResultSet::getBlob(int columnIndex, int* size)
         return NULL;
     }
     ensureCapacity(i);
-    *size = (int)_columns[i].real_length;
+    *size = static_cast<int>(_columns[i].real_length);
     return _columns[i].buffer;
 }
 
@@ -137,8 +138,8 @@ time_t MysqlResultSet::getTimestamp(int columnIndex)
 struct tm MysqlResultSet::getDateTime(int columnIndex)
 {
     CONST_STDSTR s = getString(columnIndex);
-    struct tm t = {.tm_year = 0};
-    if(!s.empty()) t = Time_toDateTime(s.c_str(), &t);
+    struct tm t = {0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0};
+    if(!s.empty()) Time_toDateTime(s.c_str(), &t);
     return t;
 }
 
@@ -151,7 +152,6 @@ void MysqlResultSet::clear()
         mysql_stmt_close(_stmt);
     if (_meta)
         mysql_free_result(_meta);
-    FREE(_columns);
     FREE(_bind);
 }
 
@@ -160,7 +160,7 @@ CONST_STDSTR MysqlResultSet::getColumnName(int columnIndex)
     --columnIndex;
     if( _columnCount <= 0 || columnIndex < 0 || columnIndex > _columnCount)
         return BADSTR;
-    return CONST_STDSTR(_columns[columnIndex].field->name);
+    return STDSTR(_columns[columnIndex].field->name);
 }
 
 long MysqlResultSet::getColumnSize(int columnIndex)
@@ -175,11 +175,18 @@ void MysqlResultSet::ensureCapacity(int i)
 {
     if(_columns[i].real_length > _bind[i].buffer_length)
     {
-        RESIZE(_columns[i].buffer , _columns[i].real_length + 1);
+        //ugly realization
+        void* temp = NULL;
+        temp = CALLOC(1 , _columns[i].real_length + 1);
+        memcpy(temp , _columns[i].buffer , _bind[i].buffer_length);
+        free(_columns[i].buffer);
+        _columns[i].buffer = static_cast<char*>(temp);
+        //TODO
         _bind[i].buffer = _columns[i].buffer;
         _bind[i].buffer_length = _columns[i].real_length;
         if ((_lastError = mysql_stmt_fetch_column(_stmt, &_bind[i], i, 0)))
-            THROW(SQLException , "mysql_stmt_fetch_column -- %s", mysql_stmt_error(_stmt));//TODO
+            THROW(SQLException , "mysql_stmt_fetch_column -- %s",
+                                                        mysql_stmt_error(_stmt));
         _needRebind = true;
     }
 }
