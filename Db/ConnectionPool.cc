@@ -121,7 +121,7 @@ void ConnectionPool::stop()
             drainPool();
             _filled = false;
             stopSweep = _doSweep && _reaper;
-            if(_stopHandler) _stopHandler();//TODO
+            if(_stopHandler) _stopHandler();
         }
     }
     if(stopSweep)
