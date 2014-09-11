@@ -145,14 +145,18 @@ struct tm MysqlResultSet::getDateTime(int columnIndex)
 
 void MysqlResultSet::clear()
 {
-    for(int i = 0; i < _columnCount; i++)
-        FREE(_columns[i].buffer);
-    mysql_stmt_free_result(_stmt);
-    if (_keep == false)
-        mysql_stmt_close(_stmt);
-    if (_meta)
-        mysql_free_result(_meta);
-    FREE(_bind);
+    if(!isCleared())
+    {
+        for(int i = 0; i < _columnCount; i++)
+            FREE(_columns[i].buffer);
+        mysql_stmt_free_result(_stmt);
+        if(_keep == false)
+            mysql_stmt_close(_stmt);
+        if(_meta)
+            mysql_free_result(_meta);
+        FREE(_bind);
+        setClearFlag();
+    }
 }
 
 CONST_STDSTR MysqlResultSet::getColumnName(int columnIndex)

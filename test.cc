@@ -9,7 +9,7 @@
 
 #include <boost/bind.hpp>
 
-void onStop()
+void onStop()//TODO
 {
     if (mysql_get_client_version() >= 50003)
         mysql_library_end();
@@ -24,9 +24,8 @@ int main(void)
     pool.start<MysqlConnection>();
     ConnectionPtr con = pool.getConnection();
     con->execute("create table if not exists bleach(name varchar(255), created_at timestamp)");
-    PreparedStatementPtr p =
-        con->getPreparedStatement("insert into bleach values (?, ?)");
-    const char *bleach[] =
+    PreparedStatementPtr p = con->getPreparedStatement("insert into bleach values (?, ?)");
+    char const* bleach[] =
     {
         "Ichigo Kurosaki", "Rukia Kuchiki", "Orihime Inoue",  "Yasutora \"Chad\" Sado",
         "Kisuke Urahara", "Ury\u016b Ishida", "Renji Abarai", 0
@@ -37,7 +36,7 @@ int main(void)
         p->setTimestamp(2, time(NULL) + i);
         p->execute();
     }
-    ResultSetPtr r = con->executeQuery(" select name , created_at from bleach where created_at = '2014-08-12 16:27:40' ");
+    ResultSetPtr r = con->executeQuery("select name , created_at from bleach");
     while (r->next())
         printf("%-22s\t %s\n", (r->getString(1)).c_str() , (r->getString(2)).c_str());
     con->execute("drop table bleach;");

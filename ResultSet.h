@@ -24,11 +24,14 @@ public:
     double getDoubleByName(CONST_STDSTR name);
     virtual void const* getBlob(int columnIndex , int* size);
     void const* getBlobByName(CONST_STDSTR name , int* size);
-    virtual time_t getTimestamp(int columnIndex);//TODO
-    time_t getTimestampByName(CONST_STDSTR name);//TODO
-    virtual struct tm getDateTime(int columnIndex);//TODO
-    struct tm getDateTimeByName(CONST_STDSTR name);//TODO
+    virtual time_t getTimestamp(int columnIndex);
+    time_t getTimestampByName(CONST_STDSTR name);
+    virtual struct tm getDateTime(int columnIndex);
+    struct tm getDateTimeByName(CONST_STDSTR name);
     virtual void clear();
+    void setClearFlag();
+    void unsetClearFlag();
+    bool isCleared();
 
 protected:
 
@@ -43,6 +46,10 @@ protected:
     virtual long getColumnSize(int columnIndex);
     int checkAndSetColumnIndex(int columnIndex);
     int getIndex(CONST_STDSTR name);
+
+private:
+
+    bool _isCleared;
 };
 
 typedef boost::shared_ptr<ResultSet> ResultSetPtr;

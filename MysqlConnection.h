@@ -25,7 +25,7 @@ public:
     virtual void execute(char const* sql , ...) __attribute__((format (printf, 2, 3)));
     virtual ResultSetPtr executeQuery(char const* sql,
                                     ...)__attribute__((format (printf, 2, 3)));
-    virtual PreparedStatementPtr getPrepareStatement(char const* sql,
+    virtual PreparedStatementPtr getPreparedStatement(char const* sql,
                                     ...)__attribute__((format (printf, 2, 3)));
     virtual CONST_STDSTR getLastError();
     virtual void close();//non-beautiful

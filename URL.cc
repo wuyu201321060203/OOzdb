@@ -71,7 +71,8 @@ URL::URL(char const* url)
         if(!parseURL())
             clear();
     }
-    THROW(SQLException , "URL create fail");//TODO
+    else
+        THROW(SQLException , "URL create fail");//TODO
 }
 
 void URL::URLCreate(char const* url , ...)
@@ -87,7 +88,8 @@ void URL::URLCreate(char const* url , ...)
         if(!parseURL())
             clear();
     }
-    THROW(SQLException , "URL create fail");//TODO
+    else
+        THROW(SQLException , "URL create fail");//TODO
 }
 
 URL::~URL()

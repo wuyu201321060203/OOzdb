@@ -18,6 +18,7 @@ ConnectionPool::ConnectionPool(char const* url):
     _maxConnections(SQL_DEFAULT_MAX_CONNECTIONS),
     _initialConnections(SQL_DEFAULT_INIT_CONNECTIONS),
     _connectionTimeout(SQL_DEFAULT_CONNECTION_TIMEOUT),
+    _doSweep(false),
     _alarm(_mutex),
     _reaper( new Thread( boost::bind(&ConnectionPool::doSweep , this) ) )
 {

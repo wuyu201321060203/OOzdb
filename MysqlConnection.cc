@@ -74,7 +74,10 @@ void MysqlConnection::execute(char const* sql , ...)
     assert(sql);
     va_list ap;
     va_start(ap , sql);
-    _resultSet->clear();
+    if(_resultSet)
+    {
+        _resultSet->clear();
+    }
     _sb.vset(sql, ap);
     _lastError = mysql_real_query(_db , _sb.toString(),
                                   _sb.getLength());
@@ -85,9 +88,11 @@ void MysqlConnection::execute(char const* sql , ...)
 
 ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
 {
-    ResultSetPtr ret;
     assert(sql);
-    _resultSet->clear();
+    if(_resultSet)
+    {
+        _resultSet->clear();
+    }
     va_list ap;
     va_start(ap , sql);
     MYSQL_STMT* stmt = NULL;
@@ -106,16 +111,16 @@ ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
         else
         {
             ResultSetPtr temp(new MysqlResultSet("MysqlResultSet" , stmt , _maxRows , false));
-            ret.swap(temp);
+            _resultSet.swap(temp);
         }
     }
     va_end(ap);
-    if(!ret)
+    if(!_resultSet)
         THROW(SQLException , "Mysql executeQuery failed");
-    return ret;
+    return _resultSet;
 }
 
-PreparedStatementPtr MysqlConnection::getPrepareStatement(char const* sql , ...)
+PreparedStatementPtr MysqlConnection::getPreparedStatement(char const* sql , ...)
 {
     PreparedStatementPtr ret;
     assert(sql);

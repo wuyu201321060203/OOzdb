@@ -28,7 +28,7 @@ void MysqlPreparedStatement::setString(int parameterIndex , CONST_STDSTR str)
     int i = checkAndSetParameterIndex(parameterIndex);
     _bind[i].buffer_type = MYSQL_TYPE_STRING;
     _bind[i].buffer = const_cast<char*>( str.c_str() );
-    if(!str.empty())
+    if(str.empty())
     {
         _params[i].length = 0;
         _bind[i].is_null = &yes;
@@ -104,7 +104,8 @@ void MysqlPreparedStatement::setTimestamp(int parameterIndex, time_t x)
 
 void MysqlPreparedStatement::execute()
 {
-    _resultSet->clear();
+    if(_resultSet)
+        _resultSet->clear();
     if(_parameterCount > 0)
         if( ( _lastError = mysql_stmt_bind_param(_stmt , _bind) ) )
             THROW(SQLException , "%s", mysql_stmt_error(_stmt));
@@ -123,7 +124,8 @@ void MysqlPreparedStatement::execute()
 ResultSetPtr MysqlPreparedStatement::executeQuery()
 {
     ResultSetPtr ret;
-    _resultSet->clear();
+    if(_resultSet)
+        _resultSet->clear();
     if(_parameterCount > 0)
         if((_lastError = mysql_stmt_bind_param(_stmt , _bind)))
             THROW(SQLException , "%s", mysql_stmt_error(_stmt));

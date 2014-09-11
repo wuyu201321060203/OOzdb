@@ -98,6 +98,22 @@ struct tm ResultSet::getDateTimeByName(CONST_STDSTR name)
 
 void ResultSet::clear()
 {
+    _isCleared = true;
+}
+
+void ResultSet::setClearFlag()
+{
+    _isCleared = true;
+}
+
+void ResultSet::unsetClearFlag()
+{
+    _isCleared = false;
+}
+
+bool ResultSet::isCleared()
+{
+    return _isCleared;
 }
 
 int ResultSet::getColumnCount()
