@@ -7,6 +7,8 @@
 #include "Config.h"
 #include "StringBuffer.h"
 #include "SQLException.h"
+#include "MemoryOperation.h"
+#include "StrOperation.h"
 
 StringBuffer::StringBuffer(char const* s):_used(0),
     _length(STRLEN)

@@ -1,13 +1,14 @@
 #include <cstdarg>
 #include <cassert>
 
-#include <boost/enable_shared_from_this.hpp>
+#include <mysql/errmsg.h>
 
-#include "ConnectionPool.h"
 #include "MysqlConnection.h"
 #include "MysqlPreparedStatement.h"
 #include "MysqlResultSet.h"
 #include "SQLException.h"
+#include "ConnectionPool.h"
+#include "StrOperation.h"
 
 MysqlConnection::MysqlConnection(ConnectionPool* pool , char** error):
     Connection(pool),

@@ -1,5 +1,6 @@
 #include "MysqlPreparedStatement.h"
 #include "SQLException.h"
+#include "MemoryOperation.h"
 
 static my_bool yes = true;
 

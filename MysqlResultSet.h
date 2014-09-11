@@ -2,7 +2,6 @@
 #define MYSQLRESULTSET_INCLUDED
 
 #include <mysql/mysql.h>
-#include <mysql/errmsg.h>
 #include <vector>
 
 #include "ResultSet.h"

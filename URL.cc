@@ -8,6 +8,7 @@
 #include "URL.h"
 #include "SQLException.h"
 #include "MemoryOperation.h"
+#include "StrOperation.h"
 
 #define UNKNOWN_PORT -1
 #define YYCTYPE       uchar_t

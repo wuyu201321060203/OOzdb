@@ -7,6 +7,8 @@
 
 #include "Config.h"
 #include "SQLException.h"
+#include "MemoryOperation.h"
+#include "StrOperation.h"
 
 #ifdef PACKAGE_PROTECTED
 #pragma GCC visibility push(hidden)

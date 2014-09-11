@@ -1,11 +1,10 @@
 #include <cassert>
 #include <stdlib.h>
-#include <stdio.h>
 #include <stdarg.h>
-#include <string>
+
+#include <mysql/errmsg.h>
 
 #include "Config.h"
-
 #include "MysqlResultSet.h"
 #include "StrOperation.h"
 #include "MemoryOperation.h"

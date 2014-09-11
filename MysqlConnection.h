@@ -2,7 +2,6 @@
 #define MYSQLCONNECTION_H
 
 #include <mysql/mysql.h>
-#include <mysql/errmsg.h>
 
 #include <boost/enable_shared_from_this.hpp>
 

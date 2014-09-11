@@ -1,3 +1,4 @@
+#include "Config.h"
 #include "Connection.h"
 #include "ConnectionPool.h"
 

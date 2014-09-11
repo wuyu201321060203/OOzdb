@@ -1,5 +1,3 @@
-#include "Config.h"
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -8,11 +6,11 @@
 #include <sys/types.h>
 #include <sys/select.h>
 
+#include "Config.h"
 #include "StrOperation.h"
 #include "TimeOperation.h"
 #include "SQLException.h"
 #include "AssertException.h"
-
 
 /**
  * Implementation of the Time interface

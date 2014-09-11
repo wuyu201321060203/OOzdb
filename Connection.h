@@ -5,7 +5,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "Config.h"
 #include "TimeOperation.h"
 #include "ResultSet.h"
 #include "PreparedStatement.h"

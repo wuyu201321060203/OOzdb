@@ -1,8 +1,6 @@
 #ifndef CONNECTIONPOOL_H
 #define CONNECTIONPOOL_H
 
-#include <type_traits>
-
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
@@ -15,10 +13,8 @@
 #include <muduo/base/Condition.h>
 #include <muduo/base/Logging.h>
 
-#include "Config.h"
 #include "URL.h"
 #include "Connection.h"
-#include "SQLException.h"
 
 using muduo::Thread;
 using muduo::MutexLock;

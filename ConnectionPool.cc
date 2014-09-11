@@ -2,10 +2,7 @@
 #include <error.h>
 #include <errno.h>
 
-#include <boost/bind.hpp>
-
-#include <muduo/base/Logging.h>
-
+#include "Config.h"
 #include "ConnectionPool.h"
 #include "TimeOperation.h"
 #include "ResultSet.h"

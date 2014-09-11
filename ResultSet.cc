@@ -1,6 +1,5 @@
-#include "Config.h"
-#include "ResultSet.h"
 #include "SQLException.h"
+#include "ResultSet.h"
 
 ResultSet::ResultSet(CONST_STDSTR name):
     _resultSetName(name),

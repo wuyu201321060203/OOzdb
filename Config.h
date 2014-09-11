@@ -9,13 +9,8 @@
  */
 
 
-#include <assert.h>
 #include <errno.h>
-
-#include "MemoryOperation.h"
-#include "StrOperation.h"
 #include <string>
-#include <cstring>
 
 
 /* --------------------------------------------- SQL standard value macros */

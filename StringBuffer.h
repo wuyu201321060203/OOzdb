@@ -2,7 +2,6 @@
 #define STRINGBUFFER_INCLUDED
 
 #include <boost/noncopyable.hpp>
-#include <cassert>
 
 typedef unsigned char uchar_t;
 
