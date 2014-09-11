@@ -88,7 +88,7 @@ private:
 };
 
 template<typename ConcreteConnection>
-void ConnectionPool::start()
+void ConnectionPool::start()//Best Practice:each ConnectionPool only start once
 {
     BOOST_STATIC_ASSERT(boost::is_base_of<Connection , ConcreteConnection>::value);
     {
@@ -98,7 +98,7 @@ void ConnectionPool::start()
         if(_filled && _doSweep)
         {
             LOG_DEBUG << "Starting Database reaper thread\n";
-            _reaper->start();//Any question?
+            _reaper->start();
         }
     }
     if(LIKELY(_filled))
