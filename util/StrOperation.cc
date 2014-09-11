@@ -68,7 +68,7 @@ char* strDup(char const* s)
     if(s)
     {
         size_t n = strlen(s) + 1;
-        t = static_cast<char*>(ALLOC(n));
+        t = SC<char*>(ALLOC(n));
         memcpy(t, s, n);
     }
     return t;
@@ -82,7 +82,7 @@ char* strNDup(char const* s , int n)
     {
         int l = strlen(s);
         n = l < n ? l : n; // Use the actual length of s if shorter than n
-        t = static_cast<char*>(ALLOC(n + 1));
+        t = SC<char*>(ALLOC(n + 1));
         memcpy(t, s, n);
         t[n] = 0;
     }
@@ -110,7 +110,7 @@ char* strVcat(char const* s , va_list ap)
         int n = 0;
         va_list ap_copy;
         int size = 88;
-        buf = static_cast<char*>(ALLOC(size));
+        buf = SC<char*>(ALLOC(size));
         while(true)
         {
             va_copy(ap_copy, ap);
@@ -119,7 +119,7 @@ char* strVcat(char const* s , va_list ap)
             if (n < size)
                 break;
             size = n + 1;
-            buf = static_cast<char*>(RESIZE(buf, size));
+            buf = SC<char*>(RESIZE(buf, size));
         }
     }
     return buf;

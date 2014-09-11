@@ -63,12 +63,12 @@ void MysqlConnection::rollback()
 
 long long MysqlConnection::getLastRowId()
 {
-    return static_cast<long long>(mysql_insert_id(_db));
+    return SC<long long>(mysql_insert_id(_db));
 }
 
 long long MysqlConnection::rowsChanged()
 {
-    return static_cast<long long>(mysql_affected_rows(_db));
+    return SC<long long>(mysql_affected_rows(_db));
 }
 
 void MysqlConnection::execute(char const* sql , ...)
@@ -102,10 +102,10 @@ ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
     if(prepare(_sb.toString() , _sb.getLength() , &stmt))
     {
 #if MYSQL_VERSION_ID >= 50002
-        unsigned long cursor = CURSOR_TYPE_READ_ONLY;
+        ULONG cursor = CURSOR_TYPE_READ_ONLY;
         mysql_stmt_attr_set(stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
-        if ((_lastError = mysql_stmt_execute(stmt)))
+        if((_lastError = mysql_stmt_execute(stmt)))
         {
             _sb.set("%s", mysql_stmt_error(stmt));
             mysql_stmt_close(stmt);
@@ -132,7 +132,7 @@ PreparedStatementPtr MysqlConnection::getPreparedStatement(char const* sql , ...
     _sb.vset(sql , ap);
     if(prepare(_sb.toString() , _sb.getLength() , &stmt))
     {
-        int parameterCount = static_cast<int>(mysql_stmt_param_count(stmt));
+        int parameterCount = SC<int>(mysql_stmt_param_count(stmt));
         PreparedStatementPtr item(new MysqlPreparedStatement(stmt , _maxRows,
                                                                parameterCount) );
         _prepared.push_back(item);
@@ -145,8 +145,8 @@ PreparedStatementPtr MysqlConnection::getPreparedStatement(char const* sql , ...
 CONST_STDSTR MysqlConnection::getLastError()
 {
     if( UNLIKELY( mysql_errno(_db) ) )
-        return static_cast<CONST_STDSTR>(mysql_error(_db));
-    return static_cast<CONST_STDSTR>( _sb.toString() ); // Either the statement itself or a statement error
+        return SC<CONST_STDSTR>(mysql_error(_db));
+    return SC<CONST_STDSTR>( _sb.toString() ); // Either the statement itself or a statement error
 }
 
 void MysqlConnection::close()
@@ -170,7 +170,7 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
     my_bool yes = 1;
     my_bool no = 0;
     int connectTimeout = SQL_DEFAULT_TCP_TIMEOUT;
-    unsigned long clientFlags = CLIENT_MULTI_STATEMENTS;
+    ULONG clientFlags = CLIENT_MULTI_STATEMENTS;
     char const *user , *password , *host , *database , *charset , *timeout;
     char const* unix_socket = url->getParameter("unix-socket");
     MYSQL* db = mysql_init(NULL);
@@ -203,9 +203,9 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
     if(IS(url->getParameter("use-ssl"), "true"))
         mysql_ssl_set(db, 0,0,0,0,0);
     if(IS(url->getParameter("secure-auth"), "true"))
-        mysql_options(db, MYSQL_SECURE_AUTH, static_cast<char const* >(&yes));
+        mysql_options(db, MYSQL_SECURE_AUTH, SC<char const* >(&yes));
     else
-        mysql_options(db, MYSQL_SECURE_AUTH, static_cast<char const*>(&no));
+        mysql_options(db, MYSQL_SECURE_AUTH, SC<char const*>(&no));
     if((timeout = url->getParameter("connect-timeout")))
     {
         try
@@ -217,11 +217,11 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
             ERROR("invalid connect timeout value");
         }
     }
-    mysql_options(db, MYSQL_OPT_CONNECT_TIMEOUT, reinterpret_cast<char const*>(&connectTimeout));
+    mysql_options(db, MYSQL_OPT_CONNECT_TIMEOUT, RC<char const*>(&connectTimeout));
     if((charset = url->getParameter("charset")))
         mysql_options(db, MYSQL_SET_CHARSET_NAME, charset);
 #if MYSQL_VERSION_ID >= 50013
-    mysql_options(db, MYSQL_OPT_RECONNECT, static_cast<char const*>(&yes));
+    mysql_options(db, MYSQL_OPT_RECONNECT, SC<char const*>(&yes));
 #endif
     /* Connect */
     if(mysql_real_connect(db, host, user, password, database, port, unix_socket,
@@ -235,13 +235,13 @@ error:
 
 int MysqlConnection::prepare(char const* sql , int len , MYSQL_STMT** stmt)
 {
-    if(!(*stmt = mysql_stmt_init(_db)))
+    if( UNLIKELY( !( *stmt = mysql_stmt_init(_db) ) ) )
     {
         LOG_DEBUG << "mysql_stmt_init -- Out of memory\n";
         _lastError = CR_OUT_OF_MEMORY;
         return false;
     }
-    if(UNLIKELY(_lastError = mysql_stmt_prepare(*stmt, sql, len)))
+    if( UNLIKELY( _lastError = mysql_stmt_prepare(*stmt, sql, len) ) )
     {
         _sb.set("%s", mysql_stmt_error(*stmt));
         mysql_stmt_close(*stmt);

@@ -3,7 +3,6 @@
 #include <stdarg.h>
 #include <mysql/errmsg.h>
 
-#include <Config.h>
 #include <util/StrOperation.h>
 #include <util/MemoryOperation.h>
 #include <Exception/SQLException.h>
@@ -15,23 +14,24 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
     ResultSet(name)
 {
     assert(stmt);
-    _stmt = static_cast<MYSQL_STMT*>(stmt);
+    _stmt = SC<MYSQL_STMT*>(stmt);
     _keep = keep;
     _maxRows = maxRows;
     _columnCount = mysql_stmt_field_count(_stmt);
-    if( UNLIKELY((_columnCount <= 0) || !(_meta = mysql_stmt_result_metadata(_stmt)) ))
+    if( UNLIKELY((_columnCount <= 0) ||
+        !(_meta = mysql_stmt_result_metadata(_stmt)) ))
     {
         LOG_DEBUG << "Warning: column error - " << (mysql_stmt_error(_stmt));
         _stop = true;
     }
     else
     {
-        _bind = static_cast<MYSQL_BIND*>( CALLOC(_columnCount , sizeof(MYSQL_BIND)) );
+        _bind = SC<MYSQL_BIND*>( CALLOC(_columnCount , sizeof(MYSQL_BIND)) );
         ColumnVec temp(_columnCount);
-        _columns.swap(temp);//C++11
+        _columns.swap(temp);
         for(int i = 0; i < _columnCount; i++)
         {
-            _columns[i].buffer = static_cast<char*>(ALLOC(STRLEN + 1));
+            _columns[i].buffer = SC<char*>(ALLOC(STRLEN + 1));
             _bind[i].buffer_type = MYSQL_TYPE_STRING;
             _bind[i].buffer = _columns[i].buffer;
             _bind[i].buffer_length = STRLEN;
@@ -122,7 +122,7 @@ void const* MysqlResultSet::getBlob(int columnIndex, int* size)
         return NULL;
     }
     ensureCapacity(i);
-    *size = static_cast<int>(_columns[i].real_length);
+    *size = SC<int>(_columns[i].real_length);
     return _columns[i].buffer;
 }
 
@@ -183,7 +183,7 @@ void MysqlResultSet::ensureCapacity(int i)
         temp = CALLOC(1 , _columns[i].real_length + 1);
         memcpy(temp , _columns[i].buffer , _bind[i].buffer_length);
         free(_columns[i].buffer);
-        _columns[i].buffer = static_cast<char*>(temp);
+        _columns[i].buffer = SC<char*>(temp);
         //TODO
         _bind[i].buffer = _columns[i].buffer;
         _bind[i].buffer_length = _columns[i].real_length;

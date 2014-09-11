@@ -21,8 +21,6 @@
 #define YYTOKEN       _token
 #define SET_PROTOCOL(PORT) *(YYCURSOR-3)=0; _protocol=_token; _port=PORT; goto authority
 
-typedef unsigned char uchar_t;
-
 static const uchar_t urlunsafe[256] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -65,11 +63,11 @@ URL::URL(char const* url)
     if(STR_DEF(url))
     {
         size_t len = strlen(url) + 1;
-        _data = static_cast<char*>(ALLOC(len));
+        _data = SC<char*>(ALLOC(len));
         memcpy(_data , url , len);
         YYCURSOR = _data;
         _port = UNKNOWN_PORT;
-        YYLIMIT = _data + strlen(reinterpret_cast<char const*>(_data));
+        YYLIMIT = _data + strlen(RC<char const*>(_data));
         if(!parseURL())
             clear();
     }
@@ -86,7 +84,7 @@ void URL::URLCreate(char const* url , ...)
         _data = strVcat(url , ap);
         YYCURSOR = _data;
         _port = UNKNOWN_PORT;
-        YYLIMIT = _data + strlen(reinterpret_cast<char const*>(_data));
+        YYLIMIT = _data + strlen(RC<char const*>(_data));
         if(!parseURL())
             clear();
     }
@@ -151,7 +149,7 @@ char** URL::getParameterNames()
         param_t* p;
         int i = 0 , len = 0;
         for(p = _params ; p ; p = p->_next) len++;
-        _paramNames = static_cast<char**>(ALLOC((len + 1) * sizeof *(_paramNames)));
+        _paramNames = SC<char**>(ALLOC((len + 1) * sizeof *(_paramNames)));
         for(p = _params ; p ; p = p->_next)
             _paramNames[i++] = p->_name;
         _paramNames[i] = NULL;
@@ -176,7 +174,7 @@ char const* URL::toString()
     {
         uchar_t port[11] = {0};
         if(_port >= 0)
-            snprintf(reinterpret_cast<char*>(port), 10, ":%d", _port);
+            snprintf(RC<char*>(port), 10, ":%d", _port);
         _toString = strCat("%s://%s%s%s%s%s%s%s%s%s",
             _protocol,
             _user ? _user : "",
@@ -205,7 +203,7 @@ char* URL::unescape(char* url)
             {
                 if (! (url[x + 1] && url[x + 2]))
                     break;
-                url[x] = x2b(reinterpret_cast<uchar_t*>(url + y + 1));
+                url[x] = x2b(RC<uchar_t*>(url + y + 1));
                 y += 2;
             }
         }
@@ -222,13 +220,13 @@ char* URL::escape(char const* url)
         char* p;
         int i, n;
         for(n = i = 0 ; url[i] ; i++)
-            if(urlunsafe[(url[i])])
+            if( urlunsafe[SC<int>( SC<uchar_t>(url[i]) )] )
                 n += 2;
-        p = escaped = static_cast<char*>(ALLOC(i + n + 1));
+        p = escaped = SC<char*>(ALLOC(i + n + 1));
         for( ; *url ; url++ , p++)
         {
-            if (urlunsafe[(*p = *url)])
-                p = reinterpret_cast<char*>(b2x(*url, reinterpret_cast<uchar_t*>(p)));
+            if( urlunsafe[ SC<int>( SC<uchar_t>(*p = *url) )] )
+                p = RC<char*>(b2x(*url, RC<uchar_t*>(p)));
         }
         *p = 0;
     }
@@ -293,7 +291,7 @@ proto:
 
     {
         YYCTYPE yych;
-        static const unsigned char yybm[] = {
+        static const uchar_t yybm[] = {
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
@@ -528,8 +526,8 @@ authority:
 
     {
         YYCTYPE yych;
-        unsigned int yyaccept = 0;
-        static const unsigned char yybm[] = {
+        UINT yyaccept = 0;
+        static const uchar_t yybm[] = {
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
@@ -626,7 +624,7 @@ yy54:
         goto yy66;
 yy55:
         {
-            _host = strNDup(YYTOKEN, (int)(YYCURSOR - YYTOKEN));
+            _host = strNDup(YYTOKEN, SC<int>(YYCURSOR - YYTOKEN));
             goto authority;
         }
 yy56:
@@ -835,7 +833,7 @@ query:
 
     {
         YYCTYPE yych;
-        static const unsigned char yybm[] = {
+        static const uchar_t yybm[] = {
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
@@ -877,7 +875,7 @@ query:
 yy83:
         {
             *YYCURSOR = 0;
-            _query = strNDup(YYTOKEN, static_cast<int>(YYCURSOR - YYTOKEN));
+            _query = strNDup(YYTOKEN, SC<int>(YYCURSOR - YYTOKEN));
             YYCURSOR = YYTOKEN; // backtrack to start of query string after terminating it and
             goto params;
         }
@@ -907,7 +905,7 @@ params:
 
     {
         YYCTYPE yych;
-        static const unsigned char yybm[] = {
+        static const uchar_t yybm[] = {
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
@@ -988,7 +986,7 @@ yy100:
         ++YYCURSOR;
         YYCURSOR = YYCTXMARKER;
         {
-            param = static_cast<param_t*>(NEW(param));
+            param = SC<param_t*>(NEW(param));//hi
             param->_name = YYTOKEN;
             param->_next = _params;
             _params = param;

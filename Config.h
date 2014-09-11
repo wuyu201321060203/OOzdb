@@ -149,11 +149,13 @@ typedef  unsigned int uint32_t;
 typedef std::string STDSTR;
 #define CONST_STDSTR STDSTR const
 
-#define SCAST(type , p) (static_cast<type>(p))
+#define SC static_cast
+#define RC reinterpret_cast
 
 #define System_getLastError (strerror(errno))
 
 #define UINT unsigned int
+#define ULONG unsigned long
 
 #define DEFAULT_SWEEP_INTERVAL 60
 

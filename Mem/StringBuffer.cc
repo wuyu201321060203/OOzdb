@@ -4,7 +4,6 @@
 #include <stdarg.h>
 #include <cassert>
 
-#include <Config.h>
 #include <Exception/SQLException.h>
 #include <util/MemoryOperation.h>
 #include <util/StrOperation.h>
@@ -14,7 +13,7 @@
 StringBuffer::StringBuffer(char const* s):_used(0),
     _length(STRLEN)
 {
-    _buffer = static_cast<uchar_t*>(ALLOC(_length));
+    _buffer = SC<uchar_t*>(ALLOC(_length));
     append("%s" , s);
 }
 
@@ -23,7 +22,7 @@ StringBuffer::StringBuffer(int length , char const* s)
     assert(length > 0);
     _used = 0;
     _length = length;
-    _buffer = static_cast<uchar_t*>(ALLOC(_length));
+    _buffer = SC<uchar_t*>(ALLOC(_length));
     append("%s" , s);
 }
 
@@ -32,7 +31,7 @@ StringBuffer::StringBuffer(int length)
     assert(length > 0);
     _used = 0;
     _length = length;
-    _buffer = static_cast<uchar_t*>(ALLOC(_length));
+    _buffer = SC<uchar_t*>(ALLOC(_length));
 }
 
 StringBuffer::~StringBuffer()
@@ -99,7 +98,7 @@ void StringBuffer::clear()
 
 char const* StringBuffer::toString()
 {
-    return reinterpret_cast<char const*>(_buffer);//may be it's a problem
+    return RC<char const*>(_buffer);//may be it's a problem
 }
 
 int StringBuffer::prepare4postgres()
@@ -132,7 +131,7 @@ void StringBuffer::doAppend(char const* s , va_list ap)
     while (true)
     {
         va_copy(ap_copy, ap);
-        int n = vsnprintf(reinterpret_cast<char*>(_buffer + _used),//ugly
+        int n = vsnprintf(RC<char*>(_buffer + _used),//ugly
             _length - _used, s, ap_copy);
         va_end(ap_copy);
         if ((_used + n) < _length) {
@@ -140,11 +139,9 @@ void StringBuffer::doAppend(char const* s , va_list ap)
             break;
         }
         _length += STRLEN + n;
-        _buffer = SCAST(uchar_t* , (RESIZE(_buffer, _length)));//TODO
+        _buffer = SC<uchar_t*>( RESIZE(_buffer, _length) );
     }
 }
-
-#define CH_TO_INT(p) (static_cast<int>(p))
 
 int StringBuffer::prepare(char prefix)
 {
@@ -160,12 +157,12 @@ int StringBuffer::prepare(char prefix)
         int required = (n * 2) + _used;
         if (required >= _length) {
             _length = required;
-            _buffer = static_cast<uchar_t*>(RESIZE(_buffer , _length));//TODO
+            _buffer = SC<uchar_t*>(RESIZE(_buffer , _length));
         }
         for (i = 0, j = 1; (j <= n); i++) {
             if (_buffer[i] == '?') {
-                if(j<10){xl=2;x[1]=static_cast<char>(j + '0');}
-                else{xl=3;x[1]=static_cast<char>((j/10) + 48);x[2]=static_cast<char>((j%10)+48);}//TODO
+                if(j<10){xl=2;x[1]=SC<char>(j + '0');}
+                else{xl=3;x[1]=SC<char>((j/10) + 48);x[2]=SC<char>((j%10)+48);}
                 memmove(_buffer + i + xl , _buffer + i + 1 , (_used - (i + 1)));
                 memmove(_buffer + i, x, xl);
                 _used += xl - 1;

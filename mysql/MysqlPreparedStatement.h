@@ -3,6 +3,7 @@
 
 #include <mysql/mysql.h>
 #include <Db/PreparedStatement.h>
+#include <Config.h>
 
 #include "MysqlResultSet.h"
 
@@ -19,7 +20,7 @@ public:
             double real;
             MYSQL_TIME timestamp;
         } type;
-        unsigned long length;
+        ULONG length;
     }param_t;
 
     MysqlPreparedStatement(void* stmt , int maxRows , int parameterCount);

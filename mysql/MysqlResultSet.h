@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <Db/ResultSet.h>
+#include <Config.h>
 
 class MysqlResultSet : public ResultSet
 {
@@ -14,7 +15,7 @@ public:
     {
         my_bool is_null;
         MYSQL_FIELD *field;
-        unsigned long real_length;
+        ULONG real_length;
         char* buffer;
     };
 

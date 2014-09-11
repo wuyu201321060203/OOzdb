@@ -33,7 +33,7 @@
  * @exception MemoryException if allocation failed
  * @hideinitializer
  */
-#define NEW(p) (CALLOC(1, (long)sizeof *(p)))
+#define NEW(p) ( CALLOC(1, static_cast<long>(sizeof *(p)) ) )
 
 
 /**

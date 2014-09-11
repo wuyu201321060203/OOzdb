@@ -1,6 +1,5 @@
 #include <Exception/SQLException.h>
 #include <util/MemoryOperation.h>
-#include <Config.h>
 
 #include "MysqlPreparedStatement.h"
 
@@ -11,12 +10,12 @@ MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
     PreparedStatement(parameterCount)
 {
     assert(stmt);
-    _stmt = static_cast<MYSQL_STMT*>(stmt);
+    _stmt = SC<MYSQL_STMT*>(stmt);
     _maxRows = maxRows;
     if(LIKELY(_parameterCount > 0))
     {
-        _params = static_cast<param_t*>(CALLOC(_parameterCount, sizeof(param_t)));
-        _bind = static_cast<MYSQL_BIND*>(CALLOC(_parameterCount, sizeof(MYSQL_BIND)));
+        _params = SC<param_t*>(CALLOC(_parameterCount, sizeof(param_t)));
+        _bind = SC<MYSQL_BIND*>(CALLOC(_parameterCount, sizeof(MYSQL_BIND)));
     }
     _lastError = MYSQL_OK;
 }
@@ -113,7 +112,7 @@ void MysqlPreparedStatement::execute()
         if( ( _lastError = mysql_stmt_bind_param(_stmt , _bind) ) )
             THROW(SQLException , "%s", mysql_stmt_error(_stmt));
 #if MYSQL_VERSION_ID >= 50002
-    unsigned long cursor = CURSOR_TYPE_NO_CURSOR;
+    ULONG cursor = CURSOR_TYPE_NO_CURSOR;
     mysql_stmt_attr_set(_stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
     if( UNLIKELY(_lastError = mysql_stmt_execute(_stmt) ) )
@@ -133,7 +132,7 @@ ResultSetPtr MysqlPreparedStatement::executeQuery()
         if((_lastError = mysql_stmt_bind_param(_stmt , _bind)))
             THROW(SQLException , "%s", mysql_stmt_error(_stmt));
 #if MYSQL_VERSION_ID >= 50002
-    unsigned long cursor = CURSOR_TYPE_READ_ONLY;
+    ULONG cursor = CURSOR_TYPE_READ_ONLY;
     mysql_stmt_attr_set(_stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
     if( UNLIKELY(_lastError = mysql_stmt_execute(_stmt)) )
@@ -149,7 +148,7 @@ ResultSetPtr MysqlPreparedStatement::executeQuery()
 
 long long MysqlPreparedStatement::rowsChanged()
 {
-    return static_cast<long long>(mysql_stmt_affected_rows(_stmt));
+    return SC<long long>(mysql_stmt_affected_rows(_stmt));
 }
 
 void MysqlPreparedStatement::clear()
@@ -157,7 +156,7 @@ void MysqlPreparedStatement::clear()
     FREE(_bind);
     mysql_stmt_free_result(_stmt);
 #if MYSQL_VERSION_ID >= 50503
-    while (mysql_stmt_next_result(_stmt) == 0);
+    while(mysql_stmt_next_result(_stmt) == 0);
 #endif
     mysql_stmt_close(_stmt);
     FREE(_params);

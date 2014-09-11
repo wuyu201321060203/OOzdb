@@ -62,13 +62,13 @@ time_t timegm(struct tm *tm)
         if(tm->tm_mon >= 2 && is_leap_year(tm->tm_year + 1900)) {
                 ++days;
         }
-        t = (static_cast<int64_t>(days) * 24 + tm->tm_hour) * 3600 + tm->tm_min * 60 + tm->tm_sec;
+        t = (SC<int64_t>(days) * 24 + tm->tm_hour) * 3600 + tm->tm_min * 60 + tm->tm_sec;
         if(sizeof(time_t) == 4) {
                 if(t < INT32_MIN || t > INT32_MAX) {
                         return -1;
                 }
         }
-        return static_cast<time_t>(t);
+        return SC<time_t>(t);
 }
 #endif /* !HAVE_TIMEGM */
 
@@ -121,7 +121,7 @@ struct tm *Time_toDateTime(const char *s, struct tm *t) {
 	while (true) {
 		if (cursor >= limit) {
                         if (has_date || has_time) {
-                                *(static_cast<struct tm*>(t)) = tm;
+                                *(SC<struct tm*>(t)) = tm;
                                 return t;
                         }
                         THROW(SQLException, "Invalid date or time");
@@ -129,9 +129,9 @@ struct tm *Time_toDateTime(const char *s, struct tm *t) {
                 token = cursor;
 
 {
-	unsigned char yych;
-	unsigned int yyaccept = 0;
-	static const unsigned char yybm[] = {
+	uchar_t yych;
+	UINT yyaccept = 0;
+	static const uchar_t yybm[] = {
 		  0,   0,   0,   0,   0,   0,   0,   0,
 		  0,   0,   0,   0,   0,   0,   0,   0,
 		  0,   0,   0,   0,   0,   0,   0,   0,
@@ -423,14 +423,14 @@ long long Time_milli(void) {
 	struct timeval t;
 	if (gettimeofday(&t, NULL) != 0)
                 THROW(AssertException, "%s", System_getLastError);
-	return static_cast<long long>(t.tv_sec) * 1000  +  static_cast<long long>(t.tv_usec) / 1000;
+	return SC<long long>(t.tv_sec) * 1000  +  SC<long long>(t.tv_usec) / 1000;
 }
 
 
 int Time_usleep(long u) {
         struct timeval t;
         t.tv_sec = u / USEC_PER_SEC;
-        t.tv_usec = static_cast<suseconds_t>(u % USEC_PER_SEC);
+        t.tv_usec = SC<suseconds_t>(u % USEC_PER_SEC);
         select(0, 0, 0, 0, &t);
         return true;
 }

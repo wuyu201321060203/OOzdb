@@ -2,8 +2,7 @@
 #define STRINGBUFFER_INCLUDED
 
 #include <boost/noncopyable.hpp>
-
-typedef unsigned char uchar_t;
+#include <Config.h>
 
 class StringBuffer : boost::noncopyable
 {
