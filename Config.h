@@ -153,4 +153,8 @@ typedef std::string STDSTR;
 
 #define System_getLastError (strerror(errno))
 
+#define UINT unsigned int
+
+#define DEFAULT_SWEEP_INTERVAL 60
+
 #endif

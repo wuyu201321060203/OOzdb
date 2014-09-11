@@ -4,7 +4,8 @@
 ResultSet::ResultSet(CONST_STDSTR name):
     _resultSetName(name),
     _maxRows(0),
-    _columnCount(0)
+    _columnCount(0),
+    _isCleared(false)
 {
     assert(!_resultSetName.empty());
 }

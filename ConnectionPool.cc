@@ -8,15 +8,16 @@
 #include "ResultSet.h"
 #include "PreparedStatement.h"
 
-#define UINT unsigned int
-
 ConnectionPool::ConnectionPool(char const* url):
     _url(new URL(url)),
     _maxConnections(SQL_DEFAULT_MAX_CONNECTIONS),
     _initialConnections(SQL_DEFAULT_INIT_CONNECTIONS),
     _connectionTimeout(SQL_DEFAULT_CONNECTION_TIMEOUT),
+    _filled(false),
     _doSweep(false),
     _alarm(_mutex),
+    _sweepInterval(DEFAULT_SWEEP_INTERVAL),
+    _stopped(true),
     _reaper( new Thread( boost::bind(&ConnectionPool::doSweep , this) ) )
 {
     assert(_url);
