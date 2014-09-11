@@ -145,7 +145,7 @@ struct tm MysqlResultSet::getDateTime(int columnIndex)
 
 void MysqlResultSet::clear()
 {
-    for (int i = 0; i < _columnCount; i++)
+    for(int i = 0; i < _columnCount; i++)
         FREE(_columns[i].buffer);
     mysql_stmt_free_result(_stmt);
     if (_keep == false)

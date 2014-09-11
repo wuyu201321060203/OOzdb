@@ -154,8 +154,8 @@ typedef  unsigned int uint32_t;
 typedef std::string STDSTR;
 #define CONST_STDSTR STDSTR const
 
-const char *System_getLastError(void) {
-        return strerror(errno);
-}
+#define SCAST(type , p) (static_cast<type>(p))
+
+#define System_getLastError (strerror(errno))
 
 #endif

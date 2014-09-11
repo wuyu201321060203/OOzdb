@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "Config.h"
+#include "SQLException.h"
 
 #ifdef PACKAGE_PROTECTED
 #pragma GCC visibility push(hidden)
@@ -65,7 +66,7 @@ char* strDup(char const* s)
     if(s)
     {
         size_t n = strlen(s) + 1;
-        t = ALLOC(n);
+        t = static_cast<char*>(ALLOC(n));
         memcpy(t, s, n);
     }
     return t;
@@ -77,9 +78,9 @@ char* strNDup(char const* s , int n)
     assert(n >= 0);
     if (s)
     {
-        int l = (int)strlen(s);
+        int l = strlen(s);
         n = l < n ? l : n; // Use the actual length of s if shorter than n
-        t = ALLOC(n + 1);
+        t = static_cast<char*>(ALLOC(n + 1));
         memcpy(t, s, n);
         t[n] = 0;
     }
@@ -107,7 +108,7 @@ char* strVcat(char const* s , va_list ap)
         int n = 0;
         va_list ap_copy;
         int size = 88;
-        buf = ALLOC(size);
+        buf = static_cast<char*>(ALLOC(size));
         while(true)
         {
             va_copy(ap_copy, ap);
@@ -116,7 +117,7 @@ char* strVcat(char const* s , va_list ap)
             if (n < size)
                 break;
             size = n + 1;
-            RESIZE(buf, size);
+            buf = static_cast<char*>(RESIZE(buf, size));
         }
     }
     return buf;
@@ -129,10 +130,10 @@ int strParseInt(char const* s)
         THROW(SQLException , "NumberFormatException: For input string null");
     errno = 0;
     char* e;
-    int i = (int)strtol(s, &e, 10);
+    int i = strtol(s, &e, 10);
     if(errno || (e == s))
         THROW(SQLException , "NumberFormatException: For input string %s -- %s",
-                                s , System_getLastError());
+                                s , System_getLastError);
     return i;
 }
 
@@ -146,7 +147,7 @@ long long strParseLLong(char const* s)
     long long ll = strtoll(s, &e, 10);
     if(errno || (e == s))
         THROW(SQLException, "NumberFormatException: For input string %s -- %s",
-                                s, System_getLastError());
+                                s, System_getLastError);
     return ll;
 }
 
@@ -159,7 +160,7 @@ double strParseDouble(const char *s)
     double d = strtod(s, &e);
     if(errno || (e == s))
         THROW(SQLException, "NumberFormatException: For input string %s -- %s",
-                                s , System_getLastError());
+                                s , System_getLastError);
     return d;
 }
 

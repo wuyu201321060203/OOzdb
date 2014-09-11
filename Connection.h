@@ -38,7 +38,6 @@ public:
                                         ...)__attribute__((format (printf, 2, 3)));
 
     virtual CONST_STDSTR getLastError();
-    virtual void onStop();
     virtual void close();
 
     /*

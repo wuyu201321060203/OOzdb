@@ -79,10 +79,6 @@ CONST_STDSTR Connection::getLastError()
     return "?";
 }
 
-void onStop()
-{
-}
-
 void Connection::setAvailable(bool available)
 {
     _isAvailable = available;

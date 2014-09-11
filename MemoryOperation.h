@@ -33,7 +33,7 @@
  * @exception MemoryException if allocation failed
  * @hideinitializer
  */
-#define NEW(p) ((p) = CALLOC(1, (long)sizeof *(p)))
+#define NEW(p) (CALLOC(1, (long)sizeof *(p)))
 
 
 /**
@@ -52,7 +52,7 @@
  * @exception AssertException if <code>n <= 0</code>
  * @hideinitializer
  */
-#define RESIZE(p, n) ((p) = Mem_resize((p), (n), __func__, __FILE__, __LINE__))
+#define RESIZE(p, n) (Mem_resize((p), (n), __func__, __FILE__, __LINE__))//TODO
 
 
 /**

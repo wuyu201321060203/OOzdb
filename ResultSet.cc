@@ -96,7 +96,7 @@ struct tm ResultSet::getDateTimeByName(CONST_STDSTR name)
     return getDateTime(getIndex(name));
 }
 
-void clear()
+void ResultSet::clear()
 {
 }
 

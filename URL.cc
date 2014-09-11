@@ -63,15 +63,15 @@ URL::URL(char const* url)
     if(STR_DEF(url))
     {
         size_t len = strlen(url) + 1;
-        _data = ALLOC(len);
-        memcopy(_data , url , len);
+        _data = static_cast<char*>(ALLOC(len));
+        memcpy(_data , url , len);
         YYCURSOR = _data;
         _port = UNKNOWN_PORT;
-        YYLIMIT = _data + strlen(_data);
+        YYLIMIT = _data + strlen(reinterpret_cast<char const*>(_data));
         if(!parseURL())
             clear();
     }
-    Throw(SQLException , "URL create fail");//TODO
+    THROW(SQLException , "URL create fail");//TODO
 }
 
 void URL::URLCreate(char const* url , ...)
@@ -80,14 +80,14 @@ void URL::URLCreate(char const* url , ...)
     {
         va_list ap;
         va_start(ap , url);
-        _data = static_cast<uchar_t*>(strVcat(url , ap));
+        _data = strVcat(url , ap);
         YYCURSOR = _data;
         _port = UNKNOWN_PORT;
-        YYLIMIT = _data + strlen(_data);
+        YYLIMIT = _data + strlen(reinterpret_cast<char const*>(_data));
         if(!parseURL())
             clear();
     }
-    Throw(SQLException , "URL create fail");//TODO
+    THROW(SQLException , "URL create fail");//TODO
 }
 
 URL::~URL()
@@ -97,7 +97,7 @@ URL::~URL()
 
 void URL::clear()
 {
-    freeParams(_params);
+    freeParams();
     FREE(_paramNames);
     FREE(_toString);
 	FREE(_query);
@@ -105,63 +105,63 @@ void URL::clear()
 	FREE(_host);
 }
 
-char const* URL::getProtocol()
+char const* URL::getProtocol() const
 {
 	return _protocol;
 }
 
-char const* URL::getUser()
+char const* URL::getUser() const
 {
 	return _user;
 }
 
-char const* URL::getPassword()
+char const* URL::getPassword() const
 {
 	return _password;
 }
 
-char const* URL::getHost()
+char const* URL::getHost() const
 {
 	return _host;
 }
 
-int URL::getPort()
+int URL::getPort() const
 {
 	return _port;
 }
 
-char const* URL::getPath()
+char const* URL::getPath() const
 {
 	return _path;
 }
 
-char const* URL::getQueryString()
+char const* URL::getQueryString() const
 {
 	return _query;
 }
 
-char const** URL::getParameterNames()
+char** URL::getParameterNames()
 {
     if(_params && (_paramNames == NULL))
     {
-        param_t p;
+        param_t* p;
         int i = 0 , len = 0;
-        for(p = _params ; p ; p = p->next) len++;
-        _paramNames = ALLOC((len + 1) * sizeof *(_paramNames));
-        for(p = _params ; p ; p = p->next)
-            _paramNames[i++] = p->name;
+        for(p = _params ; p ; p = p->_next) len++;
+        _paramNames = static_cast<char**>(ALLOC((len + 1) * sizeof *(_paramNames)));
+        for(p = _params ; p ; p = p->_next)
+            _paramNames[i++] = p->_name;
         _paramNames[i] = NULL;
     }
-    return (char const**)_paramNames;
+    return _paramNames;
 }
 
 char const* URL::getParameter(char const* name)
 {
     assert(name);
-    for(param_t p = _params ; p ; p = p->next)
+    for(param_t* p = _params ; p ; p = p->_next)
     {
-        if(strIsByteEqual(p->name, name))
-            return p->value;
+        if(strIsByteEqual(p->_name, name))
+            return p->_value;
     }
     return NULL;
 }
@@ -172,8 +172,8 @@ char const* URL::toString()
     {
         uchar_t port[11] = {0};
         if(_port >= 0)
-            snprintf(port, 10, ":%d", _port);
-        _toString = Str_cat("%s://%s%s%s%s%s%s%s%s%s",
+            snprintf(reinterpret_cast<char*>(port), 10, ":%d", _port);
+        _toString = strCat("%s://%s%s%s%s%s%s%s%s%s",
             _protocol,
             _user ? _user : "",
             _password ? ":" : "",
@@ -201,7 +201,7 @@ char* URL::unescape(char* url)
             {
                 if (! (url[x + 1] && url[x + 2]))
                     break;
-                url[x] = x2b(url + y + 1);
+                url[x] = x2b(reinterpret_cast<uchar_t*>(url + y + 1));
                 y += 2;
             }
         }
@@ -218,13 +218,13 @@ char* URL::escape(char const* url)
         char* p;
         int i, n;
         for(n = i = 0 ; url[i] ; i++)
-            if(urlunsafe[(unsigned char)(url[i])])
+            if(urlunsafe[(url[i])])
                 n += 2;
-        p = escaped = ALLOC(i + n + 1);
+        p = escaped = static_cast<char*>(ALLOC(i + n + 1));
         for( ; *url ; url++ , p++)
         {
-            if (urlunsafe[(unsigned char)(*p = *url)])
-                p = b2x(*url, p);
+            if (urlunsafe[(*p = *url)])
+                p = reinterpret_cast<char*>(b2x(*url, reinterpret_cast<uchar_t*>(p)));
         }
         *p = 0;
     }
@@ -278,17 +278,15 @@ char* URL::normalize(char* path)
     return path;
 }
 
-void URL::parseURL()
+int URL::parseURL()
 {
-    param_t param = NULL;
-#line 122 "src/net/URL.re"
+    param_t* param = NULL;
 
 proto:
     if (YYCURSOR >= YYLIMIT)
         return false;
     YYTOKEN = YYCURSOR;
 
-#line 121 "<stdout>"
     {
         YYCTYPE yych;
         static const unsigned char yybm[] = {
@@ -361,11 +359,9 @@ proto:
         }
 yy2:
         ++YYCURSOR;
-#line 129 "src/net/URL.re"
         {
             goto proto;
         }
-#line 198 "<stdout>"
 yy4:
         yych = *(YYMARKER = ++YYCURSOR);
         if (yych <= 'Z') {
@@ -381,11 +377,9 @@ yy4:
             }
         }
 yy5:
-#line 149 "src/net/URL.re"
         {
             goto proto;
         }
-#line 218 "<stdout>"
 yy6:
         yych = *(YYMARKER = ++YYCURSOR);
         if (yych <= 'Z') {
@@ -455,11 +449,9 @@ yy14:
         yych = *++YYCURSOR;
         if (yych != '/') goto yy11;
         ++YYCURSOR;
-#line 145 "src/net/URL.re"
         {
             SET_PROTOCOL(UNKNOWN_PORT);
         }
-#line 292 "<stdout>"
 yy17:
         yych = *++YYCURSOR;
         if (yych != 'a') goto yy13;
@@ -476,11 +468,9 @@ yy17:
         yych = *++YYCURSOR;
         if (yych != '/') goto yy11;
         ++YYCURSOR;
-#line 141 "src/net/URL.re"
         {
             SET_PROTOCOL(ORACLE_DEFAULT_PORT);
         }
-#line 313 "<stdout>"
 yy26:
         yych = *++YYCURSOR;
         if (yych != 's') goto yy13;
@@ -505,11 +495,9 @@ yy26:
         yych = *++YYCURSOR;
         if (yych != '/') goto yy11;
         ++YYCURSOR;
-#line 137 "src/net/URL.re"
         {
             SET_PROTOCOL(POSTGRESQL_DEFAULT_PORT);
         }
-#line 342 "<stdout>"
 yy39:
         yych = *++YYCURSOR;
         if (yych != 's') goto yy13;
@@ -524,20 +512,16 @@ yy39:
         yych = *++YYCURSOR;
         if (yych != '/') goto yy11;
         ++YYCURSOR;
-#line 133 "src/net/URL.re"
         {
             SET_PROTOCOL(MYSQL_DEFAULT_PORT);
         }
-#line 361 "<stdout>"
     }
-#line 152 "src/net/URL.re"
 
 authority:
     if (YYCURSOR >= YYLIMIT)
         return true;
     YYTOKEN = YYCURSOR;
 
-#line 370 "<stdout>"
     {
         YYCTYPE yych;
         unsigned int yyaccept = 0;
@@ -611,11 +595,9 @@ authority:
 yy49:
         ++YYCURSOR;
 yy50:
-#line 159 "src/net/URL.re"
         {
             goto authority;
         }
-#line 448 "<stdout>"
 yy51:
         yyaccept = 0;
         yych = *(YYMARKER = ++YYCURSOR);
@@ -626,11 +608,9 @@ yy52:
         yych = *(YYMARKER = ++YYCURSOR);
         if (yych >= ' ') goto yy66;
 yy53:
-#line 197 "src/net/URL.re"
         {
             return true;
         }
-#line 463 "<stdout>"
 yy54:
         yyaccept = 2;
         yych = *(YYMARKER = ++YYCURSOR);
@@ -641,12 +621,10 @@ yy54:
         if (yych == '.') goto yy76;
         goto yy66;
 yy55:
-#line 175 "src/net/URL.re"
         {
-            U->host = Str_ndup(YYTOKEN, (int)(YYCURSOR - YYTOKEN));
+            _host = strNDup(YYTOKEN, (int)(YYCURSOR - YYTOKEN));
             goto authority;
         }
-#line 479 "<stdout>"
 yy56:
         yyaccept = 3;
         yych = *(YYMARKER = ++YYCURSOR);
@@ -658,13 +636,11 @@ yy56:
         if (yych <= '?') goto yy71;
         goto yy70;
 yy57:
-#line 185 "src/net/URL.re"
         {
             *YYCURSOR = 0;
-            U->path = URL_unescape(YYTOKEN);
+            _path = unescape(YYTOKEN);
             return true;
         }
-#line 497 "<stdout>"
 yy58:
         yyaccept = 1;
         yych = *(YYMARKER = ++YYCURSOR);
@@ -688,28 +664,24 @@ yy60:
         if (yych == '@') goto yy63;
         goto yy65;
 yy62:
-#line 180 "src/net/URL.re"
         {
-            U->port = Str_parseInt(YYTOKEN + 1); // read past ':'
+            _port = strParseInt(YYTOKEN + 1); // read past ':'
             goto authority;
         }
-#line 526 "<stdout>"
 yy63:
         ++YYCURSOR;
 yy64:
-#line 163 "src/net/URL.re"
         {
             *(YYCURSOR - 1) = 0;
-            U->user = YYTOKEN;
-            char *p = strchr(U->user, ':');
+            _user = YYTOKEN;
+            char *p = strchr(_user, ':');
             if (p) {
                 *(p++) = 0;
-                U->password = URL_unescape(p);
+                _password = unescape(p);
             }
-            URL_unescape(U->user);
+            unescape(_user);
             goto authority;
         }
-#line 542 "<stdout>"
 yy65:
         ++YYCURSOR;
         if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -768,13 +740,11 @@ yy71:
         yych = *(YYMARKER = ++YYCURSOR);
         if (yych >= ' ') goto yy66;
 yy72:
-#line 191 "src/net/URL.re"
         {
             *(YYCURSOR-1) = 0;
-            U->path = URL_unescape(YYTOKEN);
+            _path = unescape(YYTOKEN);
             goto query;
         }
-#line 607 "<stdout>"
 yy73:
         ++YYCURSOR;
         if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -853,14 +823,12 @@ yy79:
             }
         }
     }
-#line 201 "src/net/URL.re"
 
 query:
     if (YYCURSOR >= YYLIMIT)
         return true;
     YYTOKEN =  YYCURSOR;
 
-#line 693 "<stdout>"
     {
         YYCTYPE yych;
         static const unsigned char yybm[] = {
@@ -903,24 +871,20 @@ query:
         if (yych == '#') goto yy85;
         goto yy84;
 yy83:
-#line 208 "src/net/URL.re"
         {
             *YYCURSOR = 0;
-            U->query = Str_ndup(YYTOKEN, (int)(YYCURSOR - YYTOKEN));
+            _query = strNDup(YYTOKEN, static_cast<int>(YYCURSOR - YYTOKEN));
             YYCURSOR = YYTOKEN; // backtrack to start of query string after terminating it and
             goto params;
         }
-#line 743 "<stdout>"
 yy84:
         yych = *++YYCURSOR;
         goto yy88;
 yy85:
         ++YYCURSOR;
-#line 215 "src/net/URL.re"
         {
             return true;
         }
-#line 753 "<stdout>"
 yy87:
         ++YYCURSOR;
         if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -931,14 +895,12 @@ yy88:
         }
         goto yy83;
     }
-#line 219 "src/net/URL.re"
 
 params:
     if (YYCURSOR >= YYLIMIT)
         return true;
     YYTOKEN =  YYCURSOR;
 
-#line 771 "<stdout>"
     {
         YYCTYPE yych;
         static const unsigned char yybm[] = {
@@ -984,35 +946,29 @@ params:
         yych = *YYCURSOR;
         goto yy103;
 yy92:
-#line 226 "src/net/URL.re"
         {
             /* No parameters in querystring */
             return true;
         }
-#line 822 "<stdout>"
 yy93:
         ++YYCURSOR;
         yych = *YYCURSOR;
         goto yy98;
 yy94:
-#line 239 "src/net/URL.re"
         {
             *YYTOKEN++ = 0;
             if (*(YYCURSOR - 1) == '&')
                 *(YYCURSOR - 1) = 0;
             if (! param) /* format error */
                 return true;
-            param->value = URL_unescape(YYTOKEN);
+            param->_value = unescape(YYTOKEN);
             goto params;
         }
-#line 838 "<stdout>"
 yy95:
         ++YYCURSOR;
-#line 249 "src/net/URL.re"
         {
             return true;
         }
-#line 845 "<stdout>"
 yy97:
         ++YYCURSOR;
         if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -1027,15 +983,13 @@ yy98:
 yy100:
         ++YYCURSOR;
         YYCURSOR = YYCTXMARKER;
-#line 231 "src/net/URL.re"
         {
-            NEW(param);
-            param->name = YYTOKEN;
-            param->next = U->params;
-            U->params = param;
+            param = static_cast<param_t*>(NEW(param));
+            param->_name = YYTOKEN;
+            param->_next = _params;
+            _params = param;
             goto params;
         }
-#line 868 "<stdout>"
 yy102:
         YYCTXMARKER = YYCURSOR + 1;
         ++YYCURSOR;
@@ -1048,7 +1002,6 @@ yy103:
         if (yych <= '<') goto yy92;
         goto yy100;
     }
-#line 252 "src/net/URL.re"
 
     return false;
 }
@@ -1057,7 +1010,7 @@ void URL::freeParams()
 {
     while(_params)
     {
-        param_t* tmp = _params->next;
+        param_t* tmp = _params->_next;
         FREE(_params);
         _params = tmp;
     }

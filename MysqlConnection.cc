@@ -142,15 +142,6 @@ CONST_STDSTR MysqlConnection::getLastError()
     return static_cast<CONST_STDSTR>( _sb.toString() ); // Either the statement itself or a statement error
 }
 
-/* Class method: MySQL client library finalization */
-void MysqlConnection::onstop()
-{
-    if (mysql_get_client_version() >= 50003)
-        mysql_library_end();
-    else
-        mysql_server_end();
-}
-
 void MysqlConnection::close()
 {
     if(_pool)

@@ -6,11 +6,12 @@
 
 #include "Config.h"
 #include "StringBuffer.h"
+#include "SQLException.h"
 
 StringBuffer::StringBuffer(char const* s):_used(0),
     _length(STRLEN)
 {
-    _buffer = ALLOC(_length);
+    _buffer = static_cast<uchar_t*>(ALLOC(_length));
     append("%s" , s);
 }
 
@@ -19,7 +20,7 @@ StringBuffer::StringBuffer(int length , char const* s)
     assert(length > 0);
     _used = 0;
     _length = length;
-    _buffer = ALLOC(_length);
+    _buffer = static_cast<uchar_t*>(ALLOC(_length));
     append("%s" , s);
 }
 
@@ -28,7 +29,7 @@ StringBuffer::StringBuffer(int length)
     assert(length > 0);
     _used = 0;
     _length = length;
-    _buffer = ALLOC(_length);
+    _buffer = static_cast<uchar_t*>(ALLOC(_length));
 }
 
 StringBuffer::~StringBuffer()
@@ -95,7 +96,7 @@ void StringBuffer::clear()
 
 char const* StringBuffer::toString()
 {
-    return static_cast<char const*>(_buffer);
+    return reinterpret_cast<char const*>(_buffer);//may be it's a problem
 }
 
 int StringBuffer::prepare4postgres()
@@ -128,7 +129,7 @@ void StringBuffer::doAppend(char const* s , va_list ap)
     while (true)
     {
         va_copy(ap_copy, ap);
-        int n = vsnprintf((char*)(_buffer + _used),
+        int n = vsnprintf(reinterpret_cast<char*>(_buffer + _used),//ugly
             _length - _used, s, ap_copy);
         va_end(ap_copy);
         if ((_used + n) < _length) {
@@ -136,16 +137,18 @@ void StringBuffer::doAppend(char const* s , va_list ap)
             break;
         }
         _length += STRLEN + n;
-        RESIZE(_buffer, _length);
+        _buffer = SCAST(uchar_t* , (RESIZE(_buffer, _length)));//TODO
     }
 }
 
-int prepare(char prefix)
+#define CH_TO_INT(p) (static_cast<int>(p))
+
+int StringBuffer::prepare(char prefix)
 {
     int n, i;
     for(n = i = 0; _buffer[i]; i++) if (_buffer[i] == '?') n++;
     if(n > 99)
-        THROW(SQLException , "Max 99 parameters are allowed in a prepared statement.
+        THROW(SQLException , "Max 99 parameters are allowed in a prepared statement.\
                              Found %d parameters in statement", n);
     else if(n)
     {
@@ -154,11 +157,12 @@ int prepare(char prefix)
         int required = (n * 2) + _used;
         if (required >= _length) {
             _length = required;
-            RESIZE(_buffer , _length);
+            _buffer = static_cast<uchar_t*>(RESIZE(_buffer , _length));//TODO
         }
         for (i = 0, j = 1; (j <= n); i++) {
             if (_buffer[i] == '?') {
-                if(j<10){xl=2;x[1]=j+'0';}else{xl=3;x[1]=(j/10)+'0';x[2]=(j%10)+'0';}
+                if(j<10){xl=2;x[1]=static_cast<char>(j + '0');}
+                else{xl=3;x[1]=static_cast<char>((j/10) + 48);x[2]=static_cast<char>((j%10)+48);}//TODO
                 memmove(_buffer + i + xl , _buffer + i + 1 , (_used - (i + 1)));
                 memmove(_buffer + i, x, xl);
                 _used += xl - 1;

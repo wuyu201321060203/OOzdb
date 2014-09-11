@@ -7,9 +7,20 @@
 #include "PreparedStatement.h"
 #include "ResultSet.h"
 
+#include <boost/bind.hpp>
+
+void onStop()
+{
+    if (mysql_get_client_version() >= 50003)
+        mysql_library_end();
+    else
+        mysql_server_end();
+}
+
 int main(void)
 {
     ConnectionPool pool("mysql://root:123@localhost:3306/test");
+    pool.setStopHandler(boost::bind(&onStop));
     pool.start<MysqlConnection>();
     ConnectionPtr con = pool.getConnection();
     con->execute("create table if not exists bleach(name varchar(255), created_at timestamp)");
@@ -22,13 +33,13 @@ int main(void)
     };
     for(int i = 0 ; bleach[i] ; i++)
     {
-        p->setString(p, 1, bleach[i]);
+        p->setString(1, bleach[i]);
         p->setTimestamp(2, time(NULL) + i);
         p->execute();
     }
     ResultSetPtr r = con->executeQuery(" select name , created_at from bleach where created_at = '2014-08-12 16:27:40' ");
     while (r->next())
-        printf("%-22s\t %s\n", r->getString(1) , r->getString(2));
+        printf("%-22s\t %s\n", (r->getString(1)).c_str() , (r->getString(2)).c_str());
     con->execute("drop table bleach;");
     return 0;
 }

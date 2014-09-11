@@ -1,5 +1,3 @@
-#line 1 "src/system/Time.re"
-
 #include "Config.h"
 
 #include <stdio.h>
@@ -66,13 +64,13 @@ time_t timegm(struct tm *tm)
         if(tm->tm_mon >= 2 && is_leap_year(tm->tm_year + 1900)) {
                 ++days;
         }
-        t = ((int64_t)days * 24 + tm->tm_hour) * 3600 + tm->tm_min * 60 + tm->tm_sec;
+        t = (static_cast<int64_t>(days) * 24 + tm->tm_hour) * 3600 + tm->tm_min * 60 + tm->tm_sec;
         if(sizeof(time_t) == 4) {
                 if(t < INT32_MIN || t > INT32_MAX) {
                         return -1;
                 }
         }
-        return t;
+        return static_cast<time_t>(t);
 }
 #endif /* !HAVE_TIMEGM */
 
@@ -106,7 +104,7 @@ static inline int a2i(const char *a, int l) {
 
 time_t Time_toTimestamp(const char *s) {
         if (STR_DEF(s)) {
-                struct tm t = {0};
+                struct tm t = {0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0};
                 if (Time_toDateTime(s, &t)) {
                         t.tm_year -= 1900;
                         return timegm(&t);
@@ -119,20 +117,19 @@ time_t Time_toTimestamp(const char *s) {
 struct tm *Time_toDateTime(const char *s, struct tm *t) {
         assert(t);
         assert(s);
-        struct tm tm = {.tm_isdst = -1};
+        struct tm tm = {0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , -1 , 0 , 0};
         int has_date = false, has_time = false;
         const char *limit = s + strlen(s), *marker, *token, *cursor = s;
 	while (true) {
 		if (cursor >= limit) {
                         if (has_date || has_time) {
-                                *(struct tm*)t = tm;
+                                *(static_cast<struct tm*>(t)) = tm;
                                 return t;
                         }
                         THROW(SQLException, "Invalid date or time");
                 }
                 token = cursor;
 
-#line 185 "<stdout>"
 {
 	unsigned char yych;
 	unsigned int yyaccept = 0;
@@ -185,11 +182,9 @@ struct tm *Time_toDateTime(const char *s, struct tm *t) {
 	if (yych <= '/') goto yy3;
 	if (yych <= '9') goto yy15;
 yy3:
-#line 241 "src/system/Time.re"
 	{
                         continue;
                  }
-#line 242 "<stdout>"
 yy4:
 	yyaccept = 0;
 	yych = *(marker = ++cursor);
@@ -226,7 +221,6 @@ yy8:
 	if (yych <= '9') goto yy11;
 	goto yy10;
 yy9:
-#line 228 "src/system/Time.re"
 	{ // Timezone: +-HH:MM, +-HH or +-HHMM is offset from UTC in seconds
                         if (has_time) { // Only set timezone if time has been seen
                                 tm.TM_GMTOFF = a2i(token + 1, 2) * 3600;
@@ -239,7 +233,6 @@ yy9:
                         }
                         continue;
                  }
-#line 292 "<stdout>"
 yy10:
 	yych = *++cursor;
 	if (yych <= '/') goto yy7;
@@ -289,7 +282,6 @@ yy20:
 	yych = *(marker = ++cursor);
 	if (yych == '.') goto yy24;
 yy23:
-#line 212 "src/system/Time.re"
 	{ // Time: HH:MM:SS
                         tm.tm_hour = a2i(token, 2);
                         tm.tm_min  = a2i(token + 3, 2);
@@ -297,7 +289,6 @@ yy23:
                         has_time = true;
                         continue;
                  }
-#line 350 "<stdout>"
 yy24:
 	yych = *++cursor;
 	if (yybm[0+yych] & 128) {
@@ -330,7 +321,6 @@ yy29:
 	if (yych <= '/') goto yy31;
 	if (yych <= '9') goto yy32;
 yy31:
-#line 220 "src/system/Time.re"
 	{ // Compressed Time: HHMMSS
                         tm.tm_hour = a2i(token, 2);
                         tm.tm_min  = a2i(token + 2, 2);
@@ -338,7 +328,6 @@ yy31:
                         has_time = true;
                         continue;
                  }
-#line 391 "<stdout>"
 yy32:
 	yych = *++cursor;
 	if (yych <= '/') goto yy7;
@@ -356,7 +345,6 @@ yy34:
 	goto yy31;
 yy36:
 	++cursor;
-#line 204 "src/system/Time.re"
 	{ // Compressed Date: YYYYMMDD
                         tm.tm_year  = a2i(token, 4);
                         tm.tm_mon   = a2i(token + 4, 2) - 1;
@@ -364,7 +352,6 @@ yy36:
                         has_date = true;
                         continue;
                  }
-#line 417 "<stdout>"
 yy38:
 	yych = *++cursor;
 	if (yych <= '/') goto yy7;
@@ -380,7 +367,6 @@ yy40:
 	if (yych <= '/') goto yy7;
 	if (yych >= ':') goto yy7;
 	++cursor;
-#line 196 "src/system/Time.re"
 	{ // Date: YYYY-MM-DD
                         tm.tm_year  = a2i(token, 4);
                         tm.tm_mon   = a2i(token + 5, 2) - 1;
@@ -388,9 +374,7 @@ yy40:
                         has_date = true;
                         continue;
                  }
-#line 441 "<stdout>"
 }
-#line 244 "src/system/Time.re"
 
         }
 	return NULL;
@@ -400,7 +384,7 @@ yy40:
 char *Time_toString(time_t time, char result[20]) {
         assert(result);
         char x[2];
-        struct tm ts = {.tm_isdst = -1};
+        struct tm ts = {0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , -1 , 0 , 0};
         gmtime_r(&time, &ts);
         memcpy(result, "YYYY-MM-DD HH:MM:SS\0", 20);
         /*              0    5  8  11 14 17 */
@@ -432,7 +416,7 @@ char *Time_toString(time_t time, char result[20]) {
 time_t Time_now(void) {
 	struct timeval t;
 	if (gettimeofday(&t, NULL) != 0)
-                THROW(AssertException, "%s", System_getLastError());
+                THROW(AssertException, "%s", System_getLastError);
 	return t.tv_sec;
 }
 
@@ -440,15 +424,15 @@ time_t Time_now(void) {
 long long Time_milli(void) {
 	struct timeval t;
 	if (gettimeofday(&t, NULL) != 0)
-                THROW(AssertException, "%s", System_getLastError());
-	return (long long)t.tv_sec * 1000  +  (long long)t.tv_usec / 1000;
+                THROW(AssertException, "%s", System_getLastError);
+	return static_cast<long long>(t.tv_sec) * 1000  +  static_cast<long long>(t.tv_usec) / 1000;
 }
 
 
 int Time_usleep(long u) {
         struct timeval t;
         t.tv_sec = u / USEC_PER_SEC;
-        t.tv_usec = (suseconds_t)(u % USEC_PER_SEC);
+        t.tv_usec = static_cast<suseconds_t>(u % USEC_PER_SEC);
         select(0, 0, 0, 0, &t);
         return true;
 }

@@ -94,7 +94,7 @@ void ConnectionPool::start()
 {
     BOOST_STATIC_ASSERT(boost::is_base_of<Connection , ConcreteConnection>::value);
     {
-        MutexLockGuard lock(&_mutex);
+        MutexLockGuard lock(_mutex);
         _stopped = false;
         _filled = fillPool<ConcreteConnection>();
         if(_filled && _doSweep)
@@ -113,7 +113,7 @@ int ConnectionPool::fillPool()
     BOOST_STATIC_ASSERT(boost::is_base_of<Connection , ConcreteConnection>::value);
     for(int i = 0 ; i != _initialConnections ; ++i)
     {
-        ConnectionPtr conn( new ConcreteConnection(this) );
+        ConnectionPtr conn( new ConcreteConnection(this , &_error));
         if(!conn)
         {
             if(i > 0)

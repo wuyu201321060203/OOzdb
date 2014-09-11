@@ -25,9 +25,9 @@ public:
     int getPort() const;
     char const* getPath() const;
     char const* getQueryString() const;
-    char const* getParameterNames() const;
-    char const* getParameter(char const* name) const;
-    char const* toString() const;
+    char** getParameterNames();
+    char const* getParameter(char const* name);
+    char const* toString();
     char* unescape(char* url);
     char* escape(char const* url);
     char* normalize(char* path);
@@ -47,17 +47,17 @@ private:
 	char* _toString;
     param_t* _params;
     char** _paramNames;
-	uchar_t* _data;
-	uchar_t* _buffer;
-	uchar_t* _marker;
-    uchar_t* _ctx;
-    uchar_t* _limit;
-    uchar_t* _token;
+	char* _data;
+	char* _buffer;
+	char* _marker;
+    char* _ctx;
+    char* _limit;
+    char* _token;
 
 
 private:
 
-    void parseURL();
+    int parseURL();
     void freeParams();
 };
 
