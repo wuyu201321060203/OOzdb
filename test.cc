@@ -7,20 +7,10 @@
 #include "PreparedStatement.h"
 #include "ResultSet.h"
 
-#include <boost/bind.hpp>
-
-void onStop()//TODO
-{
-    if (mysql_get_client_version() >= 50003)
-        mysql_library_end();
-    else
-        mysql_server_end();
-}
-
 int main(void)
 {
     ConnectionPool pool("mysql://root:123@localhost:3306/test");
-    pool.setStopHandler(boost::bind(&onStop));
+    //pool.setStopHandler(boost::bind(&onStop));
     pool.setReaper(5);
     pool.start<MysqlConnection>();
     ConnectionPtr con = pool.getConnection();

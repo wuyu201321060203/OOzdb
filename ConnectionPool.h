@@ -8,6 +8,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_base_of.hpp>
+#include <boost/bind.hpp>
 
 #include <muduo/base/Thread.h>
 #include <muduo/base/Mutex.h>
@@ -100,10 +101,12 @@ void ConnectionPool::start()
         if(_filled && _doSweep)
         {
             LOG_DEBUG << "Starting Database reaper thread\n";
-            _reaper->start();
+            _reaper->start();//Any question?
         }
     }
-    if(!_filled)
+    if(_filled)
+        setStopHandler(boost::bind(&ConcreteConnection::onStop));
+    else
         LOG_FATAL << "Failed to start connection pool";
 }
 

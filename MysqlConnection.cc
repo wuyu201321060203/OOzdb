@@ -153,6 +153,14 @@ void MysqlConnection::close()
         _pool->returnConnection(shared_from_this());
 }
 
+void MysqlConnection::onStop()
+{
+    if (mysql_get_client_version() >= 50003)
+        mysql_library_end();
+    else
+        mysql_server_end();
+}
+
 MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
 {
 #define ERROR(e) do {*error = strDup(e); goto error;} while (0)

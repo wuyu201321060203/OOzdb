@@ -29,6 +29,7 @@ public:
                                     ...)__attribute__((format (printf, 2, 3)));
     virtual CONST_STDSTR getLastError();
     virtual void close();//non-beautiful
+    static void onStop();
 
 private:
 
