@@ -206,9 +206,6 @@ CONST_STDSTR ConnectionPool::getVersion() const
 
 void ConnectionPool::drainPool()
 {
-    std::for_each( _connectionsVec.begin() , _connectionsVec.end(),
-                  [](ConnectionPtr& conn){ conn->clear(); } );//c++11
-
     _connectionsVec.clear();
 }
 

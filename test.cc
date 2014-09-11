@@ -21,6 +21,7 @@ int main(void)
 {
     ConnectionPool pool("mysql://root:123@localhost:3306/test");
     pool.setStopHandler(boost::bind(&onStop));
+    pool.setReaper(5);
     pool.start<MysqlConnection>();
     ConnectionPtr con = pool.getConnection();
     con->execute("create table if not exists bleach(name varchar(255), created_at timestamp)");
