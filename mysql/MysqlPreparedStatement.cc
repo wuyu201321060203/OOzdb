@@ -1,6 +1,8 @@
+#include <Exception/SQLException.h>
+#include <util/MemoryOperation.h>
+#include <Config.h>
+
 #include "MysqlPreparedStatement.h"
-#include "SQLException.h"
-#include "MemoryOperation.h"
 
 static my_bool yes = true;
 
@@ -11,7 +13,7 @@ MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
     assert(stmt);
     _stmt = static_cast<MYSQL_STMT*>(stmt);
     _maxRows = maxRows;
-    if(_parameterCount > 0)
+    if(LIKELY(_parameterCount > 0))
     {
         _params = static_cast<param_t*>(CALLOC(_parameterCount, sizeof(param_t)));
         _bind = static_cast<MYSQL_BIND*>(CALLOC(_parameterCount, sizeof(MYSQL_BIND)));
@@ -29,7 +31,7 @@ void MysqlPreparedStatement::setString(int parameterIndex , CONST_STDSTR str)
     int i = checkAndSetParameterIndex(parameterIndex);
     _bind[i].buffer_type = MYSQL_TYPE_STRING;
     _bind[i].buffer = const_cast<char*>( str.c_str() );
-    if(str.empty())
+    if( UNLIKELY( str.empty() ) )
     {
         _params[i].length = 0;
         _bind[i].is_null = &yes;
@@ -74,7 +76,7 @@ void MysqlPreparedStatement::setBlob(int parameterIndex , void const* x , int si
     int i = checkAndSetParameterIndex(parameterIndex);
     _bind[i].buffer_type = MYSQL_TYPE_BLOB;
     _bind[i].buffer = const_cast<void*>(x);
-    if(!x)
+    if(UNLIKELY(!x))
     {
         _params[i].length = 0;
         _bind[i].is_null = &yes;
@@ -107,16 +109,16 @@ void MysqlPreparedStatement::execute()
 {
     if(_resultSet)
         _resultSet->clear();
-    if(_parameterCount > 0)
+    if(LIKELY(_parameterCount > 0))
         if( ( _lastError = mysql_stmt_bind_param(_stmt , _bind) ) )
             THROW(SQLException , "%s", mysql_stmt_error(_stmt));
 #if MYSQL_VERSION_ID >= 50002
     unsigned long cursor = CURSOR_TYPE_NO_CURSOR;
     mysql_stmt_attr_set(_stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
-    if( (_lastError = mysql_stmt_execute(_stmt) ) )
+    if( UNLIKELY(_lastError = mysql_stmt_execute(_stmt) ) )
         THROW(SQLException , "%s", mysql_stmt_error(_stmt));
-    if(_lastError == MYSQL_OK)
+    if( LIKELY(_lastError == MYSQL_OK) )
     {
         _lastError = mysql_stmt_reset(_stmt);
     }
@@ -127,14 +129,14 @@ ResultSetPtr MysqlPreparedStatement::executeQuery()
     ResultSetPtr ret;
     if(_resultSet)
         _resultSet->clear();
-    if(_parameterCount > 0)
+    if( LIKELY(_parameterCount > 0) )
         if((_lastError = mysql_stmt_bind_param(_stmt , _bind)))
             THROW(SQLException , "%s", mysql_stmt_error(_stmt));
 #if MYSQL_VERSION_ID >= 50002
     unsigned long cursor = CURSOR_TYPE_READ_ONLY;
     mysql_stmt_attr_set(_stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
-    if((_lastError = mysql_stmt_execute(_stmt)))
+    if( UNLIKELY(_lastError = mysql_stmt_execute(_stmt)) )
         THROW(SQLException , "%s", mysql_stmt_error(_stmt));
     else
     {

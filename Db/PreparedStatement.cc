@@ -1,5 +1,6 @@
+#include <Exception/SQLException.h>
+
 #include "PreparedStatement.h"
-#include "SQLException.h"
 
 PreparedStatement::PreparedStatement(int parameterCount):
     _parameterCount(parameterCount)

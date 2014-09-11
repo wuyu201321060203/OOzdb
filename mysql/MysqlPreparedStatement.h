@@ -2,9 +2,9 @@
 #define MYSQLPREPAREDSTATEMENT_H
 
 #include <mysql/mysql.h>
+#include <Db/PreparedStatement.h>
 
 #include "MysqlResultSet.h"
-#include "PreparedStatement.h"
 
 class MysqlPreparedStatement : public PreparedStatement
 {

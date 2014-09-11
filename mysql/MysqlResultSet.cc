@@ -1,14 +1,14 @@
 #include <cassert>
 #include <stdlib.h>
 #include <stdarg.h>
-
 #include <mysql/errmsg.h>
 
-#include "Config.h"
+#include <Config.h>
+#include <util/StrOperation.h>
+#include <util/MemoryOperation.h>
+#include <Exception/SQLException.h>
+
 #include "MysqlResultSet.h"
-#include "StrOperation.h"
-#include "MemoryOperation.h"
-#include "SQLException.h"
 
 MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
                                int keep):
@@ -19,7 +19,7 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
     _keep = keep;
     _maxRows = maxRows;
     _columnCount = mysql_stmt_field_count(_stmt);
-    if( (_columnCount <= 0) || !(_meta = mysql_stmt_result_metadata(_stmt) ) )
+    if( UNLIKELY((_columnCount <= 0) || !(_meta = mysql_stmt_result_metadata(_stmt)) ))
     {
         LOG_DEBUG << "Warning: column error - " << (mysql_stmt_error(_stmt));
         _stop = true;

@@ -4,7 +4,7 @@
 #include <mysql/mysql.h>
 #include <vector>
 
-#include "ResultSet.h"
+#include <Db/ResultSet.h>
 
 class MysqlResultSet : public ResultSet
 {

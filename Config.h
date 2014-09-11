@@ -157,4 +157,7 @@ typedef std::string STDSTR;
 
 #define DEFAULT_SWEEP_INTERVAL 60
 
+#define LIKELY(x) __builtin_expect(!!(x), 1)
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+
 #endif

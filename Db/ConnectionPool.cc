@@ -2,9 +2,10 @@
 #include <error.h>
 #include <errno.h>
 
-#include "Config.h"
+#include <Config.h>
+#include <util/TimeOperation.h>
+
 #include "ConnectionPool.h"
-#include "TimeOperation.h"
 #include "ResultSet.h"
 #include "PreparedStatement.h"
 

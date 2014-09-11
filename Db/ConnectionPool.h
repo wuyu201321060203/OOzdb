@@ -13,7 +13,8 @@
 #include <muduo/base/Condition.h>
 #include <muduo/base/Logging.h>
 
-#include "URL.h"
+#include <Net/URL.h>
+
 #include "Connection.h"
 
 using muduo::Thread;
@@ -100,7 +101,7 @@ void ConnectionPool::start()
             _reaper->start();//Any question?
         }
     }
-    if(_filled)
+    if(LIKELY(_filled))
         setStopHandler(boost::bind(&ConcreteConnection::onStop));
     else
         LOG_FATAL << "Failed to start connection pool";
@@ -113,7 +114,7 @@ int ConnectionPool::fillPool()
     for(int i = 0 ; i != _initialConnections ; ++i)
     {
         ConnectionPtr conn( new ConcreteConnection(this , &_error));
-        if(!conn)
+        if(UNLIKELY(!conn))
         {
             if(i > 0)
             {

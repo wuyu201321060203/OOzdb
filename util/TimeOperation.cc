@@ -6,11 +6,11 @@
 #include <sys/types.h>
 #include <sys/select.h>
 
-#include "Config.h"
-#include "StrOperation.h"
-#include "TimeOperation.h"
-#include "SQLException.h"
-#include "AssertException.h"
+#include <Config.h>
+#include <util/StrOperation.h>
+#include <util/TimeOperation.h>
+#include <Exception/SQLException.h>
+#include <Exception/AssertException.h>
 
 /**
  * Implementation of the Time interface

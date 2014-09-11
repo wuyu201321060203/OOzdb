@@ -1,11 +1,11 @@
 #include <stdio.h>
 
-#include "Config.h"
-#include "URL.h"
-#include "ConnectionPool.h"
-#include "MysqlConnection.h"
-#include "PreparedStatement.h"
-#include "ResultSet.h"
+#include <Config.h>
+#include <Net/URL.h>
+#include <Db/ConnectionPool.h>
+#include <Db/PreparedStatement.h>
+#include <Db/ResultSet.h>
+#include <mysql/MysqlConnection.h>
 
 int main(void)
 {

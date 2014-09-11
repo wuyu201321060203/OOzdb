@@ -3,8 +3,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "TimeOperation.h"
-#include "Config.h"
+#include <util/TimeOperation.h>
+#include <Config.h>
 
 class ResultSet
 {

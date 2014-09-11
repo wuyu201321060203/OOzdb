@@ -1,14 +1,15 @@
 #include <cstdarg>
 #include <cassert>
-
 #include <mysql/errmsg.h>
+
+#include <Exception/SQLException.h>
+#include <Db/ConnectionPool.h>
+#include <util/StrOperation.h>
+#include <Config.h>
 
 #include "MysqlConnection.h"
 #include "MysqlPreparedStatement.h"
 #include "MysqlResultSet.h"
-#include "SQLException.h"
-#include "ConnectionPool.h"
-#include "StrOperation.h"
 
 MysqlConnection::MysqlConnection(ConnectionPool* pool , char** error):
     Connection(pool),
@@ -16,7 +17,7 @@ MysqlConnection::MysqlConnection(ConnectionPool* pool , char** error):
     _sb(STRLEN)
 {
     assert(error);
-    if(!(_db = doConnect(_url, error)))
+    if( UNLIKELY( !(_db = doConnect(_url, error) ) ) )
         THROW(SQLException , "Can't connect to MySQL");
 }
 
@@ -143,7 +144,7 @@ PreparedStatementPtr MysqlConnection::getPreparedStatement(char const* sql , ...
 
 CONST_STDSTR MysqlConnection::getLastError()
 {
-    if(mysql_errno(_db))
+    if( UNLIKELY( mysql_errno(_db) ) )
         return static_cast<CONST_STDSTR>(mysql_error(_db));
     return static_cast<CONST_STDSTR>( _sb.toString() ); // Either the statement itself or a statement error
 }
@@ -173,7 +174,7 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
     char const *user , *password , *host , *database , *charset , *timeout;
     char const* unix_socket = url->getParameter("unix-socket");
     MYSQL* db = mysql_init(NULL);
-    if(!db)
+    if(UNLIKELY(!db))
     {
         *error = strDup("unable to allocate mysql handler");
         return NULL;
@@ -240,7 +241,7 @@ int MysqlConnection::prepare(char const* sql , int len , MYSQL_STMT** stmt)
         _lastError = CR_OUT_OF_MEMORY;
         return false;
     }
-    if((_lastError = mysql_stmt_prepare(*stmt, sql, len)))
+    if(UNLIKELY(_lastError = mysql_stmt_prepare(*stmt, sql, len)))
     {
         _sb.set("%s", mysql_stmt_error(*stmt));
         mysql_stmt_close(*stmt);

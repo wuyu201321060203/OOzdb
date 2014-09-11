@@ -5,8 +5,8 @@
 
 #include <boost/enable_shared_from_this.hpp>
 
-#include "StringBuffer.h"
-#include "Connection.h"
+#include <Mem/StringBuffer.h>
+#include <Db/Connection.h>
 
 class MysqlConnection : public Connection,
                         public boost::enable_shared_from_this<MysqlConnection>

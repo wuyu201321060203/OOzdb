@@ -1,4 +1,5 @@
-#include "Config.h"
+#include <Config.h>
+
 #include "Connection.h"
 #include "ConnectionPool.h"
 
@@ -138,7 +139,7 @@ void Connection::clear()
     freePrepared();
 }
 
-void Connection::close()//TODO
+void Connection::close()
 {
 }
 

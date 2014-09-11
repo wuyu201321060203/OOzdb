@@ -1,4 +1,5 @@
-#include "SQLException.h"
+#include <Exception/SQLException.h>
+
 #include "ResultSet.h"
 
 ResultSet::ResultSet(CONST_STDSTR name):

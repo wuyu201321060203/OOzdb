@@ -4,11 +4,12 @@
 #include <stdarg.h>
 #include <cassert>
 
-#include "Config.h"
+#include <Config.h>
+#include <Exception/SQLException.h>
+#include <util/MemoryOperation.h>
+#include <util/StrOperation.h>
+
 #include "StringBuffer.h"
-#include "SQLException.h"
-#include "MemoryOperation.h"
-#include "StrOperation.h"
 
 StringBuffer::StringBuffer(char const* s):_used(0),
     _length(STRLEN)

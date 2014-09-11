@@ -5,10 +5,10 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "Config.h"
-#include "SQLException.h"
-#include "MemoryOperation.h"
-#include "StrOperation.h"
+#include <Config.h>
+#include <Exception/SQLException.h>
+#include <util/MemoryOperation.h>
+#include <util/StrOperation.h>
 
 #ifdef PACKAGE_PROTECTED
 #pragma GCC visibility push(hidden)

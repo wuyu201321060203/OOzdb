@@ -4,11 +4,12 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include "Config.h"
+#include <Config.h>
+#include <Exception/SQLException.h>
+#include <util/MemoryOperation.h>
+#include <util/StrOperation.h>
+
 #include "URL.h"
-#include "SQLException.h"
-#include "MemoryOperation.h"
-#include "StrOperation.h"
 
 #define UNKNOWN_PORT -1
 #define YYCTYPE       uchar_t

@@ -1,10 +1,10 @@
-#include "Config.h"
-
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
 
-#include "MemoryException.h"
+#include <Config.h>
+
+#include <Exception/MemoryException.h>
 
 
 #ifdef PACKAGE_PROTECTED

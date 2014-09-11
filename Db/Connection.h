@@ -5,21 +5,17 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "TimeOperation.h"
+#include <util/TimeOperation.h>
+#include <Net/URL.h>
+
 #include "ResultSet.h"
 #include "PreparedStatement.h"
-#include "URL.h"
 
 class ConnectionPool;
 
 class Connection
 {
 public:
-
-    /*
-     * The following functions are virtual functions and must be implemented by
-     * subclass
-     */
 
     Connection(ConnectionPool* pool);
     virtual ~Connection();
