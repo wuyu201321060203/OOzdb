@@ -1,17 +1,14 @@
 #ifndef CONFIG_INCLUDED
 #define CONFIG_INCLUDED
 
-
 /**
  * Global defines, macros and types
  *
  * @file
  */
 
-
 #include <errno.h>
 #include <string>
-
 
 /* --------------------------------------------- SQL standard value macros */
 
@@ -21,12 +18,10 @@
  */
 #define SQL_DEFAULT_TIMEOUT 3000
 
-
 /**
  * The default maximum number of database connections
  */
 #define SQL_DEFAULT_MAX_CONNECTIONS 20
-
 
 /**
  * The initial number of database connections
@@ -139,26 +134,67 @@ typedef  unsigned int uint32_t;
 
 
 
+/*
+ * The successful mysql operation return code
+ */
 #define MYSQL_OK 0
+
+/*
+ * Default Exception message length
+ */
 #define EXCEPTION_MESSAGE_LENGTH 512
+
+/*
+ * If this string is returned , it means that there must be something wrong
+ * happend
+ */
 #define BADSTR "null"
+
+/*
+ * The general successful operation return code
+ */
 #define SUCCESSFUL 0
+
+/*
+ * Invaild row id
+ */
 #define INVALID_ROWID -1
+
+/*
+ * Invalid num of changed rows
+ */
 #define INVALID_ROWSCHANGED -1
 
+/*
+ * The macro of std::string and its const type
+ */
 typedef std::string STDSTR;
 #define CONST_STDSTR STDSTR const
 
+/*
+ * The macro of cast operation of C++
+ */
 #define SC static_cast
 #define RC reinterpret_cast
+
+/*
+ * The function macro which is used to return information about error occured
+ * after last operation
+ */
 
 #define System_getLastError (strerror(errno))
 
 #define UINT unsigned int
 #define ULONG unsigned long
 
+/*
+ * Default sweep interval(seconds)
+ */
 #define DEFAULT_SWEEP_INTERVAL 60
 
+/*
+ * The macro of optimization about branch case
+ */
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 #define UNLIKELY(x) __builtin_expect(!!(x), 0)
 
