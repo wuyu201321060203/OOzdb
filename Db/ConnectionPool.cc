@@ -4,6 +4,8 @@
 
 #include <Config.h>
 #include <util/TimeOperation.h>
+#include <Exception/Exception.h>
+#include <Exception/ParameterException.h>
 
 #include "ConnectionPool.h"
 #include "ResultSet.h"
@@ -18,10 +20,10 @@ ConnectionPool::ConnectionPool(char const* url):
     _doSweep(false),
     _alarm(_mutex),
     _sweepInterval(DEFAULT_SWEEP_INTERVAL),
-    _stopped(true),
-    _reaper( new Thread( boost::bind(&ConnectionPool::doSweep , this) ) )
+    _stopped(true)
 {
-    assert(_url);
+    if(UNLIKELY(!_url))
+        THROW(ParameterException , "url is invalid");
     _connectionsVec.reserve(SQL_DEFAULT_MAX_CONNECTIONS);
 }
 
@@ -202,6 +204,28 @@ CONST_STDSTR ConnectionPool::getVersion() const
 {
     return ABOUT;
 }
+
+int ConnectionPool::getSweepInterval() const
+{
+    return _sweepInterval;
+}
+
+#ifdef DEBUG
+bool ConnectionPool::isFilled() const
+{
+    return _filled;
+}
+
+bool ConnectionPool::needDoSweep() const
+{
+    return _doSweep;
+}
+
+ThreadPtr ConnectionPool::getReaper()
+{
+    return _reaper;
+}
+#endif
 
 void ConnectionPool::drainPool()
 {

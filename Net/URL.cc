@@ -280,6 +280,11 @@ char* URL::normalize(char* path)
     return path;
 }
 
+char const* URL::toString()
+{
+    return _data;
+}
+
 int URL::parseURL()
 {
     param_t* param = NULL;

@@ -31,6 +31,7 @@ public:
     char* unescape(char* url);
     char* escape(char const* url);
     char* normalize(char* path);
+    char const* toString();
 
 private:
 

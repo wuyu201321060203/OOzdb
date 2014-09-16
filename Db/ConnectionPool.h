@@ -56,6 +56,12 @@ public:
     void returnConnection(ConnectionPtr conn);
     int reapConnections();
     CONST_STDSTR getVersion() const;
+    int getSweepInterval() const;
+#ifdef DEBUG
+    bool isFilled() const;
+    bool needDoSweep() const;
+    TheadPtr getReaper();
+#endif
 
 private:
 
@@ -98,6 +104,7 @@ void ConnectionPool::start()//Best Practice:each ConnectionPool only start once
         if(_filled && _doSweep)
         {
             LOG_DEBUG << "Starting Database reaper thread\n";
+            _reaper.reset(new Thread(boost::bind(&ConnectionPool::doSweep , this)));
             _reaper->start();
         }
     }
