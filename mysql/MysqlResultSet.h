@@ -33,6 +33,8 @@ public:
     virtual time_t getTimestamp(int columnIndex);
     virtual struct tm getDateTime(int columnIndex);
     virtual void clear();
+    virtual CONST_STDSTR getColumnName(int columnIndex);
+    virtual long getColumnSize(int columnIndex);
 
 private:
 
@@ -48,8 +50,6 @@ private:
 
 private:
 
-    virtual CONST_STDSTR getColumnName(int columnIndex);
-    virtual long getColumnSize(int columnIndex);
     inline void ensureCapacity(int i);
 };
 

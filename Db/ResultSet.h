@@ -32,6 +32,9 @@ public:
     void setClearFlag();
     void unsetClearFlag();
     bool isCleared();
+    int getColumnCount();
+    virtual CONST_STDSTR getColumnName(int columnIndex);
+    virtual long getColumnSize(int columnIndex);
 
 protected:
 
@@ -41,9 +44,6 @@ protected:
 
 protected:
 
-    int getColumnCount();
-    virtual CONST_STDSTR getColumnName(int columnIndex);
-    virtual long getColumnSize(int columnIndex);
     int checkAndSetColumnIndex(int columnIndex);
     int getIndex(CONST_STDSTR name);
 
