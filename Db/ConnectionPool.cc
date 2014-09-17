@@ -210,7 +210,7 @@ int ConnectionPool::getSweepInterval() const
     return _sweepInterval;
 }
 
-#ifdef DEBUG
+#ifdef TEST
 bool ConnectionPool::isFilled() const
 {
     return _filled;

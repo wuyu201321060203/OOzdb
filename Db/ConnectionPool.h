@@ -57,10 +57,10 @@ public:
     int reapConnections();
     CONST_STDSTR getVersion() const;
     int getSweepInterval() const;
-#ifdef DEBUG
+#ifdef TEST
     bool isFilled() const;
     bool needDoSweep() const;
-    TheadPtr getReaper();
+    ThreadPtr getReaper();
 #endif
 
 private:
