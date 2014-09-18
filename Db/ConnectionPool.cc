@@ -12,7 +12,6 @@
 #include "PreparedStatement.h"
 
 ConnectionPool::ConnectionPool(char const* url):
-    _url(new URL(url)),
     _maxConnections(SQL_DEFAULT_MAX_CONNECTIONS),
     _initialConnections(SQL_DEFAULT_INIT_CONNECTIONS),
     _connectionTimeout(SQL_DEFAULT_CONNECTION_TIMEOUT),
@@ -22,8 +21,9 @@ ConnectionPool::ConnectionPool(char const* url):
     _sweepInterval(DEFAULT_SWEEP_INTERVAL),
     _stopped(true)
 {
-    if(UNLIKELY(!_url))
+    if(UNLIKELY(!url))
         THROW(ParameterException , "url is invalid");
+    _url.reset(new URL(url)),
     _connectionsVec.reserve(SQL_DEFAULT_MAX_CONNECTIONS);
 }
 

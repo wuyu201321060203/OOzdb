@@ -1,4 +1,5 @@
 MUDUO_DIRECTORY = $(HOME)/build/debug-install
+MUDUO_LIBRARY = $(MUDUO_DIRECTORY)/lib
 MUDUO_INCLUDE = $(MUDUO_DIRECTORY)/include
 OOZDB_INCLUDE = $(HOME)/gitWork/OOzdb
 # Points to the root of Google Test, relative to where this file is.
@@ -9,6 +10,8 @@ GTEST_DIR = $(HOME)/gtest-1.7.0
 USER_DIR = .
 
 CXX = g++
+LDFLAGS = -L$(MUDUO_LIBRARY) -lmuduo_net_cpp11 -lmuduo_base_cpp11 -lpthread -lrt\
+		  -lmysqlclient
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
@@ -32,7 +35,7 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 all : $(TESTS)
 
 clean :
-	rm -f $(TESTS) *.o
+	rm -f $(TESTS)
 
 # Builds gtest.a and gtest_main.a.
 
@@ -47,5 +50,5 @@ GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 pool_unittest.o : $(USER_DIR)/pool_unittest.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $^
 
-pool_unittest : gtest_main.a OOzdb.a pool_unittest.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+pool_unittest : gtest_main.a OOzdb.a pool_unittest.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ Connection.o PreparedStatement.o ResultSet.o ConnectionPool.o MysqlConnection.o MysqlPreparedStatement.o MysqlResultSet.o StringBuffer.o StrOperation.o MemoryOperation.o TimeOperation.o URL.o -o $@ $(LDFLAGS)

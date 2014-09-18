@@ -641,7 +641,7 @@ yy57:
         {
             *YYCURSOR = 0;
             _path = unescape(YYTOKEN);
-            return true;
+            return 1;
         }
 yy58:
         yyaccept = 1;
