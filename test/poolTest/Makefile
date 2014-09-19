@@ -50,5 +50,5 @@ GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 pool_unittest.o : $(USER_DIR)/pool_unittest.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $^
 
-pool_unittest : gtest_main.a OOzdb.a pool_unittest.o
+pool_unittest : gtest_main.a pool_unittest.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ Connection.o PreparedStatement.o ResultSet.o ConnectionPool.o MysqlConnection.o MysqlPreparedStatement.o MysqlResultSet.o StringBuffer.o StrOperation.o MemoryOperation.o TimeOperation.o URL.o -o $@ $(LDFLAGS)

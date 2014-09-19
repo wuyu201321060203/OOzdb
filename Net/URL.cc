@@ -69,7 +69,7 @@ URL::URL(char const* url)
         _port = UNKNOWN_PORT;
         YYLIMIT = _data + strlen(RC<char const*>(_data));
         if(!parseURL())
-            clear();
+            THROW(SQLException , "URL create fail");//TODO
     }
     else
         THROW(SQLException , "URL create fail");//TODO
@@ -86,7 +86,7 @@ void URL::URLCreate(char const* url , ...)
         _port = UNKNOWN_PORT;
         YYLIMIT = _data + strlen(RC<char const*>(_data));
         if(!parseURL())
-            clear();
+            THROW(SQLException , "URL create fail");//TODO
     }
     else
         THROW(SQLException , "URL create fail");//TODO

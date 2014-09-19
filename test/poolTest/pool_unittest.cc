@@ -43,6 +43,8 @@ char const* testURL = "mysql://root:123@localhost:3306/test";
  * Test1: ConnectionPool's constructure
  */
 
+/*
+
 TEST(ConnectionPoolTest , ConstructTest)
 {
     ConnectionPoolPtr pool;
@@ -61,11 +63,13 @@ TEST(ConnectionPoolTest , ConstructTest)
     EXPECT_TRUE(pool->needDoSweep() == false);
     EXPECT_EQ(DEFAULT_SWEEP_INTERVAL , pool->getSweepInterval());
 }
+*/
 
 /*
  * Test2: test Bad URL
  */
 
+/*
 TEST(ConnectionPoolTest , BadURLTest)
 {
     char const* url = NULL;
@@ -74,6 +78,7 @@ TEST(ConnectionPoolTest , BadURLTest)
      , ParameterException
     );
 }
+*/
 
 /*
  * Test3: test ConnectionPool start/stop
@@ -84,7 +89,7 @@ TEST(ConnectionPoolTest , StartStopTest)
     ConnectionPoolPtr pool( new ConnectionPool(testURL) );
     ASSERT_TRUE(pool != NULL);
     pool->start<MysqlConnection>();
-    ASSERT_GT( 0 , pool->getSize() );
+    ASSERT_LT( 0 , pool->getSize() );
     EXPECT_EQ( pool->getInitialConnections() , pool->getSize() );
     if(pool->isFilled() && pool->needDoSweep())
         EXPECT_TRUE( ( pool->getReaper() ) != NULL);
