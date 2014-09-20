@@ -58,7 +58,26 @@ static inline uchar_t* b2x(uchar_t b, uchar_t* x)
     return x;
 }
 
-URL::URL(char const* url)
+URL::URL(char const* url) : _port(UNKNOWN_PORT),
+                            _ref(NULL),
+                            _path(NULL),
+                            _host(NULL),
+                            _user(NULL),
+                            _qptr(NULL),
+                            _query(NULL),
+                            _portStr(NULL),
+                            _protocol(NULL),
+                            _password(NULL),
+                            _toString(NULL),
+                            _params(NULL),
+                            _paramNames(NULL),
+                            _data(NULL),
+                            _buffer(NULL),
+                            _marker(NULL),
+                            _ctx(NULL),
+                            _limit(NULL),
+                            _token(NULL),
+                            _isCleared(false)
 {
     if(STR_DEF(url))
     {
@@ -66,35 +85,53 @@ URL::URL(char const* url)
         _data = SC<char*>(ALLOC(len));
         memcpy(_data , url , len);
         YYCURSOR = _data;
-        _port = UNKNOWN_PORT;
         YYLIMIT = _data + strlen(RC<char const*>(_data));
         if(!parseURL())
-            THROW(SQLException , "URL create fail");//TODO
+            THROW(SQLException , "URL create fail");
     }
     else
-        THROW(SQLException , "URL create fail");//TODO
+        THROW(SQLException , "URL create fail");
 }
 
 void URL::URLCreate(char const* url , ...)
 {
     if(STR_DEF(url))
     {
+        _port = UNKNOWN_PORT;
+        _ref = NULL;
+        _path = NULL;
+        _host = NULL;
+        _user = NULL;
+        _qptr = NULL;
+        _query = NULL;
+        _portStr = NULL;
+        _protocol = NULL;
+        _password = NULL;
+        _toString = NULL;
+        _params = NULL;
+        _paramNames = NULL;
+        _buffer = NULL;
+        _marker = NULL;
+        _ctx = NULL;
+        _limit = NULL;
+        _token = NULL;
+        _isCleared = false;
         va_list ap;
         va_start(ap , url);
         _data = strVcat(url , ap);
         YYCURSOR = _data;
-        _port = UNKNOWN_PORT;
         YYLIMIT = _data + strlen(RC<char const*>(_data));
         if(!parseURL())
-            THROW(SQLException , "URL create fail");//TODO
+            THROW(SQLException , "URL create fail");
     }
     else
-        THROW(SQLException , "URL create fail");//TODO
+        THROW(SQLException , "URL create fail");
 }
 
 URL::~URL()
 {
-    clear();
+    if(!_isCleared)
+        clear();
 }
 
 void URL::clear()
@@ -105,6 +142,7 @@ void URL::clear()
 	FREE(_query);
 	FREE(_data);
 	FREE(_host);
+    _isCleared = true;
 }
 
 char const* URL::getProtocol() const
@@ -280,7 +318,7 @@ char* URL::normalize(char* path)
     return path;
 }
 
-int URL::parseURL()
+bool URL::parseURL()
 {
     param_t* param = NULL;
 
@@ -291,7 +329,7 @@ proto:
 
     {
         YYCTYPE yych;
-        static const uchar_t yybm[] = {
+        static const unsigned char yybm[] = {
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
@@ -526,8 +564,8 @@ authority:
 
     {
         YYCTYPE yych;
-        UINT yyaccept = 0;
-        static const uchar_t yybm[] = {
+        unsigned int yyaccept = 0;
+        static const unsigned char yybm[] = {
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
@@ -638,11 +676,9 @@ yy56:
         if (yych <= '?') goto yy71;
         goto yy70;
 yy57:
-        {
             *YYCURSOR = 0;
             _path = unescape(YYTOKEN);
-            return 1;
-        }
+            return true;
 yy58:
         yyaccept = 1;
         yych = *(YYMARKER = ++YYCURSOR);
@@ -833,7 +869,7 @@ query:
 
     {
         YYCTYPE yych;
-        static const uchar_t yybm[] = {
+        static const unsigned char yybm[] = {
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
@@ -905,7 +941,7 @@ params:
 
     {
         YYCTYPE yych;
-        static const uchar_t yybm[] = {
+        static const unsigned char yybm[] = {
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
             0,   0,   0,   0,   0,   0,   0,   0,
@@ -963,7 +999,7 @@ yy94:
                 *(YYCURSOR - 1) = 0;
             if (! param) /* format error */
                 return true;
-            param->_value = unescape(YYTOKEN);
+            param->_value = unescape(YYTOKEN);//TODO
             goto params;
         }
 yy95:
@@ -986,7 +1022,7 @@ yy100:
         ++YYCURSOR;
         YYCURSOR = YYCTXMARKER;
         {
-            param = SC<param_t*>(NEW(param));//hi
+            NEW(param);
             param->_name = YYTOKEN;
             param->_next = _params;
             _params = param;

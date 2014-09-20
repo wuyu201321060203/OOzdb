@@ -53,11 +53,12 @@ private:
     char* _ctx;
     char* _limit;
     char* _token;
+    bool  _isCleared;
 
 
 private:
 
-    int parseURL();
+    bool parseURL();
     void freeParams();
 };
 

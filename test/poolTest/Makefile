@@ -19,7 +19,7 @@ LDFLAGS = -L$(MUDUO_LIBRARY) -lmuduo_net_cpp11 -lmuduo_base_cpp11 -lpthread -lrt
 CPPFLAGS += -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread -DTEST -I$(MUDUO_INCLUDE) -I$(OOZDB_INCLUDE)
+CXXFLAGS += -g -ggdb3 -Wall -Wextra -pthread -DTEST -I$(MUDUO_INCLUDE) -I$(OOZDB_INCLUDE)
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.

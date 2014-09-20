@@ -43,8 +43,6 @@ char const* testURL = "mysql://root:123@localhost:3306/test";
  * Test1: ConnectionPool's constructure
  */
 
-/*
-
 TEST(ConnectionPoolTest , ConstructTest)
 {
     ConnectionPoolPtr pool;
@@ -63,13 +61,11 @@ TEST(ConnectionPoolTest , ConstructTest)
     EXPECT_TRUE(pool->needDoSweep() == false);
     EXPECT_EQ(DEFAULT_SWEEP_INTERVAL , pool->getSweepInterval());
 }
-*/
 
 /*
  * Test2: test Bad URL
  */
 
-/*
 TEST(ConnectionPoolTest , BadURLTest)
 {
     char const* url = NULL;
@@ -78,7 +74,6 @@ TEST(ConnectionPoolTest , BadURLTest)
      , ParameterException
     );
 }
-*/
 
 /*
  * Test3: test ConnectionPool start/stop
@@ -121,11 +116,10 @@ TEST(ConnectionPoolTest , ExecuteTransactionTest)
     ASSERT_TRUE(pool != NULL);
     ConnectionPtr conn = pool->getConnection();
     ASSERT_TRUE(conn != NULL);
-    EXPECT_THROW(
+    EXPECT_NO_THROW(
     {
         conn->execute("drop table zild_t");
-    } , SQLException
-    );
+    });
     EXPECT_NO_THROW(
     {
         conn->execute("%s" , SCHEMA_MYSQL);
