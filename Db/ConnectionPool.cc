@@ -150,7 +150,7 @@ ConnectionPtr ConnectionPool::getConnection()
                 goto done;
             }
         }
-        if(size < _maxConnections)
+        if(size <= _maxConnections)
         {
             ConnectionPtr temp(new Connection(this));
             if(temp)
@@ -247,7 +247,7 @@ int ConnectionPool::doReapConnections()
     int reapUpperLimit = totalSize - getActiveConnections() - _initialConnections;
     time_t timeout = Time_now() - _connectionTimeout;
     ConnectionPtr conn;
-    for(UINT i = 0 ; (i != _connectionsVec.size()) && n != reapUpperLimit ; ++i)
+    for(UINT i = 0 ; (i != _connectionsVec.size()) && n != reapUpperLimit + 1 ; ++i)
     {
         conn = _connectionsVec[i];
         if(conn->isAvailable())

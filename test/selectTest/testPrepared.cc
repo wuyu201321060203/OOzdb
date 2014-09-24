@@ -13,6 +13,15 @@ int main(void)
     //pool.setStopHandler(boost::bind(&onStop));
     pool.start<MysqlConnection>();
     ConnectionPtr conn = pool.getConnection();
+    ResultSetPtr names = conn->executeQuery("select name from zild_t where id = 1");
+    while(names->next())
+       printf("%s\n", (names->getString(1)).c_str());
+
+    names = conn->executeQuery("select name from zild_t where id = 2");
+    while(names->next())
+       printf("%s\n", (names->getString(1)).c_str());
+
+    /*
     PreparedStatementPtr pre = conn->getPreparedStatement("select name from zild_t where id = ?");
     pre->setInt(1, 2);
     //ResultSetPtr names = pre->executeQuery();
@@ -24,7 +33,6 @@ int main(void)
     names = pre->executeQuery();
     while(names->next())
        printf("%s\n", (names->getString(1)).c_str());
-    /*
     ResultSetPtr names = conn->executeQuery("select name from zild_t where id = 1");
     while(names->next())
     {

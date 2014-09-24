@@ -101,12 +101,10 @@ ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
     _sb.vset(sql , ap);
     if(prepare(_sb.toString() , _sb.getLength() , &stmt))
     {
-/*
 #if MYSQL_VERSION_ID >= 50002
         ULONG cursor = CURSOR_TYPE_READ_ONLY;
         mysql_stmt_attr_set(stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
-*/
         if((_lastError = mysql_stmt_execute(stmt)))
         {
             _sb.set("%s", mysql_stmt_error(stmt));

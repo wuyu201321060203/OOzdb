@@ -3,7 +3,6 @@
 #include <stdarg.h>
 #include <strings.h>
 #include <mysql/errmsg.h>
-#include <iostream>//TODO
 
 #include <util/StrOperation.h>
 #include <util/MemoryOperation.h>
@@ -32,9 +31,7 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
         _bind = SC<MYSQL_BIND*>( CALLOC(_columnCount , sizeof(MYSQL_BIND)) );
         //bzero(_bind , _columnCount * (sizeof(MYSQL_BIND)));
         ColumnVec temp(_columnCount);
-        std::cout << temp.size() << "\n";//TODO
         _columns.swap(temp);
-        std::cout << _columns.size() << "\n";//TODO
         for(int i = 0 ; i != _columnCount ; ++i)
         {
             _columns[i]._buffer = SC<char*>(ALLOC(STRLEN + 1));
@@ -157,9 +154,9 @@ void MysqlResultSet::clear()
             FREE(_columns[i]._buffer);
         mysql_stmt_free_result(_stmt);
         if(_keep == false)
-            mysql_stmt_close(_stmt);
+            mysql_stmt_close(_stmt);//dangerous
         if(_meta)
-            mysql_free_result(_meta);
+            mysql_free_result(_meta);//dangerous
         FREE(_bind);
         setClearFlag();
     }
@@ -185,13 +182,7 @@ void MysqlResultSet::ensureCapacity(int i)
 {
     if(_columns[i]._real_length > _bind[i].buffer_length)
     {
-        //ugly realization
-        void* temp = NULL;
-        temp = CALLOC(1 , _columns[i]._real_length + 1);
-        memcpy(temp , _columns[i]._buffer , _bind[i].buffer_length);
-        free(_columns[i]._buffer);
-        _columns[i]._buffer = SC<char*>(temp);
-        //TODO
+        RESIZE(SC<void*>(_columns[i]._buffer) , _columns[i]._real_length + 1);
         _bind[i].buffer = _columns[i]._buffer;
         _bind[i].buffer_length = _columns[i]._real_length;
         if ((_lastError = mysql_stmt_fetch_column(_stmt, &_bind[i], i, 0)))

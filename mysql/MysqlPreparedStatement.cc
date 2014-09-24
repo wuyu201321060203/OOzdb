@@ -1,6 +1,4 @@
 #include <strings.h>
-#include <stdio.h>//TODO
-#include <string>//TODO
 
 #include <Exception/SQLException.h>
 #include <util/MemoryOperation.h>
@@ -129,10 +127,8 @@ void MysqlPreparedStatement::execute()
     }
 }
 
-ResultSetPtr MysqlPreparedStatement::executeQuery()//TODO
+ResultSetPtr MysqlPreparedStatement::executeQuery()
 {
-    ResultSetPtr ret;
-    //ResultSet* ret;
     if(_resultSet)
         _resultSet->clear();
     if( LIKELY(_parameterCount > 0) )
@@ -146,14 +142,11 @@ ResultSetPtr MysqlPreparedStatement::executeQuery()//TODO
         THROW(SQLException , "%s", mysql_stmt_error(_stmt));
     else
     {
-        ResultSet* lala = new MysqlResultSet("MysqlResultSet" , _stmt, _maxRows,
-            true);
-        ResultSetPtr temp(lala);         //ret.swap(temp);
-        ret = temp;
-        //while(ret->next())
-         //   printf("%s\n" , (ret->getString(1).c_str()));
+        ResultSetPtr temp(new MysqlResultSet("MysqlResultSet" , _stmt, _maxRows,
+            true));
+        _resultSet.swap(temp);
     }
-    return ret;
+    return _resultSet;
 }
 
 long long MysqlPreparedStatement::rowsChanged()

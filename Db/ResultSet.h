@@ -1,6 +1,8 @@
 #ifndef RESULTSET_H
 #define RESULTSET_H
 
+#include <vector>
+
 #include <boost/shared_ptr.hpp>
 
 #include <util/TimeOperation.h>
@@ -53,5 +55,6 @@ private:
 };
 
 typedef boost::shared_ptr<ResultSet> ResultSetPtr;
+typedef std::vector<ResultSetPtr> ResultSetVec;
 
 #endif
