@@ -13,10 +13,10 @@ public:
 
     struct column_t
     {
-        my_bool is_null;
-        MYSQL_FIELD *field;
-        ULONG real_length;
-        char* buffer;
+        my_bool _is_null;
+        MYSQL_FIELD* _field;
+        ULONG _real_length;
+        char* _buffer;
     };
 
     typedef std::vector<column_t> ColumnVec;

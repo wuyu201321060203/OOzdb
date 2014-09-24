@@ -10,7 +10,7 @@ Connection::Connection(ConnectionPool* pool):
     _timeout(SQL_DEFAULT_TIMEOUT),
     _url(_pool->getURL()),
     _lastAccessedTime(Time_now()),
-    _maxRows(0)
+    _maxRows(DEFAULT_MAX_ROWS)
 {
     assert(_pool);
 }

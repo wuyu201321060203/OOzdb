@@ -32,7 +32,7 @@ public:
     virtual void setBlob(int parameterIndex , const void *x , int size);
     virtual void setTimestamp(int parameterIndex, time_t x);
     virtual void execute();
-    virtual ResultSetPtr executeQuery();
+    virtual ResultSetPtr executeQuery();//TODO
     virtual long long rowsChanged();
     virtual void clear();
 
@@ -41,8 +41,8 @@ private:
     int _maxRows;
     int _lastError;
     param_t* _params;
-    MYSQL_STMT *_stmt;
-    MYSQL_BIND *_bind;
+    MYSQL_STMT* _stmt;
+    MYSQL_BIND* _bind;
 };
 
 #endif

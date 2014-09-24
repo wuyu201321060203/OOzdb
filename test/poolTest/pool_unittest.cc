@@ -114,12 +114,13 @@ TEST(ConnectionPoolTest , ExecuteTransactionTest)
 
     ConnectionPoolPtr pool(new ConnectionPool(testURL));
     ASSERT_TRUE(pool != NULL);
+    pool->start<MysqlConnection>();
     ConnectionPtr conn = pool->getConnection();
     ASSERT_TRUE(conn != NULL);
-    EXPECT_NO_THROW(
+    EXPECT_THROW(
     {
         conn->execute("drop table zild_t");
-    });
+    } , SQLException);
     EXPECT_NO_THROW(
     {
         conn->execute("%s" , SCHEMA_MYSQL);
@@ -156,13 +157,14 @@ TEST(ConnectionPoolTest , PreparedStatement)
     };
     ConnectionPoolPtr pool( new ConnectionPool(testURL) );
     ASSERT_TRUE(pool != NULL);
+    pool->start<MysqlConnection>();
     ConnectionPtr conn = pool->getConnection();
     ASSERT_TRUE(conn != NULL);
     PreparedStatementPtr st = conn->getPreparedStatement("update zild_t set image=?;");
     ASSERT_TRUE(st != NULL);
-    st->setString(1 , "");
+    st->setString(1 , "xx");
     st->execute();
-    EXPECT_EQ(12 , st->rowsChanged());
+    EXPECT_EQ(11 , st->rowsChanged());
     PreparedStatementPtr st1 = conn->getPreparedStatement("update zild_t set image=? where id=?;");
     ASSERT_TRUE(st1 != NULL);
     EXPECT_EQ(2 , st1->getParameterCount());
@@ -178,7 +180,7 @@ TEST(ConnectionPoolTest , PreparedStatement)
         st1->setBlob(1, NULL, 0);
         st1->setInt(2, 5);
         st1->execute();
-        st1->setString(1, NULL);
+        st1->setString(1, "");
         st1->setInt(2, 1);
         st1->execute();
         memset(blob, 'x', 8192);
@@ -201,6 +203,7 @@ TEST(ConnectionPoolTest , ResultSet)
     int imagesize = 0;
     ConnectionPoolPtr pool(new ConnectionPool(testURL));
     ASSERT_TRUE(pool != NULL);
+    pool->start<MysqlConnection>();
     ConnectionPtr conn = pool->getConnection();
     ASSERT_TRUE(conn != NULL);
     ResultSetPtr rset;
@@ -222,7 +225,7 @@ TEST(ConnectionPoolTest , ResultSet)
         char const* blob = static_cast<char const*>( rset->getBlob(4, &imagesize) );
         printf("\t%-5d%-16s%-10.2f%-16.38s\n", id, name ? name : "null", percent, imagesize ? blob : "");
     }
-    rset = conn->executeQuery("select image from zild_t where id=12;");
+    rset = conn->executeQuery("select image from zild_t where id=11;");
     EXPECT_EQ(1 , rset->getColumnCount());
     // Assert that types are interchangeable and that all data is returned
     while(rset->next())
@@ -230,8 +233,8 @@ TEST(ConnectionPoolTest , ResultSet)
         char const* image = (rset->getStringByName("image")).c_str();
         void const* blob = rset->getBlobByName("image", &imagesize);
         ASSERT_TRUE((image && blob) == true);
-        EXPECT_EQ(8192 , strlen(image) + 1);
-        EXPECT_EQ(8192 , imagesize);
+        EXPECT_EQ(25 , strlen(image) + 1);
+        EXPECT_EQ(25 , imagesize);
     }
     rset = conn->executeQuery("select id, image from zild_t where id in(1,5,2);");
     while(rset->next())
@@ -248,7 +251,6 @@ TEST(ConnectionPoolTest , ResultSet)
     i = 0;
     while (rset->next()) i++;
     EXPECT_TRUE(i == 3);
-    conn->setMaxRows(0);
     PreparedStatementPtr pre = conn->getPreparedStatement("select name from zild_t where id=?");
     ASSERT_TRUE(pre != NULL);
     pre->setInt(1, 2);
@@ -259,7 +261,7 @@ TEST(ConnectionPoolTest , ResultSet)
     pre->setInt(1, 1);
     names = pre->executeQuery();
     ASSERT_TRUE(names != NULL);
-    ASSERT_TRUE(names->next());
+    ASSERT_TRUE(names->next());//TODO
     EXPECT_EQ("Fry", names->getString(1));
     pre = conn->getPreparedStatement("select name from zild_t;");
     ASSERT_TRUE(pre);

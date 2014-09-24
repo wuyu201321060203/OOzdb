@@ -22,7 +22,7 @@ public:
     virtual void setBlob(int parameterIndex , void const* x , int size);
     virtual void setTimestamp(int parameterIndex , time_t x);
     virtual void execute();
-    virtual ResultSetPtr executeQuery();
+    virtual ResultSetPtr executeQuery();//TODO
     virtual long long rowsChanged();
     virtual void clear();
     int getParameterCount();

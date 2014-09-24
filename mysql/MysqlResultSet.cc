@@ -1,7 +1,9 @@
 #include <cassert>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <strings.h>
 #include <mysql/errmsg.h>
+#include <iostream>//TODO
 
 #include <util/StrOperation.h>
 #include <util/MemoryOperation.h>
@@ -11,13 +13,14 @@
 
 MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
                                int keep):
-    ResultSet(name)
+    ResultSet(name) , _stop(false) , _needRebind(false) , _currentRow(0)
 {
     assert(stmt);
     _stmt = SC<MYSQL_STMT*>(stmt);
     _keep = keep;
     _maxRows = maxRows;
-    _columnCount = mysql_stmt_field_count(_stmt);
+    _columnCount = 1;
+   // _columnCount = mysql_stmt_field_count(_stmt);
     if( UNLIKELY((_columnCount <= 0) ||
         !(_meta = mysql_stmt_result_metadata(_stmt)) ))
     {
@@ -27,17 +30,21 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
     else
     {
         _bind = SC<MYSQL_BIND*>( CALLOC(_columnCount , sizeof(MYSQL_BIND)) );
+        //bzero(_bind , _columnCount * (sizeof(MYSQL_BIND)));
         ColumnVec temp(_columnCount);
+        std::cout << temp.size() << "\n";//TODO
         _columns.swap(temp);
-        for(int i = 0; i < _columnCount; i++)
+        std::cout << _columns.size() << "\n";//TODO
+        for(int i = 0 ; i != _columnCount ; ++i)
         {
-            _columns[i].buffer = SC<char*>(ALLOC(STRLEN + 1));
+            _columns[i]._buffer = SC<char*>(ALLOC(STRLEN + 1));
+            bzero(_columns[i]._buffer , STRLEN + 1);
             _bind[i].buffer_type = MYSQL_TYPE_STRING;
-            _bind[i].buffer = _columns[i].buffer;
+            _bind[i].buffer = _columns[i]._buffer;
             _bind[i].buffer_length = STRLEN;
-            _bind[i].is_null = &_columns[i].is_null;
-            _bind[i].length = &_columns[i].real_length;
-            _columns[i].field = mysql_fetch_field_direct(_meta, i);
+            _bind[i].is_null = 0;//&_columns[i]._is_null;
+            _bind[i].length = &_columns[i]._real_length;
+            //_columns[i]._field = mysql_fetch_field_direct(_meta, i);
         }
         if((_lastError = mysql_stmt_bind_result(_stmt, _bind)))
         {
@@ -82,17 +89,17 @@ int MysqlResultSet::next()
 int MysqlResultSet::isnull(int columnIndex)
 {
     int i = checkAndSetColumnIndex(columnIndex);
-    return _columns[i].is_null;
+    return _columns[i]._is_null;
 }
 
 CONST_STDSTR MysqlResultSet::getString(int columnIndex)
 {
     int i = checkAndSetColumnIndex(columnIndex);
-    if (_columns[i].is_null)
+    if (_columns[i]._is_null)
         return BADSTR;
     ensureCapacity(i);
-    _columns[i].buffer[_columns[i].real_length] = 0;
-    return STDSTR(_columns[i].buffer);
+    _columns[i]._buffer[_columns[i]._real_length] = 0;
+    return STDSTR(_columns[i]._buffer);
 }
 
 int MysqlResultSet::getInt(int columnIndex)
@@ -116,14 +123,14 @@ double MysqlResultSet::getDouble(int columnIndex)
 void const* MysqlResultSet::getBlob(int columnIndex, int* size)
 {
     int i = checkAndSetColumnIndex(columnIndex);
-    if (_columns[i].is_null)
+    if (_columns[i]._is_null)
     {
         *size = 0;
         return NULL;
     }
     ensureCapacity(i);
-    *size = SC<int>(_columns[i].real_length);
-    return _columns[i].buffer;
+    *size = SC<int>(_columns[i]._real_length);
+    return _columns[i]._buffer;
 }
 
 time_t MysqlResultSet::getTimestamp(int columnIndex)
@@ -147,7 +154,7 @@ void MysqlResultSet::clear()
     if(!isCleared())
     {
         for(int i = 0; i < _columnCount; i++)
-            FREE(_columns[i].buffer);
+            FREE(_columns[i]._buffer);
         mysql_stmt_free_result(_stmt);
         if(_keep == false)
             mysql_stmt_close(_stmt);
@@ -163,30 +170,30 @@ CONST_STDSTR MysqlResultSet::getColumnName(int columnIndex)
     --columnIndex;
     if( _columnCount <= 0 || columnIndex < 0 || columnIndex > _columnCount)
         return BADSTR;
-    return STDSTR(_columns[columnIndex].field->name);
+    return STDSTR(_columns[columnIndex]._field->name);
 }
 
 long MysqlResultSet::getColumnSize(int columnIndex)
 {
     int i = checkAndSetColumnIndex(columnIndex);
-    if (_columns[i].is_null)
+    if (_columns[i]._is_null)
             return 0;
-    return _columns[i].real_length;
+    return _columns[i]._real_length;
 }
 
 void MysqlResultSet::ensureCapacity(int i)
 {
-    if(_columns[i].real_length > _bind[i].buffer_length)
+    if(_columns[i]._real_length > _bind[i].buffer_length)
     {
         //ugly realization
         void* temp = NULL;
-        temp = CALLOC(1 , _columns[i].real_length + 1);
-        memcpy(temp , _columns[i].buffer , _bind[i].buffer_length);
-        free(_columns[i].buffer);
-        _columns[i].buffer = SC<char*>(temp);
+        temp = CALLOC(1 , _columns[i]._real_length + 1);
+        memcpy(temp , _columns[i]._buffer , _bind[i].buffer_length);
+        free(_columns[i]._buffer);
+        _columns[i]._buffer = SC<char*>(temp);
         //TODO
-        _bind[i].buffer = _columns[i].buffer;
-        _bind[i].buffer_length = _columns[i].real_length;
+        _bind[i].buffer = _columns[i]._buffer;
+        _bind[i].buffer_length = _columns[i]._real_length;
         if ((_lastError = mysql_stmt_fetch_column(_stmt, &_bind[i], i, 0)))
             THROW(SQLException , "mysql_stmt_fetch_column -- %s",
                                                         mysql_stmt_error(_stmt));

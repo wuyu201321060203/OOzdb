@@ -91,20 +91,22 @@ void MysqlConnection::execute(char const* sql , ...)
 ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
 {
     assert(sql);
+    va_list ap;
+    va_start(ap , sql);
     if(_resultSet)
     {
         _resultSet->clear();
     }
-    va_list ap;
-    va_start(ap , sql);
     MYSQL_STMT* stmt = NULL;
     _sb.vset(sql , ap);
     if(prepare(_sb.toString() , _sb.getLength() , &stmt))
     {
+/*
 #if MYSQL_VERSION_ID >= 50002
         ULONG cursor = CURSOR_TYPE_READ_ONLY;
         mysql_stmt_attr_set(stmt, STMT_ATTR_CURSOR_TYPE, &cursor);
 #endif
+*/
         if((_lastError = mysql_stmt_execute(stmt)))
         {
             _sb.set("%s", mysql_stmt_error(stmt));
@@ -112,7 +114,8 @@ ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
         }
         else
         {
-            ResultSetPtr temp(new MysqlResultSet("MysqlResultSet" , stmt , _maxRows , false));
+            ResultSetPtr temp(new MysqlResultSet("MysqlResultSet" ,
+                                                 stmt , _maxRows , false));
             _resultSet.swap(temp);
         }
     }

@@ -4,7 +4,7 @@
 
 ResultSet::ResultSet(CONST_STDSTR name):
     _resultSetName(name),
-    _maxRows(0),
+    _maxRows(DEFAULT_MAX_ROWS),
     _columnCount(0),
     _isCleared(false)
 {

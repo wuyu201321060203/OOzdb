@@ -198,4 +198,9 @@ typedef std::string STDSTR;
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 #define UNLIKELY(x) __builtin_expect(!!(x), 0)
 
+/*
+ * Default max rows of a query's result
+ */
+#define DEFAULT_MAX_ROWS 100
+
 #endif

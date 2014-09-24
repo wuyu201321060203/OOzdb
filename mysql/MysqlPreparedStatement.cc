@@ -1,3 +1,7 @@
+#include <strings.h>
+#include <stdio.h>//TODO
+#include <string>//TODO
+
 #include <Exception/SQLException.h>
 #include <util/MemoryOperation.h>
 
@@ -17,6 +21,8 @@ MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
         _params = SC<param_t*>(CALLOC(_parameterCount, sizeof(param_t)));
         _bind = SC<MYSQL_BIND*>(CALLOC(_parameterCount, sizeof(MYSQL_BIND)));
     }
+    bzero(_params , _parameterCount*sizeof(param_t));
+    bzero(_bind , _parameterCount*sizeof(MYSQL_BIND));
     _lastError = MYSQL_OK;
 }
 
@@ -123,9 +129,10 @@ void MysqlPreparedStatement::execute()
     }
 }
 
-ResultSetPtr MysqlPreparedStatement::executeQuery()
+ResultSetPtr MysqlPreparedStatement::executeQuery()//TODO
 {
     ResultSetPtr ret;
+    //ResultSet* ret;
     if(_resultSet)
         _resultSet->clear();
     if( LIKELY(_parameterCount > 0) )
@@ -139,9 +146,12 @@ ResultSetPtr MysqlPreparedStatement::executeQuery()
         THROW(SQLException , "%s", mysql_stmt_error(_stmt));
     else
     {
-        ResultSetPtr temp( new MysqlResultSet("MysqlResultSet" , _stmt, _maxRows,
-            true));
-        ret.swap(temp);
+        ResultSet* lala = new MysqlResultSet("MysqlResultSet" , _stmt, _maxRows,
+            true);
+        ResultSetPtr temp(lala);         //ret.swap(temp);
+        ret = temp;
+        //while(ret->next())
+         //   printf("%s\n" , (ret->getString(1).c_str()));
     }
     return ret;
 }

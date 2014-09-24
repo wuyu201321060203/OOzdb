@@ -43,7 +43,8 @@ void PreparedStatement::execute()
 ResultSetPtr PreparedStatement::executeQuery()
 {
     _resultSet->clear();
-    return _resultSet;
+    //return _resultSet;
+    return NULL;
 }
 
 long long PreparedStatement::rowsChanged()
