@@ -27,7 +27,7 @@ typedef boost::function<void (void)> ThreadFunc;
 typedef boost::function<void (void)> StopHandler;
 typedef boost::shared_ptr<Thread> ThreadPtr;
 
-#define VERSION "0.1"
+#define VERSION "1.0"
 #define OOzdb_URL "https://github.com/wuyu201321060203/OOzdb"
 
 #define ABOUT "OOzdb/" VERSION " Copyright (C) Wu Yu" OOzdb_URL
