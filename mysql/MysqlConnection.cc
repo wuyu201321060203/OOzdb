@@ -247,7 +247,7 @@ int MysqlConnection::prepare(char const* sql , int len , MYSQL_STMT** stmt)
         _sb.set("%s", mysql_stmt_error(*stmt));
         mysql_stmt_close(*stmt);
         *stmt = NULL;
-        return false;
+        THROW(SQLException , "prepare stmt error");
     }
     return true;
 }

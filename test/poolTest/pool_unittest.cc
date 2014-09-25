@@ -115,7 +115,7 @@ TEST(ConnectionPoolTest , ExecuteTransactionTest)
     ConnectionPoolPtr pool(new ConnectionPool(testURL));
     ASSERT_TRUE(pool != NULL);
     pool->start<MysqlConnection>();
-    ConnectionPtr conn = pool->getConnection();
+    ConnectionPtr conn = pool->getConnection<MysqlConnection>();
     ASSERT_TRUE(conn != NULL);
     EXPECT_THROW(
     {
@@ -158,7 +158,7 @@ TEST(ConnectionPoolTest , PreparedStatement)
     ConnectionPoolPtr pool( new ConnectionPool(testURL) );
     ASSERT_TRUE(pool != NULL);
     pool->start<MysqlConnection>();
-    ConnectionPtr conn = pool->getConnection();
+    ConnectionPtr conn = pool->getConnection<MysqlConnection>();
     ASSERT_TRUE(conn != NULL);
     PreparedStatementPtr st = conn->getPreparedStatement("update zild_t set image=?;");
     ASSERT_TRUE(st != NULL);
@@ -198,14 +198,13 @@ TEST(ConnectionPoolTest , PreparedStatement)
  * Test6: test Result sets
  */
 
-/*
 TEST(ConnectionPoolTest , ResultSet)
 {
     int imagesize = 0;
     ConnectionPoolPtr pool(new ConnectionPool(testURL));
     ASSERT_TRUE(pool != NULL);
     pool->start<MysqlConnection>();
-    ConnectionPtr conn = pool->getConnection();
+    ConnectionPtr conn = pool->getConnection<MysqlConnection>();
     ASSERT_TRUE(conn != NULL);
     ResultSetPtr rset;
     EXPECT_NO_THROW({
@@ -264,18 +263,18 @@ TEST(ConnectionPoolTest , ResultSet)
     ASSERT_TRUE(names != NULL);
     ASSERT_TRUE(names->next());//TODO
     EXPECT_EQ("Fry", names->getString(1));
+    conn->setMaxRows(11);
     pre = conn->getPreparedStatement("select name from zild_t;");
     ASSERT_TRUE(pre);
     names = pre->executeQuery();
     ASSERT_TRUE(names);
-    for(i = 0 ; rset->next() ; i++);
+    for(i = 0 ; names->next() ; i++);
     EXPECT_EQ(11 , i);
     // Need to close and release statements before
      //  we can drop the table, sqlite need this
     conn->clear();
     conn->execute("drop table zild_t;");
 }
-*/
 
 /*
  * Test7: reaper start/stop
@@ -295,19 +294,17 @@ TEST(ConnectionPoolTest , ReaperTest)
     pool->start<MysqlConnection>();
     ASSERT_EQ(4 , pool->getSize());
     for(i = 0 ; i<20 ; i++)
-        connections.push_back(pool->getConnection());
+        connections.push_back(pool->getConnection<MysqlConnection>());
     EXPECT_EQ(20 , pool->getSize());
+    EXPECT_EQ(20 , pool->getActiveConnections());
+    for(ConnectionVec::iterator ptr = connections.begin() ; ptr != connections.end() ; ++ptr)
+        (*ptr)->close();
+    connections.clear();
     EXPECT_EQ(0 , pool->getActiveConnections());
-    while(!connections.empty())
-    {
-        (connections.front())->close();
-        connections.erase(connections.begin());
-    }
-    EXPECT_EQ(4 , pool->getActiveConnections());
     EXPECT_EQ(20 , pool->getSize());
-    ConnectionPtr con = pool->getConnection();
+    ConnectionPtr con = pool->getConnection<MysqlConnection>();
     sleep(10);
-    EXPECT_EQ(5 , pool->getSize()); // 4 initial connections + the one active we got above
+    EXPECT_EQ(4 , pool->getSize());
     EXPECT_EQ(1 , pool->getActiveConnections());
     con->close();
     pool->stop();
@@ -326,7 +323,7 @@ void testHelper()
     };
     ConnectionPoolPtr pool(new ConnectionPool(testURL));
     pool->start<MysqlConnection>();
-    ConnectionPtr con = pool->getConnection();
+    ConnectionPtr con = pool->getConnection<MysqlConnection>();
     con->beginTransaction();
     for(int i = 0 ; data[i] ; i++)
         con->execute("insert into zild_t (name, percent) values('%s', %d.%d);" , data[i] , i+1 , i);
@@ -339,7 +336,7 @@ TEST(COnnectionPoolTest , ExceptionHandling)
     ConnectionPoolPtr pool(new ConnectionPool(testURL));
     ASSERT_TRUE(pool != NULL);
     pool->start<MysqlConnection>();
-    ConnectionPtr con = pool->getConnection();
+    ConnectionPtr con = pool->getConnection<MysqlConnection>();
     ASSERT_TRUE(con != NULL);
     ResultSetPtr r;
     PreparedStatementPtr p;
@@ -356,7 +353,7 @@ TEST(COnnectionPoolTest , ExceptionHandling)
         testHelper();
     });
     con->close();
-    con = pool->getConnection();
+    con = pool->getConnection<MysqlConnection>();
 
     /* //TODO
     EXPECT_NO_THROW({
@@ -391,7 +388,7 @@ TEST(COnnectionPoolTest , ExceptionHandling)
      * out of range, while Connection_getLastError(con) only has SQL errors
      */
     EXPECT_THROW({
-        con = pool->getConnection();
+        con = pool->getConnection<MysqlConnection>();
         ASSERT_TRUE(con != NULL);
         con->execute("%s", SCHEMA_MYSQL);
         /* Creating the table again should fail and we
@@ -400,14 +397,14 @@ TEST(COnnectionPoolTest , ExceptionHandling)
     } , SQLException);
     con->close();
     EXPECT_THROW({
-        con = pool->getConnection();
+        con = pool->getConnection<MysqlConnection>();
         ASSERT_TRUE(con != NULL);
         con->executeQuery("blablabala;");
     } , SQLException);
     con->close();
     EXPECT_THROW({
         printf("\tTesting: Prepared statement query with errors.. ");
-        con = pool->getConnection();
+        con = pool->getConnection<MysqlConnection>();
         ASSERT_TRUE(con != NULL);
         p = con->getPreparedStatement("blalalalal");
         r = p->executeQuery();
@@ -416,7 +413,7 @@ TEST(COnnectionPoolTest , ExceptionHandling)
     con->close();
     EXPECT_THROW(
     {
-        con = pool->getConnection();
+        con = pool->getConnection<MysqlConnection>();
         r = con->executeQuery("select id, name from zild_t;");
         while(r->next())
         {
@@ -430,7 +427,7 @@ TEST(COnnectionPoolTest , ExceptionHandling)
     con->close();
     EXPECT_THROW(
     {
-        con = pool->getConnection();
+        con = pool->getConnection<MysqlConnection>();
         r = con->executeQuery("select name from zild_t;");
         while(r->next())
         {
@@ -440,129 +437,13 @@ TEST(COnnectionPoolTest , ExceptionHandling)
     con->close();
     EXPECT_THROW(
     {
-        con = pool->getConnection();
+        con = pool->getConnection<MysqlConnection>();
         p = con->getPreparedStatement("update zild_t set name = ? where id = ?;");
         p->setInt(3, 123);
     } , SQLException);
     con->close();
-    con = pool->getConnection();
+    con = pool->getConnection<MysqlConnection>();
     ASSERT_TRUE(con != NULL);
-    con->execute("drop table zild_t;");
-    con->close();
-}
-
-/*
- * Test9: Ensure Capacity
- */
-
-TEST(ConnectionPoolTest , EnsureCapacityTest)
-{
-    /* Check that MySQL ensureCapacity works for columns that exceed the preallocated buffer and that no truncation is done */
-    int myimagesize;
-    ConnectionPoolPtr pool(new ConnectionPool(testURL));
-    ASSERT_TRUE(pool != NULL);
-    pool->start<MysqlConnection>();
-    ConnectionPtr con = pool->getConnection();
-    ASSERT_TRUE(con != NULL);
-    con->execute("CREATE TABLE zild_t(id INTEGER AUTO_INCREMENT PRIMARY KEY, image BLOB, string TEXT);");
-    PreparedStatementPtr p = con->getPreparedStatement("insert into zild_t (image, string) values(?, ?);");
-    char t[4096];
-    memset(t, 'x', 4096);
-    t[4095] = 0;
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        p->setBlob(1, t, (i+1)*512); // store successive larger string-blobs to trigger realloc on ResultSet_getBlobByName
-        p->setString(2, t);
-        p->execute();
-    }
-    ResultSetPtr r = con->executeQuery("select image, string from zild_t;");
-    for(int i = 0 ; r->next() ; i++)
-    {
-        r->getBlobByName("image", &myimagesize);
-        char const* image = (r->getStringByName("image")).c_str(); // Blob as image should be terminated
-        char const* string = (r->getStringByName("string")).c_str();
-        EXPECT_EQ((i + 1) * 512 , myimagesize);
-        EXPECT_EQ((i + 1) * 512 , strlen(image));
-        EXPECT_EQ(4095 , strlen(string));
-    }
-    p = con->getPreparedStatement("select image, string from zild_t;");
-    r = p->executeQuery();
-    for(int i = 0 ; r->next() ; i++)
-    {
-        r->getBlobByName("image", &myimagesize);
-        char const* image = (r->getStringByName("image")).c_str();
-        char const* string = (r->getStringByName("string").c_str());
-        EXPECT_EQ((i + 1) * 512 , myimagesize);
-        EXPECT_EQ((i + 1) * 512 , strlen(image));
-        EXPECT_EQ(4095 , strlen(string));
-    }
-    con->execute("drop table zild_t;");
-    con->close();
-}
-
-/*
- * Test10: Date , Time , DateTime and Timestamp
- */
-
-TEST(ConnectionPoolTest , TimeTest)
-{
-    ConnectionPoolPtr pool(new ConnectionPool(testURL));
-    ASSERT_TRUE( pool != NULL );
-    setenv("TZ", "Europe/Oslo" , 1);
-    pool->start<MysqlConnection>();
-    ConnectionPtr con = pool->getConnection();
-    con->execute("create table zild_t(d date, t time, dt datetime, ts timestamp)");
-    PreparedStatementPtr p = con->getPreparedStatement("insert into zild_t values (?, ?, ?, ?)");
-    p->setString(1, "2013-12-28");
-    p->setString(2, "10:12:42");
-    p->setString(3, "2013-12-28 10:12:42");
-    p->setTimestamp(4, 1387066378);
-    p->execute();
-    ResultSetPtr r = con->executeQuery("select * from zild_t");
-    if(r->next())
-    {
-        struct tm date = r->getDateTime(1);
-        struct tm time = r->getDateTime(2);
-        struct tm datetime = r->getDateTime(3);
-        time_t timestamp = r->getTimestamp(4);
-        struct tm timestampAsTm = r->getDateTime(4);
-        // Check Date
-        EXPECT_EQ(0 , date.tm_hour);
-        EXPECT_EQ(2013 , date.tm_year);
-        EXPECT_EQ(11 , date.tm_mon);
-        EXPECT_EQ(28 , date.tm_mday);
-        EXPECT_EQ(0 , date.TM_GMTOFF);
-        // Check Time
-        EXPECT_EQ(0 , time.tm_year);
-        EXPECT_EQ(10 , time.tm_hour);
-        EXPECT_EQ(12 , time.tm_min);
-        EXPECT_EQ(42 , time.tm_sec);
-        EXPECT_EQ(0 , time.TM_GMTOFF);
-        // Check datetime
-        EXPECT_EQ(2013 , datetime.tm_year);
-        EXPECT_EQ(11 , datetime.tm_mon);
-        EXPECT_EQ(28 , datetime.tm_mday);
-        EXPECT_EQ(10 , datetime.tm_hour);
-        EXPECT_EQ(12 , datetime.tm_min);
-        EXPECT_EQ(42 , datetime.tm_sec);
-        EXPECT_EQ(0 , datetime.TM_GMTOFF);
-        // Check timestamp
-        EXPECT_EQ(1387066378 , timestamp);
-        // Check timestamp as datetime
-        EXPECT_EQ(2013 , timestampAsTm.tm_year);
-        EXPECT_EQ(11 , timestampAsTm.tm_mon);
-        EXPECT_EQ(15 , timestampAsTm.tm_mday);
-        EXPECT_EQ(0 , timestampAsTm.tm_hour);
-        EXPECT_EQ(12 , timestampAsTm.tm_min);
-        EXPECT_EQ(58 , timestampAsTm.tm_sec);
-        EXPECT_EQ(0 , timestampAsTm.TM_GMTOFF);
-        // Result
-        printf("\tResult: Date: %s, Time: %s, DateTime: %s, Timestamp: %s\n",
-            (r->getString(1)).c_str(),
-            (r->getString(2)).c_str(),
-            (r->getString(3)).c_str(),
-            (r->getString(4)).c_str()); // SQLite will show unix time, others will show a time string
-    }
     con->execute("drop table zild_t;");
     con->close();
 }

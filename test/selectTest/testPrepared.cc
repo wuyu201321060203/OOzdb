@@ -12,8 +12,8 @@ int main(void)
     ConnectionPool pool("mysql://root:123@localhost:3306/test");
     //pool.setStopHandler(boost::bind(&onStop));
     pool.start<MysqlConnection>();
-    ConnectionPtr conn = pool.getConnection();
-    ResultSetPtr names = conn->executeQuery("select name from zild_t where id = 1");
+    ConnectionPtr conn = pool.getConnection<MysqlConnection>();
+    ResultSetPtr names = conn->executeQuery("balalalala");
     while(names->next())
        printf("%s\n", (names->getString(1)).c_str());
 

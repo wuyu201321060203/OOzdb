@@ -18,8 +18,7 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
     _stmt = SC<MYSQL_STMT*>(stmt);
     _keep = keep;
     _maxRows = maxRows;
-    _columnCount = 1;
-   // _columnCount = mysql_stmt_field_count(_stmt);
+    _columnCount = mysql_stmt_field_count(_stmt);
     if( UNLIKELY((_columnCount <= 0) ||
         !(_meta = mysql_stmt_result_metadata(_stmt)) ))
     {
@@ -29,7 +28,6 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
     else
     {
         _bind = SC<MYSQL_BIND*>( CALLOC(_columnCount , sizeof(MYSQL_BIND)) );
-        //bzero(_bind , _columnCount * (sizeof(MYSQL_BIND)));
         ColumnVec temp(_columnCount);
         _columns.swap(temp);
         for(int i = 0 ; i != _columnCount ; ++i)
@@ -39,9 +37,9 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
             _bind[i].buffer_type = MYSQL_TYPE_STRING;
             _bind[i].buffer = _columns[i]._buffer;
             _bind[i].buffer_length = STRLEN;
-            _bind[i].is_null = 0;//&_columns[i]._is_null;
+            _bind[i].is_null = &_columns[i]._is_null;
             _bind[i].length = &_columns[i]._real_length;
-            //_columns[i]._field = mysql_fetch_field_direct(_meta, i);
+            _columns[i]._field = mysql_fetch_field_direct(_meta, i);
         }
         if((_lastError = mysql_stmt_bind_result(_stmt, _bind)))
         {

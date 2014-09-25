@@ -52,7 +52,7 @@ public:
     int getActiveConnections();
     template<typename ConcreteConnection> void start();
     void stop();
-    ConnectionPtr getConnection();
+    template<typename ConcreteConnection> ConnectionPtr getConnection();
     void returnConnection(ConnectionPtr conn);
     int reapConnections();
     CONST_STDSTR getVersion() const;
@@ -112,6 +112,42 @@ void ConnectionPool::start()//Best Practice:each ConnectionPool only start once
         setStopHandler(boost::bind(&ConcreteConnection::onStop));
     else
         LOG_FATAL << "Failed to start connection pool";
+}
+
+template<typename ConcreteConnection>
+ConnectionPtr ConnectionPool::getConnection()
+{
+    ConnectionPtr conn;
+    {
+        MutexLockGuard lock(_mutex);
+        int size = _connectionsVec.size();
+        for( int i = 0; i != size ; ++i )
+        {
+            ConnectionPtr temp(_connectionsVec.at(i));
+            if(temp->isAvailable() && temp->ping())
+            {
+                temp->setAvailable(false);
+                conn.swap(temp);
+                goto done;
+            }
+        }
+        if(size <= _maxConnections)
+        {
+            ConnectionPtr temp(new ConcreteConnection(this , &_error));
+            if(temp)
+            {
+                temp->setAvailable(false);
+                _connectionsVec.push_back(temp);
+                conn.swap(temp);
+            }
+            else
+            {
+                LOG_DEBUG << "Failed to create connection\n";
+            }
+        }
+    }
+done:
+    return conn;
 }
 
 template<typename ConcreteConnection>

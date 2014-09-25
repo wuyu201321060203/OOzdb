@@ -27,7 +27,7 @@ public:
     virtual PreparedStatementPtr getPreparedStatement(char const* sql,
                                     ...)__attribute__((format (printf, 2, 3)));
     virtual CONST_STDSTR getLastError();
-    virtual void close();//TODO
+    virtual void close();
     static void onStop();
 
 private:

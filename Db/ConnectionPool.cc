@@ -105,10 +105,7 @@ int ConnectionPool::getSize() const
 int ConnectionPool::getActiveConnections()
 {
     int n = 0;
-    {
-        MutexLockGuard lock(_mutex);
-        n = doGetActiveConnections();
-    }
+    n = doGetActiveConnections();
     return n;
 }
 
@@ -132,41 +129,6 @@ void ConnectionPool::stop()
         _alarm.notify();
         _reaper->join();
     }
-}
-
-ConnectionPtr ConnectionPool::getConnection()
-{
-    ConnectionPtr conn;
-    {
-        MutexLockGuard lock(_mutex);
-        int size = _connectionsVec.size();
-        for( int i = 0; i != size ; ++i )
-        {
-            ConnectionPtr temp = _connectionsVec.at(i);
-            if(temp->isAvailable() && temp->ping())
-            {
-                temp->setAvailable(false);
-                conn.swap(temp);
-                goto done;
-            }
-        }
-        if(size <= _maxConnections)
-        {
-            ConnectionPtr temp(new Connection(this));
-            if(temp)
-            {
-                temp->setAvailable(false);
-                _connectionsVec.push_back(temp);
-                conn.swap(temp);
-            }
-            else
-            {
-                LOG_DEBUG << "Failed to create connection\n";
-            }
-        }
-    }
-done:
-    return conn;
 }
 
 void ConnectionPool::returnConnection(ConnectionPtr conn)
@@ -193,10 +155,7 @@ void ConnectionPool::returnConnection(ConnectionPtr conn)
 int ConnectionPool::reapConnections()
 {
     int n = 0;
-    {
-        MutexLockGuard lock(_mutex);
-        n = doReapConnections();
-    }
+    n = doReapConnections();
     return n;
 }
 
@@ -235,8 +194,15 @@ void ConnectionPool::drainPool()
 int ConnectionPool::doGetActiveConnections()
 {
     int n = 0;
+    int temp = 0;
+    std::cout << _connectionsVec.size() << "\n";
+    for(unsigned int i = 0 ; i != _connectionsVec.size() ; ++i)
+    {
+        if(!_connectionsVec[i]->isAvailable())
+            ++temp;
+    }
     std::for_each(_connectionsVec.begin() , _connectionsVec.end(),
-                  [&n](ConnectionPtr& conn){if(conn->isAvailable()) ++n;});
+                  [&n](ConnectionPtr& conn){if(!conn->isAvailable()) ++n;});
     return n;
 }
 
