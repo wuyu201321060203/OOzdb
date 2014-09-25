@@ -13,7 +13,7 @@ int main(void)
     //pool.setStopHandler(boost::bind(&onStop));
     pool.start<MysqlConnection>();
     ConnectionPtr conn = pool.getConnection<MysqlConnection>();
-    ResultSetPtr names = conn->executeQuery("balalalala");
+    ResultSetPtr names = conn->executeQuery("select name from zild_t where id = 1");
     while(names->next())
        printf("%s\n", (names->getString(1)).c_str());
 
