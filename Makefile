@@ -29,12 +29,6 @@ $(BIN_PROGRAM): Connection.o PreparedStatement.o ResultSet.o ConnectionPool.o\
 	  StringBuffer.o StrOperation.o MemoryOperation.o TimeOperation.o URL.o example1.o
 	g++ $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-OOzdb.a: OOzdb-all.o
-	$(AR) $(ARFLAGS) $@ $^
-
-OOzdb-all.o: $(SRC)/OOzdb-all.cc
-	g++ $(CXXFLAGS) -c $^
-
 Connection.o: $(SRC)/Db/Connection.cc
 	g++ $(CXXFLAGS) -c $^
 
