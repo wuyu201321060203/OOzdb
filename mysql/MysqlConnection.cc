@@ -11,6 +11,8 @@
 #include "MysqlPreparedStatement.h"
 #include "MysqlResultSet.h"
 
+using namespace OOzdb;
+
 MysqlConnection::MysqlConnection(ConnectionPool* pool , char** error):
     Connection(pool),
     _lastError(MYSQL_OK),

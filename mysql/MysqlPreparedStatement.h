@@ -7,6 +7,9 @@
 
 #include "MysqlResultSet.h"
 
+namespace OOzdb
+{
+
 class MysqlPreparedStatement : public PreparedStatement
 {
 public:
@@ -44,5 +47,7 @@ private:
     MYSQL_STMT* _stmt;
     MYSQL_BIND* _bind;
 };
+
+}
 
 #endif

@@ -21,6 +21,8 @@
 #define YYTOKEN       _token
 #define SET_PROTOCOL(PORT) *(YYCURSOR-3)=0; _protocol=_token; _port=PORT; goto authority
 
+using namespace OOzdb;
+
 static const uchar_t urlunsafe[256] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

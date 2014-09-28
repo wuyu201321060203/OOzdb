@@ -7,6 +7,8 @@
 #include <Db/ResultSet.h>
 #include <mysql/MysqlConnection.h>
 
+using namespace OOzdb;
+
 int main(void)
 {
     ConnectionPool pool("mysql://root:123@localhost:3306/test");

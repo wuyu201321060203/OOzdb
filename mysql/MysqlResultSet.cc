@@ -10,6 +10,8 @@
 
 #include "MysqlResultSet.h"
 
+using namespace OOzdb;
+
 MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
                                int keep):
     ResultSet(name) , _stop(false) , _needRebind(false) , _currentRow(0)

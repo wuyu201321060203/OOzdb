@@ -4,6 +4,9 @@
 #include <boost/noncopyable.hpp>
 #include <Config.h>
 
+namespace OOzdb
+{
+
 class StringBuffer : boost::noncopyable
 {
 public:
@@ -34,5 +37,7 @@ private:
     inline void doAppend(char const* s , va_list ap);
     int prepare(char prefix);
 };
+
+}
 
 #endif

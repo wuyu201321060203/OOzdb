@@ -12,6 +12,9 @@
 
 #include <Config.h>
 
+namespace OOzdb
+{
+
 class Exception
 {
 public:
@@ -102,6 +105,8 @@ void ExceptionThrow(T e , char const* funcName,
     throw e;
 }
 
+}
+
 #define THROW(e, cause, ...) \
-        ExceptionThrow((e()), __func__, __FILE__, __LINE__, cause, ##__VA_ARGS__, NULL)
+    OOzdb::ExceptionThrow((e()), __func__, __FILE__, __LINE__, cause, ##__VA_ARGS__, NULL)
 #endif

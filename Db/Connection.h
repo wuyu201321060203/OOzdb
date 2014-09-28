@@ -11,6 +11,9 @@
 #include "ResultSet.h"
 #include "PreparedStatement.h"
 
+namespace OOzdb
+{
+
 class ConnectionPool;
 
 class Connection
@@ -71,5 +74,7 @@ private:
 
 typedef boost::shared_ptr<Connection> ConnectionPtr;
 typedef std::vector<ConnectionPtr> ConnectionVec;
+
+}
 
 #endif

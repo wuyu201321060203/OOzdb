@@ -3,6 +3,9 @@
 
 #include "Exception.h"
 
+namespace OOzdb
+{
+
 class SQLException : public Exception
 {
 public:
@@ -15,5 +18,7 @@ public:
     {
     }
 };
+
+}
 
 #endif

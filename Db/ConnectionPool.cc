@@ -11,6 +11,8 @@
 #include "ResultSet.h"
 #include "PreparedStatement.h"
 
+using namespace OOzdb;
+
 ConnectionPool::ConnectionPool(char const* url):
     _maxConnections(SQL_DEFAULT_MAX_CONNECTIONS),
     _initialConnections(SQL_DEFAULT_INIT_CONNECTIONS),

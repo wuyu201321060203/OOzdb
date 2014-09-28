@@ -8,6 +8,9 @@
 #include <Mem/StringBuffer.h>
 #include <Db/Connection.h>
 
+namespace OOzdb
+{
+
 class MysqlConnection : public Connection,
                         public boost::enable_shared_from_this<MysqlConnection>
 {
@@ -41,5 +44,7 @@ private:
     static MYSQL* doConnect(URLPtr url , char **error);
     int prepare(char const*sql , int len, MYSQL_STMT **stmt);
 };
+
+}
 
 #endif

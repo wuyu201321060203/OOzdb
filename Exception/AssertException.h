@@ -3,6 +3,9 @@
 
 #include "Exception.h"
 
+namespace OOzdb
+{
+
 class AssertException : public Exception
 {
 public:
@@ -15,5 +18,7 @@ public:
     {
     }
 };
+
+}
 
 #endif

@@ -14,6 +14,8 @@
 #pragma GCC visibility push(hidden)
 #endif
 
+using namespace OOzdb;
+
 int strIsEqual(char const* a , char const* b)
 {
     if(a && b)

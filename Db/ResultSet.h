@@ -8,6 +8,9 @@
 #include <util/TimeOperation.h>
 #include <Config.h>
 
+namespace OOzdb
+{
+
 class ResultSet
 {
 public:
@@ -56,5 +59,7 @@ private:
 
 typedef boost::shared_ptr<ResultSet> ResultSetPtr;
 typedef std::vector<ResultSetPtr> ResultSetVec;
+
+}
 
 #endif

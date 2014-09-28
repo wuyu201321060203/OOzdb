@@ -20,6 +20,8 @@
 
 #include "gtest/gtest.h"
 
+using namespace OOzdb;
+
 
 /**
  * OOzdb connection pool unity tests.

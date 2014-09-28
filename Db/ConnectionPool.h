@@ -32,6 +32,9 @@ typedef boost::shared_ptr<Thread> ThreadPtr;
 
 #define ABOUT "OOzdb/" VERSION " Copyright (C) Wu Yu" OOzdb_URL
 
+namespace OOzdb
+{
+
 class ConnectionPool : boost::noncopyable
 {
 public:
@@ -172,5 +175,7 @@ int ConnectionPool::fillPool()
 }
 
 typedef boost::shared_ptr<ConnectionPool> ConnectionPoolPtr;
+
+}
 
 #endif

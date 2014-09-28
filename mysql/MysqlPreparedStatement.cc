@@ -5,6 +5,8 @@
 
 #include "MysqlPreparedStatement.h"
 
+using namespace OOzdb;
+
 static my_bool yes = true;
 
 MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,

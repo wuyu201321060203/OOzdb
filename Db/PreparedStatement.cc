@@ -2,6 +2,8 @@
 
 #include "PreparedStatement.h"
 
+using namespace OOzdb;
+
 PreparedStatement::PreparedStatement(int parameterCount):
     _parameterCount(parameterCount)
 {

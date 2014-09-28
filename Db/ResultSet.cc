@@ -2,6 +2,8 @@
 
 #include "ResultSet.h"
 
+using namespace OOzdb;
+
 ResultSet::ResultSet(CONST_STDSTR name):
     _resultSetName(name),
     _maxRows(DEFAULT_MAX_ROWS),

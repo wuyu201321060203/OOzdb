@@ -7,6 +7,9 @@
 #include <Db/ResultSet.h>
 #include <Config.h>
 
+namespace OOzdb
+{
+
 class MysqlResultSet : public ResultSet
 {
 public:
@@ -52,5 +55,7 @@ private:
 
     inline void ensureCapacity(int i);
 };
+
+}
 
 #endif

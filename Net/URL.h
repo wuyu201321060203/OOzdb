@@ -3,6 +3,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+namespace OOzdb
+{
+
 class URL
 {
 public:
@@ -63,5 +66,7 @@ private:
 };
 
 typedef boost::shared_ptr<URL> URLPtr;
+
+}
 
 #endif

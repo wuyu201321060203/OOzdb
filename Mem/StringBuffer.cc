@@ -10,6 +10,8 @@
 
 #include "StringBuffer.h"
 
+using namespace OOzdb;
+
 StringBuffer::StringBuffer(char const* s):_used(0),
     _length(STRLEN)
 {

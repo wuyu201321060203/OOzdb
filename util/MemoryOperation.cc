@@ -11,6 +11,8 @@
 #pragma GCC visibility push(hidden)
 #endif
 
+using namespace OOzdb;
+
 void *Mem_alloc(long size, const char *func, const char *file, int line){
 	assert(size > 0);
 	void *p = malloc(size);

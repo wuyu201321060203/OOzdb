@@ -3,6 +3,8 @@
 #include "Connection.h"
 #include "ConnectionPool.h"
 
+using namespace OOzdb;
+
 Connection::Connection(ConnectionPool* pool):
     _pool(pool),
     _isAvailable(true),

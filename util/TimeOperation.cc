@@ -12,6 +12,8 @@
 #include <Exception/SQLException.h>
 #include <Exception/AssertException.h>
 
+using namespace OOzdb;
+
 /**
  * Implementation of the Time interface
  *

@@ -6,6 +6,9 @@
 
 #include "ResultSet.h"
 
+namespace OOzdb
+{
+
 class PreparedStatement
 {
 public:
@@ -39,5 +42,7 @@ protected:
 
 typedef boost::shared_ptr<PreparedStatement> PreparedStatementPtr;
 typedef std::vector<PreparedStatementPtr> PreparedStatementVec;
+
+}
 
 #endif
