@@ -346,7 +346,7 @@ yy34:
 yy36:
 	++cursor;
 	{ // Compressed Date: YYYYMMDD
-                        tm.tm_year  = a2i(token, 4);
+                        tm.tm_year  = a2i(token, 4) - 1900;
                         tm.tm_mon   = a2i(token + 4, 2) - 1;
                         tm.tm_mday  = a2i(token + 6, 2);
                         has_date = true;
@@ -368,7 +368,7 @@ yy40:
 	if (yych >= ':') goto yy7;
 	++cursor;
 	{ // Date: YYYY-MM-DD
-                        tm.tm_year  = a2i(token, 4);
+                        tm.tm_year  = a2i(token, 4) - 1900;
                         tm.tm_mon   = a2i(token + 5, 2) - 1;
                         tm.tm_mday  = a2i(token + 8, 2);
                         has_date = true;
