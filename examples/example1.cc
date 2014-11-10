@@ -11,7 +11,7 @@ using namespace OOzdb;
 
 int main(void)
 {
-    ConnectionPool pool("mysql://root:mysql@192.168.10.121:3306/test");
+    ConnectionPool pool("mysql://root:123@localhost:3306/test");
     pool.setReaper(5);
     pool.start<MysqlConnection>();
     ConnectionPtr con = pool.getConnection<MysqlConnection>();
