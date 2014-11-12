@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <cassert>
@@ -16,6 +17,7 @@ StringBuffer::StringBuffer(char const* s):_used(0),
     _length(STRLEN)
 {
     _buffer = SC<uchar_t*>(ALLOC(_length));
+    bzero(_buffer , _length);
     append("%s" , s);
 }
 
@@ -25,6 +27,7 @@ StringBuffer::StringBuffer(int length , char const* s)
     _used = 0;
     _length = length;
     _buffer = SC<uchar_t*>(ALLOC(_length));
+    bzero(_buffer , _length);
     append("%s" , s);
 }
 
@@ -34,6 +37,7 @@ StringBuffer::StringBuffer(int length)
     _used = 0;
     _length = length;
     _buffer = SC<uchar_t*>(ALLOC(_length));
+    bzero(_buffer , _length);
 }
 
 StringBuffer::~StringBuffer()

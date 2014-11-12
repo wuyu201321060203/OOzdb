@@ -182,12 +182,13 @@ void MysqlResultSet::ensureCapacity(int i)
 {
     if(_columns[i]._real_length > _bind[i].buffer_length)
     {
-        RESIZE(SC<void*>(_columns[i]._buffer) , _columns[i]._real_length + 1);
+        _columns[i]._buffer = SC<char*>(RESIZE(SC<void*>(_columns[i]._buffer) ,
+                                            _columns[i]._real_length + 1));
         _bind[i].buffer = _columns[i]._buffer;
         _bind[i].buffer_length = _columns[i]._real_length;
         if ((_lastError = mysql_stmt_fetch_column(_stmt, &_bind[i], i, 0)))
             THROW(SQLException , "mysql_stmt_fetch_column -- %s",
-                                                        mysql_stmt_error(_stmt));
+                mysql_stmt_error(_stmt));
         _needRebind = true;
     }
 }
