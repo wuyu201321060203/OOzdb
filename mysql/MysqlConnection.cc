@@ -82,7 +82,9 @@ void MysqlConnection::execute(char const* sql , ...)
     {
         _resultSet->clear();
     }
-    _sb.vset(sql, ap);
+    _sb.vset(sql, ap);//may be this is a problem in x86/64 and a segment fault
+    // arises in vsnprintf function
+    // _sb.vset1(sql);
     _lastError = mysql_real_query(_db , _sb.toString(),
                                   _sb.getLength());
     va_end(ap);

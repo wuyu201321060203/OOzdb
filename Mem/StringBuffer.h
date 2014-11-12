@@ -19,6 +19,7 @@ public:
     void vappend(char const* s , va_list ap);
     void set(char const* s , ...)__attribute__((format (printf, 2, 3)));
     void vset(char const* s , va_list ap);
+    //void vset1(char const* s);
     int getLength();
     void clear();
     char const* toString();
