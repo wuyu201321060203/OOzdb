@@ -165,7 +165,7 @@ void MysqlResultSet::clear()
 CONST_STDSTR MysqlResultSet::getColumnName(int columnIndex)
 {
     --columnIndex;
-    if( _columnCount <= 0 || columnIndex < 0 || columnIndex > _columnCount)
+    if( _columnCount <= 0 || columnIndex < 0 || columnIndex >= _columnCount)
         return BADSTR;
     return STDSTR(_columns[columnIndex]._field->name);
 }
