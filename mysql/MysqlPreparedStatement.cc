@@ -158,11 +158,11 @@ long long MysqlPreparedStatement::rowsChanged()
 
 void MysqlPreparedStatement::clear()
 {
-    //FREE(_bind);
-    //mysql_stmt_free_result(_stmt);
+    FREE(_bind);
+    mysql_stmt_free_result(_stmt);
 #if MYSQL_VERSION_ID >= 50503
     while(mysql_stmt_next_result(_stmt) == 0);
 #endif
-    //mysql_stmt_close(_stmt);
+    mysql_stmt_close(_stmt);
     FREE(_params);
 }
