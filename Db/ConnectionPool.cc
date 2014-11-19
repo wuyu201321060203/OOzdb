@@ -196,6 +196,13 @@ void ConnectionPool::drainPool()
 int ConnectionPool::doGetActiveConnections()
 {
     int n = 0;
+    int temp = 0;
+    std::cout << _connectionsVec.size() << "\n";
+    for(unsigned int i = 0 ; i != _connectionsVec.size() ; ++i)
+    {
+        if(!_connectionsVec[i]->isAvailable())
+            ++temp;
+    }
     std::for_each(_connectionsVec.begin() , _connectionsVec.end(),
                   [&n](ConnectionPtr& conn){if(!conn->isAvailable()) ++n;});
     return n;
