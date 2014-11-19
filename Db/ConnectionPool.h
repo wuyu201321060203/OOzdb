@@ -157,7 +157,6 @@ template<typename ConcreteConnection>
 int ConnectionPool::fillPool()
 {
     BOOST_STATIC_ASSERT(boost::is_base_of<Connection , ConcreteConnection>::value);
-    _connectionsVec.reserve(_initialConnections);
     for(int i = 0 ; i != _initialConnections ; ++i)
     {
         ConnectionPtr conn( new ConcreteConnection(this , &_error));
