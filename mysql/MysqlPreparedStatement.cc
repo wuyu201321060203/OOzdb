@@ -11,7 +11,7 @@ static my_bool yes = true;
 
 MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
                                                int parameterCount):
-    PreparedStatement(parameterCount)
+    PreparedStatement(parameterCount) , _params(NULL) , _bind(NULL)
 {
     assert(stmt);
     _stmt = SC<MYSQL_STMT*>(stmt);
@@ -20,9 +20,10 @@ MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
     {
         _params = SC<param_t*>(CALLOC(_parameterCount, sizeof(param_t)));
         _bind = SC<MYSQL_BIND*>(CALLOC(_parameterCount, sizeof(MYSQL_BIND)));
+        bzero(_params , _parameterCount*sizeof(param_t));
+        bzero(_bind , _parameterCount*sizeof(MYSQL_BIND));
+
     }
-    bzero(_params , _parameterCount*sizeof(param_t));
-    bzero(_bind , _parameterCount*sizeof(MYSQL_BIND));
     _lastError = MYSQL_OK;
 }
 
@@ -158,11 +159,13 @@ long long MysqlPreparedStatement::rowsChanged()
 
 void MysqlPreparedStatement::clear()
 {
-    FREE(_bind);
+    if(_bind != NULL)
+        FREE(_bind);
     mysql_stmt_free_result(_stmt);//may be a problem
 #if MYSQL_VERSION_ID >= 50503
     while(mysql_stmt_next_result(_stmt) == 0);
 #endif
     mysql_stmt_close(_stmt);
-    FREE(_params);
+    if(_params != NULL)
+        FREE(_params);
 }

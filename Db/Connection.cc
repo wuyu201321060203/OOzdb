@@ -135,7 +135,7 @@ void Connection::clear()
     if(_resultSet)
         _resultSet->clear();
     if(_maxRows)
-        setMaxRows(0);
+        setMaxRows(DEFAULT_MAX_ROWS);
     if(_timeout != SQL_DEFAULT_TIMEOUT)
         setQueryTimeout(SQL_DEFAULT_TIMEOUT);
     freePrepared();
