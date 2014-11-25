@@ -30,6 +30,7 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
     else
     {
         _bind = SC<MYSQL_BIND*>( CALLOC(_columnCount , sizeof(MYSQL_BIND)) );
+        bzero( _bind , _columnCount * sizeof(MYSQL_BIND) );//OOps! make it reuseable!
         ColumnVec temp(_columnCount);
         _columns.swap(temp);
         for(int i = 0 ; i != _columnCount ; ++i)

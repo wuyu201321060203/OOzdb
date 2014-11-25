@@ -20,8 +20,8 @@ MysqlPreparedStatement::MysqlPreparedStatement(void* stmt , int maxRows,
     {
         _params = SC<param_t*>(CALLOC(_parameterCount, sizeof(param_t)));
         _bind = SC<MYSQL_BIND*>(CALLOC(_parameterCount, sizeof(MYSQL_BIND)));
-        bzero(_params , _parameterCount*sizeof(param_t));
-        bzero(_bind , _parameterCount*sizeof(MYSQL_BIND));
+        bzero(_params , _parameterCount * sizeof(param_t));
+        bzero(_bind , _parameterCount * sizeof(MYSQL_BIND));
 
     }
     _lastError = MYSQL_OK;
