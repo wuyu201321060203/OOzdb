@@ -11,6 +11,8 @@
 #include "MysqlPreparedStatement.h"
 #include "MysqlResultSet.h"
 
+//#include <iostream>
+
 using namespace OOzdb;
 
 MysqlConnection::MysqlConnection(ConnectionPool* pool , char** error):
@@ -82,9 +84,7 @@ void MysqlConnection::execute(char const* sql , ...)
     {
         _resultSet->clear();
     }
-    _sb.vset(sql, ap);//may be this is a problem in x86/64 and a segment fault
-    // arises in vsnprintf function
-    // _sb.vset1(sql);
+    _sb.vset(sql, ap);
     _lastError = mysql_real_query(_db , _sb.toString(),
                                   _sb.getLength());
     va_end(ap);
@@ -113,6 +113,7 @@ ResultSetPtr MysqlConnection::executeQuery(char const* sql , ...)
         {
             _sb.set("%s", mysql_stmt_error(stmt));
             mysql_stmt_close(stmt);
+            //std::cout<<rt;
         }
         else
         {
@@ -229,10 +230,10 @@ MYSQL* MysqlConnection::doConnect(URLPtr url , char **error)
     mysql_options(db, MYSQL_OPT_RECONNECT, SC<char const*>(&yes));
 #endif
     /* Connect */
-    if(mysql_real_connect(db, host, user, password, database, port, unix_socket,
-                           clientFlags))
+    if(mysql_real_connect(db, host, user, password, database, port, unix_socket,clientFlags))
         return db;
     *error = strDup(mysql_error(db));
+
 error:
     mysql_close(db);
     return NULL;
@@ -250,6 +251,7 @@ int MysqlConnection::prepare(char const* sql , int len , MYSQL_STMT** stmt)
     {
         _sb.set("%s", mysql_stmt_error(*stmt));
         mysql_stmt_close(*stmt);
+        //std::cout<<rt;
         *stmt = NULL;
         THROW(SQLException , "prepare stmt error");
     }

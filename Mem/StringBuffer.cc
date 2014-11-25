@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <string.h>
 #include <strings.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <cassert>
 
 #include <Exception/SQLException.h>
 #include <util/MemoryOperation.h>
@@ -90,22 +85,6 @@ void StringBuffer::vset(char const* s , va_list ap)
         va_end(ap_copy);
     }
 }
-
-/*
-void StringBuffer::vset1(char const* s)
-{
-    clear();
-    int len = strlen(s);
-    if(STR_DEF(s))
-    {
-        if(strlen(s) >= STRLEN)
-            _buffer = SC<uchar_t*>( RESIZE(_buffer, len + 1) );
-        bcopy(s , _buffer , len);
-        _buffer[len] = '\0';
-        _used = len;
-    }
-}
-*/
 
 int StringBuffer::getLength()
 {

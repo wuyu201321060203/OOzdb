@@ -197,7 +197,7 @@ int ConnectionPool::doGetActiveConnections()
 {
     int n = 0;
     int temp = 0;
-    std::cout << _connectionsVec.size() << "\n";
+    //std::cout << _connectionsVec.size() << "\n";
     for(unsigned int i = 0 ; i != _connectionsVec.size() ; ++i)
     {
         if(!_connectionsVec[i]->isAvailable())

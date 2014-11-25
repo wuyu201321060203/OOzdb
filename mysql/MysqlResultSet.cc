@@ -10,6 +10,8 @@
 
 #include "MysqlResultSet.h"
 
+//#include <iostream>
+
 using namespace OOzdb;
 
 MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
@@ -30,7 +32,6 @@ MysqlResultSet::MysqlResultSet(CONST_STDSTR name , void* stmt , int maxRows,
     else
     {
         _bind = SC<MYSQL_BIND*>( CALLOC(_columnCount , sizeof(MYSQL_BIND)) );
-        bzero( _bind , _columnCount * sizeof(MYSQL_BIND) );//OOps! make it reuseable!
         ColumnVec temp(_columnCount);
         _columns.swap(temp);
         for(int i = 0 ; i != _columnCount ; ++i)
@@ -155,7 +156,10 @@ void MysqlResultSet::clear()
             FREE(_columns[i]._buffer);
         mysql_stmt_free_result(_stmt);
         if(_keep == false)
+        {
             mysql_stmt_close(_stmt);//dangerous
+            //std::cout<<rt;
+        }
         if(_meta)
             mysql_free_result(_meta);//dangerous
         FREE(_bind);
@@ -165,10 +169,8 @@ void MysqlResultSet::clear()
 
 CONST_STDSTR MysqlResultSet::getColumnName(int columnIndex)
 {
-    --columnIndex;
-    if( _columnCount <= 0 || columnIndex < 0 || columnIndex >= _columnCount)
-        return BADSTR;
-    return STDSTR(_columns[columnIndex]._field->name);
+    int i = checkAndSetColumnIndex(columnIndex);
+    return STDSTR(_columns[i]._field->name);
 }
 
 long MysqlResultSet::getColumnSize(int columnIndex)
@@ -184,12 +186,13 @@ void MysqlResultSet::ensureCapacity(int i)
     if(_columns[i]._real_length > _bind[i].buffer_length)
     {
         _columns[i]._buffer = SC<char*>(RESIZE(SC<void*>(_columns[i]._buffer) ,
-                                            _columns[i]._real_length + 1));
+                                _columns[i]._real_length + 1));
+        bzero(_columns[i]._buffer , _columns[i]._real_length + 1);
         _bind[i].buffer = _columns[i]._buffer;
         _bind[i].buffer_length = _columns[i]._real_length;
         if ((_lastError = mysql_stmt_fetch_column(_stmt, &_bind[i], i, 0)))
             THROW(SQLException , "mysql_stmt_fetch_column -- %s",
-                mysql_stmt_error(_stmt));
+                                                        mysql_stmt_error(_stmt));
         _needRebind = true;
     }
 }

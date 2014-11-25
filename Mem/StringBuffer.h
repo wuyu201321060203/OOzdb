@@ -1,6 +1,11 @@
 #ifndef STRINGBUFFER_INCLUDED
 #define STRINGBUFFER_INCLUDED
 
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <cassert>
 #include <boost/noncopyable.hpp>
 #include <Config.h>
 
@@ -19,7 +24,6 @@ public:
     void vappend(char const* s , va_list ap);
     void set(char const* s , ...)__attribute__((format (printf, 2, 3)));
     void vset(char const* s , va_list ap);
-    //void vset1(char const* s);
     int getLength();
     void clear();
     char const* toString();
