@@ -13,7 +13,7 @@ CXXFLAGS = -g -O0 -Wall -Wextra \
 LDFLAGS = -L$(MUDUO_LIBRARY) -lmuduo_net_cpp11 -lmuduo_base_cpp11 -lpthread -lrt\
 -lmysqlclient
 
-BIN_PROGRAM = example1
+BIN_PROGRAM = example2
 
 AR = ar
 ARFLAGS = -r
@@ -26,7 +26,7 @@ clean:
 
 $(BIN_PROGRAM): Connection.o PreparedStatement.o ResultSet.o ConnectionPool.o\
 	  MysqlConnection.o MysqlPreparedStatement.o MysqlResultSet.o \
-	  StringBuffer.o StrOperation.o MemoryOperation.o TimeOperation.o URL.o example1.o
+	  StringBuffer.o StrOperation.o MemoryOperation.o TimeOperation.o URL.o example2.o
 	g++ $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 Connection.o: $(SRC)/Db/Connection.cc
@@ -65,7 +65,7 @@ TimeOperation.o: $(SRC)/util/TimeOperation.cc
 URL.o: $(SRC)/Net/URL.cc
 	g++ $(CXXFLAGS) -c $^
 
-example1.o: $(SRC)/examples/example1.cc
+example2.o: $(SRC)/examples/example2.cc
 	g++ $(CXXFLAGS) -c $^
 
 .PHONY: all clean

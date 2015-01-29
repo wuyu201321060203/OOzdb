@@ -158,7 +158,6 @@ void MysqlResultSet::clear()
         if(_keep == false)
         {
             mysql_stmt_close(_stmt);//dangerous
-            //std::cout<<rt;
         }
         if(_meta)
             mysql_free_result(_meta);//dangerous

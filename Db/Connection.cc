@@ -19,7 +19,6 @@ Connection::Connection(ConnectionPool* pool):
 
 Connection::~Connection()
 {
-    clear();
 }
 
 int Connection::ping()

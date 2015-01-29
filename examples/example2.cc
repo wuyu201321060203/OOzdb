@@ -11,17 +11,16 @@ using namespace OOzdb;
 
 int main(void)
 {
-    ConnectionPool pool("mysql://root:123@localhost:3306/test");
+    ConnectionPool pool("mysql://root:123@localhost:3306/DM");
     pool.setReaper(5);
     pool.start<MysqlConnection>();
     ConnectionPtr con = pool.getConnection<MysqlConnection>();
-    PreparedStatementPtr p = con->getPreparedStatement("select name from angel where id = 1");
-    ResultSetPtr r = p->executeQuery();
-    while(r->next())
+    ResultSetPtr ret;
+    int i = 0;
+    while(i < 1000)
     {
-        std::string const tmp = r->getString(1);
-        char const* tmp1 = tmp.c_str();
-        printf("%s\n" , tmp1);
+        ret = con->executeQuery("select id from USER_INFo where name = 'ddcnmb'");
+        ++i;
     }
     return 0;
 }
