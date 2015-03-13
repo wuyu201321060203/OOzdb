@@ -141,7 +141,7 @@ PreparedStatementPtr MysqlConnection::getPreparedStatement(char const* sql , ...
         int parameterCount = SC<int>(mysql_stmt_param_count(stmt));
         PreparedStatementPtr item(new MysqlPreparedStatement(stmt , _maxRows,
                                                                parameterCount) );
-        _prepared.push_back(item);
+        //_prepared.push_back(item);
         ret.swap(item);
     }
     va_end(ap);

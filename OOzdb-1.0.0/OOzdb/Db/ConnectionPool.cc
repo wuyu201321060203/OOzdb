@@ -171,7 +171,7 @@ int ConnectionPool::getSweepInterval() const
     return _sweepInterval;
 }
 
-#ifdef TEST
+#ifdef OOZDBTEST
 bool ConnectionPool::isFilled() const
 {
     return _filled;

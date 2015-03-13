@@ -1,0 +1,8 @@
+OOzdb is a database connection pool based on libzdb3.0
+It runs on Linux with kernel version >= 2.6.28.
+
+You can use this Software product free of charge to develop,
+use and distribute Open Source application programs, including reusable
+components and other software that link with the Software. You may also
+use and modify any example source code included with the Software for
+any purpose.

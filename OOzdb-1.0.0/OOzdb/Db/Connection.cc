@@ -8,7 +8,7 @@ using namespace OOzdb;
 Connection::Connection(ConnectionPool* pool):
     _pool(pool),
     _isAvailable(true),
-    _isInTransaction(false),
+    _isInTransaction(0),
     _timeout(SQL_DEFAULT_TIMEOUT),
     _url(_pool->getURL()),
     _lastAccessedTime(Time_now()),
@@ -146,5 +146,5 @@ void Connection::close()
 
 void Connection::freePrepared()
 {
-    _prepared.clear();
+    //_prepared.clear();//TODO
 }

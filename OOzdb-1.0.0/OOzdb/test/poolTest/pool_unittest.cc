@@ -39,7 +39,7 @@ using namespace OOzdb;
 #define TM_GMTOFF tm_wday
 #endif
 
-char const* testURL = "mysql://root:123@localhost:3306/test";
+char const* testURL = "mysql://root:123@localhost:3306/mysql";
 
 /*
  * Test1: ConnectionPool's constructure
@@ -266,10 +266,8 @@ TEST(ConnectionPoolTest , ResultSet)
     ASSERT_TRUE(names->next());//TODO
     EXPECT_EQ("Fry", names->getString(1));
     conn->setMaxRows(11);
-    pre = conn->getPreparedStatement("select name from zild_t;");
-    ASSERT_TRUE(pre);
-    names = pre->executeQuery();
-    ASSERT_TRUE(names);
+    names = conn->executeQuery("select name from zild_t;");
+    ASSERT_TRUE(names != NULL);
     for(i = 0 ; names->next() ; i++);
     EXPECT_EQ(11 , i);
     // Need to close and release statements before

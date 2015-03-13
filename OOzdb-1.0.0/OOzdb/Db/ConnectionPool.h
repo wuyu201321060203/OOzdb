@@ -60,7 +60,7 @@ public:
     int reapConnections();
     CONST_STDSTR getVersion() const;
     int getSweepInterval() const;
-#ifdef TEST
+#ifdef OOZDBTEST
     bool isFilled() const;
     bool needDoSweep() const;
     ThreadPtr getReaper();

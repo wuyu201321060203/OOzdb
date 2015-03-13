@@ -64,7 +64,7 @@ protected:
     URLPtr _url;
     time_t _lastAccessedTime;
     int _maxRows;
-    PreparedStatementVec _prepared;
+    //PreparedStatementVec _prepared;
     ResultSetPtr _resultSet;
 
 private:

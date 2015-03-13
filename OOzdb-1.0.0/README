@@ -1,0 +1,6 @@
+How to build:
+    sudo INSTALL_DIR=/usr/local ./build.sh
+
+Tips:
+    Please check your mysql login name and password if the examples and
+    unit-test fail
